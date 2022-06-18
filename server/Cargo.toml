@@ -8,5 +8,4 @@ authors = ["Veritius"]
 rustcraft_shared = { path = "../shared" }
 bevy = { version = "0.7.0", features = ["dynamic"] }
 bevy_rapier3d = "0.14.1"
-bevy_eventwork = "0.7.2"
 serde = "1.0.137"
