@@ -1,62 +1,38 @@
-use bevy::prelude::*;
-use bevy::tasks::IoTaskPool;
-use bootleg_networking::*;
+use bevy_app::{App, ScheduleRunnerPlugin};
+use bevy_core::CorePlugin;
+use bevy_log::{info, LogPlugin};
 
-const MESSAGE_CHANNEL_ID: MessageChannelID = MessageChannelID::new(0);
-const MESSAGE_SETTINGS: MessageChannelSettings = MessageChannelSettings {
-    channel: MESSAGE_CHANNEL_ID.id,
-    channel_mode: MessageChannelMode::Unreliable {
-		settings: turbulence::unreliable_channel::Settings {
-			bandwidth: 4096,
-			burst_bandwidth: 1024,
-		},
-		max_message_len: 256,	
-	},
-    message_buffer_size: 256,
-    packet_buffer_size: 256,
-};
+use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig, Stage};
+
+use rustcraft_shared::{protocol::Protocol, shared_config, Channels};
+
+mod resources;
+mod systems;
+
+use systems::{events, init, tick};
 
 fn main() {
-    App::new()
-        // Game essentials
-        .add_plugins(DefaultPlugins)
+    info!("Starting game server");
 
-        // Networking
-        .add_plugin(NetworkingPlugin)
-        .add_startup_system(setup_network)
-        .add_system(receive)
-        
-        // Start the game
+    // Build App
+    App::default()
+        // Plugins
+        .add_plugin(CorePlugin::default())
+        .add_plugin(ScheduleRunnerPlugin::default())
+        .add_plugin(LogPlugin::default())
+        .add_plugin(ServerPlugin::<Protocol, Channels>::new(
+            ServerConfig::default(),
+            shared_config(),
+        ))
+        // Startup System
+        .add_startup_system(init)
+        // Receive Server Events
+        .add_system_to_stage(Stage::ReceiveEvents, events::authorization_event)
+        .add_system_to_stage(Stage::ReceiveEvents, events::connection_event)
+        .add_system_to_stage(Stage::ReceiveEvents, events::disconnection_event)
+        .add_system_to_stage(Stage::ReceiveEvents, events::receive_message_event)
+        // Gameplay Loop on Tick
+        .add_system_to_stage(Stage::Tick, tick)
+        // Run App
         .run();
-}
-
-fn setup_network(mut commands: Commands, tokio_rt: Res<Runtime>, task_pool: Res<IoTaskPool>) {
-    let mut net = NetworkResource::new_server(tokio_rt.clone(), task_pool.0.clone());
-
-    let listen_config = ListenConfig {
-        tcp_addr: "127.0.0.1:9000",
-        udp_addr: "127.0.0.1:9001",
-        naia_addr: "127.0.0.1:9002",
-        webrtc_listen_addr: "127.0.0.1:9003",
-        public_webrtc_listen_addr: "127.0.0.1:9004"
-    };
-
-    net.listen(listen_config, Some(2048));
-
-    net.register_message_channel_native(MESSAGE_SETTINGS, &MESSAGE_CHANNEL_ID).unwrap();
-    net.set_channels_builder(|builder: &mut ConnectionChannelsBuilder| {
-        builder
-            .register::<String>(MESSAGE_SETTINGS)
-            .unwrap();
-    });
-
-    commands.insert_resource(net);
-}
-
-fn receive(mut net: ResMut<NetworkResource>) {
-    let messages = net.view_messages::<String>(&MESSAGE_CHANNEL_ID).unwrap();
-
-    for (_handle, message) in messages.iter() {
-        println!("Message: {}", message)
-    }
 }

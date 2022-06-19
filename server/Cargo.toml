@@ -6,8 +6,11 @@ authors = ["Veritius"]
 
 [dependencies]
 rustcraft_shared = { path = "../shared" }
-bevy = { version = "0.7.0", features = ["dynamic"] }
-bootleg_networking = { version = "0.2", git = "https://github.com/billyb2/bootleg_networking.git" }
+bevy_app = { version = "0.7", default-features=false }
+bevy_core = { version = "0.7", default-features=false }
+bevy_ecs = { version = "0.7", default-features=false }
+bevy_log = { version = "0.7", default-features=false }
+naia-bevy-server = { version = "0.10.1", features = ["use-udp"] }
 bevy_console = "0.3.1"
 bevy_proto = "0.4.0"
 heron = "3.1.0"
