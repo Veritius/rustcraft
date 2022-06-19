@@ -10,7 +10,7 @@ pub fn shared_config() -> SharedConfig<Channels> {
 
     let link_condition = Some(LinkConditionerConfig {
         incoming_latency: tick_interval.unwrap().as_millis() as u32 + 10,
-        incoming_jitter: 1,
+        incoming_jitter: 25,
         incoming_loss: 0.0,
     });
 
