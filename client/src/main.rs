@@ -5,6 +5,7 @@ use bevy_discord_presence::config::{RPCConfig, RPCPlugin};
 use rustcraft_shared::{protocol::Protocol, shared_config, Channels};
 use crate::systems::{events, init, input, sync, tick};
 
+mod command_history; //hack
 mod systems;
 mod resources;
 
