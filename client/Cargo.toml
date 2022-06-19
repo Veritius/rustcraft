@@ -8,6 +8,7 @@ authors = ["Veritius"]
 rustcraft_shared = { path = "../shared" }
 bevy = { version = "0.7.0", features = ["dynamic"] }
 naia-bevy-client = "0.10.1"
+naia-shared = "0.10.0"
 bevy_console = "0.3.1"
 bevy-discord-presence = "0.3.1"
 heron = "3.1.0"

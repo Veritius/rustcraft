@@ -1,6 +1,7 @@
 use std::default::Default;
 use bevy::ecs::entity::Entity;
 use naia_bevy_client::CommandHistory;
+use naia_shared::EntityProperty;
 use rustcraft_shared::protocol::KeyCommand;
 
 pub struct OwnedEntity {

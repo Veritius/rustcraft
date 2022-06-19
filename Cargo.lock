@@ -3427,6 +3427,7 @@ dependencies = [
  "bevy_console",
  "heron",
  "naia-bevy-client",
+ "naia-shared",
  "rustcraft_shared",
  "serde",
 ]
@@ -3443,6 +3444,7 @@ dependencies = [
  "bevy_proto",
  "heron",
  "naia-bevy-server",
+ "naia-shared",
  "rustcraft_shared",
  "serde",
 ]
