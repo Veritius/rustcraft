@@ -1,4 +1,4 @@
-use bevy::{app::App, DefaultPlugins};
+use bevy::{prelude::*, app::App, DefaultPlugins, window::PresentMode};
 use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, Stage};
 use bevy_console::{AddConsoleCommand, ConsoleCommand, ConsolePlugin};
 use bevy_discord_presence::config::{RPCConfig, RPCPlugin};
@@ -13,6 +13,13 @@ fn main() {
     App::new()
         // Game essentials
         .add_plugins(DefaultPlugins)
+        .insert_resource(WindowDescriptor {
+            title: "Rustcraft vUnknown".to_string(),
+            width: 500.,
+            height: 300.,
+            present_mode: PresentMode::Fifo,
+            ..default()
+        })
         
         // Networking
         .add_plugin(ClientPlugin::<Protocol, Channels>::new(
