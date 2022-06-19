@@ -11,5 +11,5 @@ naia-bevy-client = "0.10.1"
 naia-shared = "0.10.0"
 bevy_console = "0.3.1"
 bevy-discord-presence = "0.3.1"
-heron = "3.1.0"
+heron = { version = "3.1.0", features = ["3d"] }
 serde = "1.0.137"

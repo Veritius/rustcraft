@@ -1,5 +1,6 @@
 use bevy::{prelude::*, app::App, DefaultPlugins, window::PresentMode};
 use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, Stage};
+use heron::prelude::*;
 use bevy_console::{AddConsoleCommand, ConsoleCommand, ConsolePlugin};
 use bevy_discord_presence::config::{RPCConfig, RPCPlugin};
 use rustcraft_shared::{protocol::Protocol, shared_config, Channels};
@@ -10,6 +11,8 @@ mod systems;
 mod resources;
 
 fn main() {
+    info!("Starting client");
+
     App::new()
         // Game essentials
         .add_plugins(DefaultPlugins)
@@ -20,6 +23,7 @@ fn main() {
             present_mode: PresentMode::Fifo,
             ..default()
         })
+        .add_plugin(PhysicsPlugin::default())
         
         // Networking
         .add_plugin(ClientPlugin::<Protocol, Channels>::new(
