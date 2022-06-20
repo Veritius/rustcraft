@@ -1,0 +1,13 @@
+- type: Voxel
+  id: "BlockDirt"
+  components:
+    - type: Model
+      path: modelPath
+      texture: texturePath
+
+- type: Voxel
+  id: "BlockGrass"
+  components:
+    - type: Model
+      path: modelPath
+      texture: texturePath
