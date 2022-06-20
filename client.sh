@@ -1,2 +1,2 @@
 cd client/
-cargo run
+cargo run --features bevy/dynamic
