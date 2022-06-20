@@ -38,7 +38,7 @@ pub fn spawn_entity_event(mut event_reader: EventReader<SpawnEntityEvent>) {
     for event in event_reader.iter() {
         match event {
             SpawnEntityEvent(_entity) => {
-                info!("spawned entity");
+                info!("spawned entity {}", _entity.id());
             }
         }
     }
@@ -52,7 +52,7 @@ pub fn insert_component_event(
     for event in event_reader.iter() {
         if let InsertComponentEvent(entity, ProtocolKind::Color) = event {
             if let Ok(color) = color_query.get(*entity) {
-                info!("add color to entity");
+                info!("added color to entity {}", entity.id());
 
                 let color = {
                     match *color.value {

@@ -1,6 +1,7 @@
 use bevy_app::{App, ScheduleRunnerPlugin};
 use bevy_core::CorePlugin;
 use bevy_log::{info, LogPlugin};
+use bevy_math::f32::Vec3;
 use heron::prelude::*;
 
 use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig, Stage};
@@ -25,7 +26,10 @@ fn main() {
             ServerConfig::default(),
             shared_config(),
         ))
+
+        // Physics
         .add_plugin(PhysicsPlugin::default())
+        .insert_resource(Gravity::from(Vec3::new(0.0, -9.81, 0.0)))
 
         .add_startup_system(init)
         .add_system_to_stage(Stage::ReceiveEvents, events::authorization_event)

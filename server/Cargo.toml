@@ -9,6 +9,7 @@ rustcraft_shared = { path = "../shared" }
 bevy_app = { version = "0.7", default-features=false }
 bevy_core = { version = "0.7", default-features=false }
 bevy_ecs = { version = "0.7", default-features=false }
+bevy_math = { version = "0.7", default-features=false }
 bevy_log = { version = "0.7", default-features=false }
 naia-bevy-server = { version = "0.10.1", features = ["use-udp"] }
 naia-shared = "0.10.0"

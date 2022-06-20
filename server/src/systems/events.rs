@@ -51,9 +51,9 @@ pub fn connection_event<'world, 'state>(
 
         // Position component
         let position = {
-            let x = 16 * ((Random::gen_range_u32(0, 40) as i16) - 20);
-            let y = 16 * ((Random::gen_range_u32(0, 30) as i16) - 15);
-            let z = 16 * ((Random::gen_range_u32(0, 30) as i16) - 10);
+            let x = 16. * ((Random::gen_range_u32(0, 40) as f32) - 20.);
+            let y = 16. * ((Random::gen_range_u32(0, 30) as f32) - 15.);
+            let z = 16. * ((Random::gen_range_u32(0, 30) as f32) - 10.);
             Position::new(x, y, z)
         };
 

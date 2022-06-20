@@ -4,13 +4,13 @@ use naia_shared::{Property, Replicate};
 #[derive(Component, Replicate)]
 #[protocol_path = "crate::protocol::Protocol"]
 pub struct Position {
-    pub x: Property<i16>,
-    pub y: Property<i16>,
-    pub z: Property<i16>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub z: Property<f32>,
 }
 
 impl Position {
-    pub fn new(x: i16, y: i16, z: i16) -> Self {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
         Position::new_complete(x, y, z)
     }
 }

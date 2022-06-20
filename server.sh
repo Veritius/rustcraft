@@ -1,2 +1,5 @@
 cd server/
-cargo run --features bevy/dynamic
+cargo run
+
+#disabled until I can figure it out
+#cargo run --features bevy/dynamic
