@@ -3542,7 +3542,6 @@ name = "rustcraft_server"
 version = "0.1.0"
 dependencies = [
  "bevy_app",
- "bevy_console",
  "bevy_core",
  "bevy_ecs",
  "bevy_log",
