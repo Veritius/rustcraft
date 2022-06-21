@@ -5,7 +5,9 @@ edition = "2021"
 authors = ["Veritius"]
 
 [dependencies]
-bevy_ecs = { version = "0.7", default-features=false}
+bevy_ecs = { version = "0.7", default-features=false }
+bevy_math = { version = "0.7", default-features=false }
 naia-shared = "0.10.0"
 cfg-if = { version = "1.0" }
+ndarray = "0.12.1"
 log = { version = "0.4" }
