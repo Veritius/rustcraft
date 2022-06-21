@@ -21,6 +21,8 @@ pub fn input(
     let s = keyboard_input.pressed(KeyCode::S);
     let a = keyboard_input.pressed(KeyCode::A);
     let d = keyboard_input.pressed(KeyCode::D);
+    let q = keyboard_input.pressed(KeyCode::Q);
+    let e = keyboard_input.pressed(KeyCode::E);
 
     if let Some(command) = &mut global.queued_command {
         if w {
@@ -35,8 +37,14 @@ pub fn input(
         if d {
             *command.d = true;
         }
+        if q {
+            *command.q = true;
+        }
+        if e {
+            *command.e = true;
+        }
     } else if let Some(owned_entity) = &global.owned_entity {
-        let mut key_command = KeyCommand::new(w, s, a, d);
+        let mut key_command = KeyCommand::new(w, s, a, d, q, e);
         key_command.entity.set(&client, &owned_entity.confirmed);
         global.queued_command = Some(key_command);
     }

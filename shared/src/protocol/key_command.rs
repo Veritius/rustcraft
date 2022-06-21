@@ -9,10 +9,12 @@ pub struct KeyCommand {
     pub s: Property<bool>,
     pub a: Property<bool>,
     pub d: Property<bool>,
+    pub q: Property<bool>,
+    pub e: Property<bool>
 }
 
 impl KeyCommand {
-    pub fn new(w: bool, s: bool, a: bool, d: bool) -> Self {
-        KeyCommand::new_complete(w, s, a, d)
+    pub fn new(w: bool, s: bool, a: bool, d: bool, q: bool, e: bool) -> Self {
+        KeyCommand::new_complete(w, s, a, d, q, e)
     }
 }

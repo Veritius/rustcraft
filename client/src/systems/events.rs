@@ -1,4 +1,5 @@
 use bevy::{
+    prelude::*,
     ecs::{
         event::EventReader,
         system::{Commands, Query, ResMut},
@@ -47,6 +48,8 @@ pub fn spawn_entity_event(mut event_reader: EventReader<SpawnEntityEvent>) {
 pub fn insert_component_event(
     mut event_reader: EventReader<InsertComponentEvent<ProtocolKind>>,
     mut local: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     color_query: Query<&Color>,
 ) {
     for event in event_reader.iter() {
@@ -62,12 +65,9 @@ pub fn insert_component_event(
                     }
                 };
 
-                local.entity(*entity).insert_bundle(SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::new(SQUARE_SIZE, SQUARE_SIZE)),
-                        color,
-                        ..Default::default()
-                    },
+                local.entity(*entity).insert_bundle(PbrBundle {
+                    mesh: meshes.add(Mesh::from(shape::Cube { size: 5.0 })),
+                    material: materials.add(color.into()),
                     transform: Transform::from_xyz(0.0, 0.0, 0.0),
                     ..Default::default()
                 });
@@ -124,6 +124,8 @@ pub fn receive_message_event(
     mut event_reader: EventReader<MessageEvent<Protocol, Channels>>,
     mut local: Commands,
     mut global: ResMut<Global>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     client: Client<Protocol, Channels>,
 ) {
     for event in event_reader.iter() {
@@ -137,12 +139,9 @@ pub fn receive_message_event(
 
                 let prediction_entity =
                     CommandsExt::<Protocol>::duplicate_entity(&mut local, entity)
-                        .insert_bundle(SpriteBundle {
-                            sprite: Sprite {
-                                custom_size: Some(Vec2::new(SQUARE_SIZE, SQUARE_SIZE)),
-                                color: BevyColor::WHITE,
-                                ..Default::default()
-                            },
+                        .insert_bundle(PbrBundle {
+                            mesh: meshes.add(Mesh::from(shape::Cube { size: 5.0 })),
+                            material: materials.add(BevyColor::WHITE.into()),
                             transform: Transform::from_xyz(0.0, 0.0, 0.0),
                             ..Default::default()
                         })

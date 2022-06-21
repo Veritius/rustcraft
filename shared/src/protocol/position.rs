@@ -6,7 +6,7 @@ use naia_shared::{Property, Replicate};
 pub struct Position {
     pub x: Property<f32>,
     pub y: Property<f32>,
-    pub z: Property<f32>,
+    pub z: Property<f32>
 }
 
 impl Position {
