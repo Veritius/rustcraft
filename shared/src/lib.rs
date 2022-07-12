@@ -3,6 +3,8 @@ extern crate log;
 pub mod behavior;
 pub mod protocol;
 
+mod voxelplugin;
+
 mod channels;
 pub use channels::Channels;
 
