@@ -4,6 +4,7 @@ use bevy_ecs::system::Command;
 use bevy_log::{info, LogPlugin};
 use bevy_math::f32::Vec3;
 use bevy_ecs::prelude::Commands;
+use rustcraft_shared::{voxelplugin::VoxelPlugin};
 use heron::prelude::*;
 
 use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig, Stage};
@@ -28,10 +29,12 @@ fn main() {
     app.add_plugin(ScheduleRunnerPlugin::default());
     app.add_plugin(LogPlugin::default());
 
-
     // Physics
     app.add_plugin(PhysicsPlugin::default());
     app.insert_resource(Gravity::from(Vec3::new(0.0, -9.81, 0.0)));
+
+    // Voxel world
+    app.add_plugin(VoxelPlugin);
 
     // Networking
     app.add_plugin(ServerPlugin::<Protocol, Channels>::new(

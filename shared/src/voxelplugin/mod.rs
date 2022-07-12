@@ -23,8 +23,8 @@ struct GlobalVoxelData {
     //chunks: Chunk, //TODO: make this a 3d array, placeholder atm
 }
 
-impl FromWorld for GlobalVoxelData {
-    fn from_world(world: &mut World) -> Self {
+impl Default for GlobalVoxelData {
+    fn default() -> Self {
         let table = VoxelDataTable {};
         let air_block = VoxelDataTableEntry {
             string_id: "air",
