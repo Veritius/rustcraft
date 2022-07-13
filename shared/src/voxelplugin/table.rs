@@ -1,5 +1,4 @@
 /// A table of voxel information
-/// Directly
 pub struct VoxelDataTable {
     
 }

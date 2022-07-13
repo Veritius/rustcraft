@@ -4,9 +4,11 @@ use bevy_ecs::prelude::{World, FromWorld};
 mod chunk;
 mod table;
 mod voxel;
+mod events;
 
 use table::{VoxelDataTable, VoxelDataTableEntry};
 use chunk::Chunk;
+use events::*;
 
 /// An implementation for a voxel world system
 pub struct VoxelPlugin;
@@ -14,6 +16,12 @@ pub struct VoxelPlugin;
 impl Plugin for VoxelPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GlobalVoxelData>();
+        
+        //TODO: Put this in events.rs
+        app.add_event::<BlockRemovedEvent>();
+        app.add_event::<BlockPlacedEvent>();
+        app.add_event::<BlockReplacedEvent>();
+        app.add_event::<BlockUpdateEvent>();
     }
 }
 
