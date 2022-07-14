@@ -18,10 +18,13 @@ impl Plugin for VoxelPlugin {
         app.init_resource::<GlobalVoxelData>();
         
         //TODO: Put this in events.rs
-        app.add_event::<BlockRemovedEvent>();
-        app.add_event::<BlockPlacedEvent>();
-        app.add_event::<BlockReplacedEvent>();
         app.add_event::<BlockUpdateEvent>();
+        app.add_event::<BlockRemovalAttemptEvent>();
+        app.add_event::<BlockRemovalEvent>();
+        app.add_event::<BlockPlacementAttemptEvent>();
+        app.add_event::<BlockPlacementEvent>();
+        app.add_event::<BlockReplacementAttemptEvent>();
+        app.add_event::<BlockReplacementEvent>();
     }
 }
 
