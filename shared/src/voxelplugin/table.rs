@@ -6,7 +6,7 @@ pub struct VoxelDataTable {
 impl VoxelDataTable {
     pub fn new() -> VoxelDataTable {
         let mut table = Vec::<VoxelDataTableEntry>::new();
-        /// Ensure index 0 is always "empty"
+        // Ensure index 0 is always "empty"
         let air = VoxelDataTableEntry {
             string_id: "air".to_string(),
             name: "Air".to_string(),

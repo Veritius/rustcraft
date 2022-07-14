@@ -15,7 +15,8 @@ pub struct BlockPlacedEvent {
 
 /// Event fired off when a block is replaced with another
 pub struct BlockReplacedEvent {
-    new: Voxel
+    new: Voxel,
+    old: Voxel,
 }
 
 /// Event fired off when a block updates
