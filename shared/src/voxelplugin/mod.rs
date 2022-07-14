@@ -27,28 +27,15 @@ impl Plugin for VoxelPlugin {
 
 /// Globally accessible voxel plugin related information
 struct GlobalVoxelData {
-    table: VoxelDataTable,
+    pub table: VoxelDataTable,
     //chunks: Chunk, //TODO: make this a 3d array, placeholder atm
 }
 
 impl Default for GlobalVoxelData {
     fn default() -> Self {
-        let table = VoxelDataTable {};
-        let air_block = VoxelDataTableEntry {
-            string_id: "air",
-            name: "Empty",
-            opaque: false
-        };
-        table.add_block_type(air_block);
+        let table = VoxelDataTable::new();
         //let chunks = Chunk {};
 
         GlobalVoxelData { table }//, chunks }
-    }
-}
-
-impl GlobalVoxelData {
-    /// not implemented
-    fn get_voxel_table() {
-        
     }
 }

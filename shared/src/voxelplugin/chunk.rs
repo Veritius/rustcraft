@@ -1,6 +1,6 @@
 use bevy_ecs::{component::Component, entity::Entity};
 
-pub(crate) struct Chunk {
+pub struct Chunk {
     entity: Entity //World representaton of the chunk
 }
 
