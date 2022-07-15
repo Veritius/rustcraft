@@ -1,13 +1,13 @@
 use bevy_ecs::{component::Component, entity::Entity};
 
-/// A world's chunk table
-pub struct ChunkTable {
+/// A world's chunk table and methods for interacting with voxels
+pub struct ChunkManager {
 
 }
 
-impl Default for ChunkTable {
-    fn default() -> ChunkTable {
-        ChunkTable { }
+impl Default for ChunkManager {
+    fn default() -> ChunkManager {
+        ChunkManager { }
     }
 }
 

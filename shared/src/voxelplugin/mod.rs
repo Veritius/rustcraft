@@ -5,7 +5,7 @@ mod voxel;
 mod events;
 
 use voxel::VoxelDataTable;
-use chunk::ChunkTable;
+use chunk::ChunkManager;
 use events::*;
 
 /// An implementation for a voxel world system
@@ -15,7 +15,7 @@ impl Plugin for VoxelPlugin {
     fn build(&self, app: &mut App) {
         //No multi-world/dimensions support (yet).
         app.init_resource::<VoxelDataTable>();
-        app.init_resource::<ChunkTable>();
+        app.init_resource::<ChunkManager>();
         
         //TODO: Put this in events.rs
         app.add_event::<BlockUpdateEvent>();
