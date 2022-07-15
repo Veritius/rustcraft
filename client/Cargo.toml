@@ -13,4 +13,5 @@ bevy_console = "0.3.1"
 bevy-discord-presence = "0.3.1"
 heron = { version = "3.1.0", features = ["3d"] }
 ndarray = { version = "0.15.4", features = ["serde"] }
+fluent = "0.16.0"
 serde = "1.0.137"

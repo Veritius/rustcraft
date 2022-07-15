@@ -1,6 +1,0 @@
-- type: Voxel
-  id: "BlockGlass"
-  components:
-    - type: Model
-      path: modelPath
-      texture: texturePath
