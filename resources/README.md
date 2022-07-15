@@ -6,7 +6,7 @@ resources
     │   ├── models
     │   └── textures
     ├── locale
-    │   └── en-US
+    │   └── en-US
     └── meta.yml
 ```
 
@@ -24,8 +24,8 @@ The fields are as follows:
 `meta.yml` example
 ```yml
 id: rustcraft.core
-name: rustcraft-core-plugin-name
-desc: rustcraft-core-plugin-desc
+name: rustcraft-core-package-name
+desc: rustcraft-core-package-desc
 authors: ["Veritius"]
 ```
 
