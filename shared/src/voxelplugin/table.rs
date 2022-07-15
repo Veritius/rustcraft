@@ -3,20 +3,24 @@ pub struct VoxelDataTable {
     table: Vec<VoxelDataTableEntry>
 }
 
-impl VoxelDataTable {
-    pub fn new() -> VoxelDataTable {
+impl Default for VoxelDataTable {
+    fn default() -> VoxelDataTable {
         let mut table = Vec::<VoxelDataTableEntry>::new();
         // Ensure index 0 is always "empty"
         let air = VoxelDataTableEntry {
             string_id: "air".to_string(),
             name: "Air".to_string(),
-            opaque: false
+            opaque: false,
+            permeable: true,
+            solid: false,
         };
         table.push(air);
 
         return VoxelDataTable { table };
     }
+}
 
+impl VoxelDataTable {
     ///Get the flyweighted voxel information for a specific integer voxel id
     pub fn get_block_data(self, id: u16) -> Option<VoxelDataTableEntry> {
         // TODO: Replace with try_get
@@ -50,4 +54,8 @@ pub struct VoxelDataTableEntry {
     pub name: String,
     /// Don't create adjacent faces
     pub opaque: bool,
+    /// Can water and temperature flow through this block
+    pub permeable: bool,
+    /// Can players/other physics objects move through this block
+    pub solid: bool,
 }

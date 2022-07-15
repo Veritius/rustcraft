@@ -5,7 +5,7 @@ pub struct BlockUpdateEvent {
 
 }
 
-/// Event fired off when a block is attempted to be removed
+/// Cancellable event fired off when a block is attempted to be removed
 pub struct BlockRemovalAttemptEvent {
     /// Set to `true` to cancel the removal
     cancelled: bool,
@@ -17,7 +17,7 @@ pub struct BlockRemovalEvent {
     obj: Voxel
 }
 
-/// Event fired off when a block is attempted to be placed
+/// Cancellable event fired off when a block is attempted to be placed
 pub struct BlockPlacementAttemptEvent {
     /// Set to `true` to cancel the placement
     cancelled: bool,
@@ -29,7 +29,7 @@ pub struct BlockPlacementEvent {
     obj: Voxel,
 }
 
-/// Event fired off when a block is attempted to be replaced with another
+/// Cancellable event fired off when a block is attempted to be replaced with another
 pub struct BlockReplacementAttemptEvent {
     /// Set to `true` to cancel the replacement
     cancelled: bool,
