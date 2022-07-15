@@ -4,7 +4,7 @@ use bevy_ecs::system::Command;
 use bevy_log::{info, LogPlugin};
 use bevy_math::f32::Vec3;
 use bevy_ecs::prelude::Commands;
-use rustcraft_shared::{voxelplugin::VoxelPlugin};
+use rustcraft_shared::{voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
 use heron::prelude::*;
 
 use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig, Stage};
@@ -35,6 +35,9 @@ fn main() {
 
     // Voxel world
     app.add_plugin(VoxelPlugin);
+
+    // Fluent support
+    app.add_plugin(LocalePlugin);
 
     // Networking
     app.add_plugin(ServerPlugin::<Protocol, Channels>::new(

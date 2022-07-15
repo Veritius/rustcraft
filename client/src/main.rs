@@ -3,7 +3,7 @@ use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, Stage};
 use heron::prelude::*;
 use bevy_console::{AddConsoleCommand, ConsoleCommand, ConsolePlugin};
 use bevy_discord_presence::config::{RPCConfig, RPCPlugin};
-use rustcraft_shared::{protocol::Protocol, shared_config, Channels, voxelplugin::VoxelPlugin};
+use rustcraft_shared::{protocol::Protocol, shared_config, Channels, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
 use crate::systems::{events, init, input, sync, tick};
 
 mod command_history; //hack
@@ -33,6 +33,9 @@ fn main() {
 
     // Voxel world
     app.add_plugin(VoxelPlugin);
+
+    // Fluent support
+    app.add_plugin(LocalePlugin);
     
     // Startup System
     app.add_startup_system(systems::init);
