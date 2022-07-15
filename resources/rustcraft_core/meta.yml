@@ -1,3 +1,4 @@
-name: Rustcraft Core
-desc: Basic gameplay stuff.
-author: Veritius
+id: rustcraft.core
+name: rustcraft-core-plugin-name
+desc: rustcraft-core-plugin-desc
+authors: ["Veritius"]

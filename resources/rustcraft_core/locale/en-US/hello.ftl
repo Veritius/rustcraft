@@ -1,1 +1,1 @@
-debug-hello = Hello, {$person}!
+rustcraft-core-debug-hello = Hello, {$person}!
