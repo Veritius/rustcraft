@@ -17,12 +17,12 @@ impl Plugin for LocalePlugin {
     }
 }
 
-pub struct Locale<T> {
-    bundle: FluentBundle<FluentResource, T>,
+pub struct Locale {
+    bundle: FluentBundle<FluentResource, intl_memoizer::concurrent::IntlLangMemoizer>,
 }
 
-impl Locale<T> {
-    pub fn new(chosen_locale: &str) -> Locale<T> {
+impl Locale {
+    pub fn new(chosen_locale: &str) -> Locale {
         let langid: LanguageIdentifier = chosen_locale.parse().expect("Invalid LanguageIdentifier");
         let locale_as_string = langid.to_string();
         let mut bundle = FluentBundle::new_concurrent(vec![langid]);
@@ -60,7 +60,7 @@ impl Locale<T> {
                                     Ok(_) => {}
                                     Err(_) => {
                                         // TODO: Surely there's a better approach than this
-                                        let error_message = String::from("Failed to add a Fluent string (");
+                                        let mut error_message = String::from("Failed to add a Fluent string (");
                                         error_message.push_str(&file_path_str);
                                         error_message.push_str(" line ");
                                         error_message.push_str(index.to_string().as_str());
@@ -70,7 +70,7 @@ impl Locale<T> {
                             }
                             Err(error) => {
                                 let formatted_error = format!("{:?}", error);
-                                let error_message = String::from("Fluent error at ");
+                                let mut error_message = String::from("Fluent error at ");
                                 error_message.push_str(&file_path_str);
                                 error_message.push_str(" line ");
                                 error_message.push_str(index.to_string().as_str());
