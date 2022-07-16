@@ -2,7 +2,6 @@
 A Minecraft clone made in Rust, promoting moddability, flexibility, and performance.
 
 ![GitHub top language](https://img.shields.io/github/languages/top/veritius/rustcraft)
-![GitHub license](https://img.shields.io/github/license/veritius/rustcraft)
 ![GitHub issues](https://img.shields.io/github/issues/veritius/rustcraft)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/veritius/rustcraft)
 ![GitHub all releases](https://img.shields.io/github/downloads/veritius/rustcraft/total)
