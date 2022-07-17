@@ -1,5 +1,5 @@
 # Official Packages
-This directory, contains some official packages for the game. Feel free to use them as a template for your own packages.
+This directory contains some official packages for the game. Feel free to use them as a template for your own packages.
 
 # Example Content Package Structure
 ```
