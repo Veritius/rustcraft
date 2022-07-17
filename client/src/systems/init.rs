@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ecs::system::Commands, log::info, render::camera::OrthographicCameraBundle};
+use rustcraft_shared::bevy::{prelude::*, ecs::system::Commands, log::info, render::camera::OrthographicCameraBundle};
 
 use naia_bevy_client::Client;
 

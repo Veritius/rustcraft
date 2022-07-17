@@ -1,5 +1,5 @@
 use std::default::Default;
-use bevy::ecs::entity::Entity;
+use rustcraft_shared::bevy::ecs::entity::Entity;
 use naia_shared::EntityProperty;
 use rustcraft_shared::protocol::KeyCommand;
 use crate::command_history::*;

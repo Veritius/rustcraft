@@ -1,4 +1,4 @@
-use bevy::{ecs::system::Query, transform::components::Transform};
+use rustcraft_shared::bevy::{ecs::system::Query, transform::components::Transform};
 
 use rustcraft_shared::protocol::Position;
 

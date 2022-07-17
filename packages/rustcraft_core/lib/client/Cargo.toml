@@ -1,9 +1,10 @@
 [package]
-name = "rustcraft_package_client"
+name = "rustcraft_core_client"
 version = "0.1.0"
 edition = "2021"
 authors = ["Veritius"]
 
 [dependencies]
+rustcraft_core_shared = { path = "../shared" }
 rustcraft_shared = { path = "../../../../shared" }
 rustcraft_client = { path = "../../../../client" }

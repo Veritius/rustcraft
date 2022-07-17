@@ -1,4 +1,4 @@
-use bevy_ecs::component::Component;
+use bevy::ecs::component::Component;
 
 /// A table of voxel information
 pub struct VoxelDataTable {

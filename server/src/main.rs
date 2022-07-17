@@ -1,9 +1,8 @@
-use bevy_app::{App, ScheduleRunnerPlugin};
-use bevy_core::CorePlugin;
-use bevy_ecs::system::Command;
-use bevy_log::{info, LogPlugin};
-use bevy_math::f32::Vec3;
-use bevy_ecs::prelude::Commands;
+use rustcraft_shared::bevy::core::CorePlugin;
+use rustcraft_shared::bevy::app::{App, ScheduleRunnerPlugin};
+use rustcraft_shared::bevy::ecs::{system::Command, prelude::Commands};
+use rustcraft_shared::bevy::log::{info, LogPlugin};
+use rustcraft_shared::bevy::math::f32::Vec3;
 use rustcraft_shared::{voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
 use heron::prelude::*;
 

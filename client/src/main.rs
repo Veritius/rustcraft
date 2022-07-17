@@ -1,4 +1,4 @@
-use bevy::{prelude::*, app::App, DefaultPlugins, window::PresentMode, ecs::system::Command};
+use rustcraft_shared::bevy::{prelude::*, app::App, DefaultPlugins, window::PresentMode, ecs::system::Command};
 use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, Stage};
 use heron::prelude::*;
 use bevy_console::{AddConsoleCommand, ConsoleCommand, ConsolePlugin};

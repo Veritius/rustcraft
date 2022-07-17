@@ -1,4 +1,4 @@
-use bevy::{
+use rustcraft_shared::bevy::{
     ecs::system::{Res, ResMut},
     input::{keyboard::KeyCode, Input},
 };

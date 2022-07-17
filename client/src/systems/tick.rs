@@ -1,4 +1,4 @@
-use bevy::ecs::system::{Query, ResMut};
+use rustcraft_shared::bevy::ecs::system::{Query, ResMut};
 
 use naia_bevy_client::Client;
 

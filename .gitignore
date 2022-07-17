@@ -3,3 +3,4 @@
 
 # Cargo stuff
 /target
+/packages/*/lib/target/

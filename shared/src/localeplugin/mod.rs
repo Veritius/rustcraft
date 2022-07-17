@@ -1,4 +1,4 @@
-use bevy_app::{App, Plugin};
+use bevy::app::{App, Plugin};
 use glob::glob;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -30,7 +30,7 @@ impl Locale {
         // packages/*/locale/en-US/**/*.ftl
         let mut locdir = String::from("packages/*/locale/");
         locdir.push_str(&locale_as_string);
-        locdir.push_str("/**/*.ftl"); 
+        locdir.push_str("/**/*.ftl");
         
         // Loop over files
         for path in glob(&locdir).expect("Error in glob pattern") {

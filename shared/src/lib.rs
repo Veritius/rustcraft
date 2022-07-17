@@ -1,4 +1,5 @@
-extern crate log;
+pub use bevy;
+pub use log;
 
 pub mod behavior;
 pub mod protocol;

@@ -1,4 +1,4 @@
-use bevy::{
+use rustcraft_shared::bevy::{
     prelude::*,
     ecs::{
         event::EventReader,

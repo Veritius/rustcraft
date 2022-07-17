@@ -1,4 +1,4 @@
-use bevy_ecs::{component::Component, entity::Entity};
+use bevy::ecs::{component::Component, entity::Entity};
 
 /// A world's chunk table and methods for interacting with voxels
 pub struct ChunkManager {

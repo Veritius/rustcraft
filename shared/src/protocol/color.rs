@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::Component;
+use bevy::ecs::component::Component;
 use naia_shared::{derive_serde, serde, Property, Replicate};
 
 #[derive_serde]

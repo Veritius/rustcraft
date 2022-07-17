@@ -1,4 +1,4 @@
-use bevy_app::{App, Plugin};
+use bevy::app::{App, Plugin};
 
 mod chunk;
 mod voxel;
