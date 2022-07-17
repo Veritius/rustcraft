@@ -27,8 +27,8 @@ impl Locale {
         let locale_as_string = langid.to_string();
         let mut bundle = FluentBundle::new_concurrent(vec![langid]);
 
-        // resources/*/locale/en-US/**/*.ftl
-        let mut locdir = String::from("resources/*/locale/");
+        // packages/*/locale/en-US/**/*.ftl
+        let mut locdir = String::from("packages/*/locale/");
         locdir.push_str(&locale_as_string);
         locdir.push_str("/**/*.ftl"); 
         
