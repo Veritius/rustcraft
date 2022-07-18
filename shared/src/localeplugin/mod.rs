@@ -51,8 +51,6 @@ impl Locale {
                         let file_path_str = file_path.as_str();
                         let reader = BufReader::new(validated_file);
 
-                        log::info!("{}", file_path_str);
-
                         // Loop over every line
                         for (index, line) in reader.lines().enumerate() {
                             let line = line.unwrap();
@@ -64,24 +62,12 @@ impl Locale {
                                     match result {
                                         Ok(_) => {}
                                         Err(_) => {
-                                            // TODO: Surely there's a better approach than this
-                                            let mut error_message = String::from("Failed to add a Fluent string (");
-                                            error_message.push_str(&file_path_str);
-                                            error_message.push_str(" line ");
-                                            error_message.push_str(index.to_string().as_str());
-                                            error_message.push_str(")");
-                                            warn!(target:"LocalePlugin", "{}", error_message) }
+                                            warn!(target:"LocalePlugin", "Failed to add a Fluent string ({} line {})", &file_path_str, index.to_string().as_str())
+                                        }
                                     }
                                 }
                                 Err(error) => {
-                                    let formatted_error = format!("{:?}", error);
-                                    let mut error_message = String::from("Fluent error at ");
-                                    error_message.push_str(&file_path_str);
-                                    error_message.push_str(" line ");
-                                    error_message.push_str(index.to_string().as_str());
-                                    error_message.push_str(": ");
-                                    error_message.push_str(&formatted_error);
-                                    error!(target:"LocalePlugin", "{}", error_message)
+                                    error!(target:"LocalePlugin", "Fluent error at {} line {}: {:?}", &file_path_str, index.to_string().as_str(), error)
                                 }
                             }
                         }

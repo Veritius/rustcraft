@@ -37,14 +37,12 @@ impl PackageTable {
                             }
                         }
                         Err(error_message) => {
-                            let mut message_contents = String::from("Package path is inaccessible ");
-                            message_contents.push_str(format!("{}", error_message).as_str());
-                            error!("{}", message_contents)
+                            error!("Package path is inaccessible {}", error_message)
                         }
                     }
                 }
                 Err(error_message) => {
-                    error!("{}", format!("{}", error_message).as_str());
+                    error!("Glob error: {}", error_message);
                 }
             }
         }
