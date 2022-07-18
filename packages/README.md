@@ -43,7 +43,6 @@ Optional fields:
 
 `package.toml` example
 ```toml
-[package]
 id = "jimmysmod.decorations"
 name = "jimmysmod-decorations-package-name"
 desc = "jimmysmod-decorations-package-desc"
