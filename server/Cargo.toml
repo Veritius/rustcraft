@@ -9,6 +9,3 @@ rustcraft_shared = { path = "../shared" }
 naia-bevy-server = { version = "0.10.1", features = ["use-udp"] }
 naia-shared = "0.10.0"
 bevy_proto = "0.4.0"
-heron = { version = "3.1.0", features = ["3d"] }
-ndarray = { version = "0.15.4", features = ["serde"] }
-serde = "1.0.137"

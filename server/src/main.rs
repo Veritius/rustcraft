@@ -1,13 +1,15 @@
+pub use naia_bevy_server;
+
 use rustcraft_shared::bevy::core::CorePlugin;
 use rustcraft_shared::bevy::app::{App, ScheduleRunnerPlugin};
 use rustcraft_shared::bevy::ecs::{system::Command, prelude::Commands};
 use rustcraft_shared::bevy::log::{info, LogPlugin};
 use rustcraft_shared::bevy::math::f32::Vec3;
 use rustcraft_shared::{voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
-use heron::prelude::*;
+use rustcraft_shared::heron::prelude::*;
 
 use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig, Stage};
-use naia_shared::Property;
+use rustcraft_shared::naia_shared::Property;
 
 use rustcraft_shared::{protocol::GridFixture};
 use rustcraft_shared::{protocol::Protocol, protocol::Position, shared_config, Channels};

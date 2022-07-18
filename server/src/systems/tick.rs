@@ -1,4 +1,4 @@
-use bevy_ecs::system::{Query, ResMut};
+use rustcraft_shared::bevy::ecs::system::{Query, ResMut};
 use naia_bevy_server::Server;
 use rustcraft_shared::{
     behavior as shared_behavior,

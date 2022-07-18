@@ -1,5 +1,5 @@
-use bevy_ecs::{event::EventReader, system::ResMut};
-use bevy_log::info;
+use rustcraft_shared::bevy::ecs::{event::EventReader, system::ResMut};
+use rustcraft_shared::bevy::log::info;
 
 use naia_bevy_server::{
     events::{AuthorizationEvent, ConnectionEvent, DisconnectionEvent, MessageEvent},

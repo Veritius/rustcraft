@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use bevy_ecs::entity::Entity;
+use rustcraft_shared::bevy::ecs::entity::Entity;
 use naia_bevy_server::{RoomKey, UserKey};
 use rustcraft_shared::protocol::KeyCommand;
 

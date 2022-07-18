@@ -7,10 +7,5 @@ authors = ["Veritius"]
 [dependencies]
 rustcraft_shared = { path = "../shared" }
 naia-bevy-client = "0.10.1"
-naia-shared = "0.10.0"
 bevy_console = "0.3.1"
 bevy-discord-presence = "0.3.1"
-heron = { version = "3.1.0", features = ["3d"] }
-ndarray = { version = "0.15.4", features = ["serde"] }
-fluent = "0.16.0"
-serde = "1.0.137"

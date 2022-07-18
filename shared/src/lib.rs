@@ -1,4 +1,9 @@
 pub use bevy;
+pub use heron;
+pub use ndarray;
+pub use serde;
+pub use fluent;
+pub use naia_shared;
 pub use log;
 
 pub mod behavior;

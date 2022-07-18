@@ -3607,13 +3607,8 @@ version = "0.1.0"
 dependencies = [
  "bevy-discord-presence",
  "bevy_console",
- "fluent",
- "heron",
  "naia-bevy-client",
- "naia-shared",
- "ndarray",
  "rustcraft_shared",
- "serde",
 ]
 
 [[package]]
@@ -3621,12 +3616,9 @@ name = "rustcraft_server"
 version = "0.1.0"
 dependencies = [
  "bevy_proto",
- "heron",
  "naia-bevy-server",
  "naia-shared",
- "ndarray",
  "rustcraft_shared",
- "serde",
 ]
 
 [[package]]
@@ -3637,10 +3629,12 @@ dependencies = [
  "cfg-if 1.0.0",
  "fluent",
  "glob",
+ "heron",
  "intl-memoizer",
  "log",
  "naia-shared",
  "ndarray",
+ "serde",
  "unic-langid",
 ]
 

@@ -1,6 +1,9 @@
+pub use naia_bevy_client;
+pub use bevy_console;
+
 use rustcraft_shared::bevy::{prelude::*, app::App, DefaultPlugins, window::PresentMode, ecs::system::Command};
 use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, Stage};
-use heron::prelude::*;
+use rustcraft_shared::heron::prelude::*;
 use bevy_console::{AddConsoleCommand, ConsoleCommand, ConsolePlugin};
 use bevy_discord_presence::config::{RPCConfig, RPCPlugin};
 use rustcraft_shared::{protocol::Protocol, shared_config, Channels, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};

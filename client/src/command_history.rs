@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use naia_shared::{sequence_greater_than, Tick};
+use rustcraft_shared::naia_shared::{sequence_greater_than, Tick};
 
 pub struct CommandHistory<T: Clone> {
     buffer: VecDeque<(Tick, T)>,
