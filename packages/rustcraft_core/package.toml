@@ -1,0 +1,8 @@
+id = "rustcraft.core"
+name = "rustcraft-core-package-name"
+desc = "rustcraft-core-package-desc"
+authors = ["Veritius"]
+packageversion = "0.1.0"
+gameversionrange = { min = "0.1.0", max = "0.1.0" }
+dependencies = []
+incompatibilities = []

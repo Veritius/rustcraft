@@ -5,7 +5,7 @@ use rustcraft_shared::bevy::app::{App, ScheduleRunnerPlugin};
 use rustcraft_shared::bevy::ecs::{system::Command, prelude::Commands};
 use rustcraft_shared::bevy::log::{info, LogPlugin};
 use rustcraft_shared::bevy::math::f32::Vec3;
-use rustcraft_shared::{voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
+use rustcraft_shared::{modloader::ModLoaderPlugin, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
 use rustcraft_shared::heron::prelude::*;
 
 use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig, Stage};
@@ -24,6 +24,8 @@ fn main() {
 
     // Make app
     let mut app = App::new();
+
+    app.add_plugin(ModLoaderPlugin);
 
     // Game essentials
     app.add_plugin(CorePlugin::default());

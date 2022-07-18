@@ -5,9 +5,13 @@ pub use serde;
 pub use fluent;
 pub use naia_shared;
 pub use log;
+pub use yaml_rust;
+pub use toml;
 
 pub mod behavior;
 pub mod protocol;
+
+pub mod modloader;
 
 pub mod localeplugin;
 pub mod voxelplugin;

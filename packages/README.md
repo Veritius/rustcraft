@@ -21,28 +21,37 @@ packages
     │       └── cabbage.png
     ├── locale
     │   └── en-US
-    └── meta.yml
+    └── package.toml
 ```
 
 # Directories and Files
-## meta.yml
-The `meta.yml` file is always at the root of the package.
+## package.toml
+The `package.toml` file is always at the root of the package.
 It describes information about the package, such as names.
 
-The fields are as follows:
+Mandatory fields:
 - `id`: Unique identifier for this package
 - `name`: A localised package name (Fluent ID)
 - `desc`: A localised package description (Fluent ID)
 - `authors`: A list of authors (strings)
-- `dependencies`: A list of packages that this package depends on.
+- `packageversion`: The version of the package (please follow [Semantic Versioning](https://semver.org/) rules)
+- `gameversionrange`: Restricts the package to running within a specific range of game versions
 
-`meta.yml` example
-```yml
-id: packagetitle.submodule
-name: packagetitle-submodule-package-name
-desc: packagetitle-submodule-package-desc
-authors: ["Veritius"]
-dependencies: ["packagetitle.submodule2"]
+Optional fields:
+- `dependencies`: A list of packages that this package depends on.
+- `incompatibilities`: A list of packages that this package will refuse to function with.
+
+`package.toml` example
+```toml
+[package]
+id = "jimmysmod.decorations"
+name = "jimmysmod-decorations-package-name"
+desc = "jimmysmod-decorations-package-desc"
+authors = ["Jimmy"]
+packageversion = "1.7.2"
+gameversionrange = { min = "0.1.0", max = "0.1.0" }
+dependencies = ["jimmysmod.core"]
+incompatibilities = ["davesmod.decorations"]
 ```
 
 ## lib

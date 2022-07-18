@@ -6,7 +6,8 @@ use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, Stage};
 use rustcraft_shared::heron::prelude::*;
 use bevy_console::{AddConsoleCommand, ConsoleCommand, ConsolePlugin};
 use bevy_discord_presence::config::{RPCConfig, RPCPlugin};
-use rustcraft_shared::{protocol::Protocol, shared_config, Channels, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
+use rustcraft_shared::{protocol::Protocol, shared_config, Channels};
+use rustcraft_shared::{modloader::ModLoaderPlugin, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
 use crate::systems::{events, init, input, sync, tick};
 
 mod command_history; //hack
@@ -17,6 +18,10 @@ fn main() {
     info!("Starting client");
 
     let mut app = App::new();
+
+    // Modloader is loaded first
+    app.add_plugin(ModLoaderPlugin);
+
     // Game essentials
     app.add_plugins(DefaultPlugins);
     app.insert_resource(WindowDescriptor {
