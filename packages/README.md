@@ -55,7 +55,7 @@ incompatibilities = ["davesmod.decorations"]
 
 ## lib
 The `lib` directory contains libraries that the game will load in at runtime.
-- Libraries in the `shared` directory will not be loaded, they instead should be used by a `server` or `client` library.
+- Libraries in the `shared` directory will be loaded on both the server and client.
 - Libraries in the `server` directory will be loaded on only the server.
 - Libraries in the `client` directory will be loaded on only the client.
 
