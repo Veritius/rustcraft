@@ -30,10 +30,7 @@ impl Locale {
         let mut bundle = FluentBundle::new_concurrent(vec![langid]);
 
         for package in &packagetable.table {
-            let mut locdir = package.path.to_owned();
-            locdir.push_str("/locale/");
-            locdir.push_str(&locale_as_string);
-            locdir.push_str("/**/*.ftl");
+            let locdir = format!("{}/locale/{}/**/*.ftl", package.path.to_owned(), &locale_as_string);
 
             // Loop over files
             for path in glob(&locdir).expect("Error in glob pattern") {
