@@ -6,12 +6,9 @@ This directory contains some official packages for the game. Feel free to use th
 packages
 └── example_package_alpha
     ├── lib
-    │   ├── client
-    │   │   └── client.rs
-    │   ├── server
-    │   │   └── server.rs
-    │   └── shared
-    │       └── server.rs
+    │   ├── jimmysmod_client.so
+    │   ├── jimmysmod_server.so
+    │   └── jimmysmod_shared.so
     ├── assets
     │   ├── models
     │   │   └── cabbage.obj
@@ -20,7 +17,16 @@ packages
     │   └── textures
     │       └── cabbage.png
     ├── locale
-    │   └── en-US
+    │   ├── en-US
+    │   │   ├── package.ftl
+    │   │   ├── ui
+    │   │   │   └── mainmenu.ftl
+    │   │   └── blocks
+    │   │       └── stone.ftl
+    │   └── nl-NL 
+    │       ├── package.ftl
+    │       ├── ui
+    │       └── blocks
     └── package.toml
 ```
 
@@ -34,10 +40,11 @@ Mandatory fields:
 - `name`: A localised package name (Fluent ID)
 - `desc`: A localised package description (Fluent ID)
 - `authors`: A list of authors (strings)
-- `packageversion`: The version of the package (please follow [Semantic Versioning](https://semver.org/) rules)
+- `packageversion`: The version of the package (SemVer compliant)
 - `gameversionrange`: Restricts the package to running within a specific range of game versions
 
 Optional fields:
+- `libentrypoint`: Entry points for shared, server, and client packages.
 - `dependencies`: A list of packages that this package depends on.
 - `incompatibilities`: A list of packages that this package will refuse to function with.
 
@@ -48,10 +55,13 @@ name = "jimmysmod-decorations-package-name"
 desc = "jimmysmod-decorations-package-desc"
 authors = ["Jimmy"]
 packageversion = "1.7.2"
-gameversionrange = { min = "0.1.0", max = "0.1.0" }
+gameversionreq = "1.7.*"
+libentrypoint = { shared = "jimmysmod_shared", server = "jimmysmod_client", client = "jimmysmod_server" }
 dependencies = ["jimmysmod.core"]
 incompatibilities = ["davesmod.decorations"]
 ```
+
+**Further reading:** [Semantic Versioning](https://semver.org/), [Version Requirement](https://docs.rs/semver/latest/semver/struct.VersionReq.html)
 
 ## lib
 The `lib` directory contains libraries that the game will load in at runtime.

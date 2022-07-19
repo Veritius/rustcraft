@@ -5,7 +5,7 @@ use rustcraft_shared::bevy::app::{App, ScheduleRunnerPlugin};
 use rustcraft_shared::bevy::ecs::{system::Command, prelude::Commands};
 use rustcraft_shared::bevy::log::{info, LogPlugin};
 use rustcraft_shared::bevy::math::f32::Vec3;
-use rustcraft_shared::{modloader::ModLoaderPlugin, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
+use rustcraft_shared::{modloader::{ModLoaderPlugin, run_foreign_libraries}, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
 use rustcraft_shared::heron::prelude::*;
 
 use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig, Stage};
@@ -53,6 +53,9 @@ fn main() {
     app.add_system_to_stage(Stage::ReceiveEvents, events::disconnection_event);
     app.add_system_to_stage(Stage::ReceiveEvents, events::receive_message_event);
     app.add_system_to_stage(Stage::Tick, tick);
+
+    // Never call this more than once, and never right before app.start.
+    run_foreign_libraries(&mut app, true);
 
     // Start the game
     app.run();

@@ -1,7 +1,7 @@
 use rustcraft_shared::bevy::app::{App, Plugin};
 
-fn package() -> RustcraftCoreServer {
-    RustcraftCoreServer {}
+fn bevy_entry_point() {
+
 }
 
 pub struct RustcraftCoreServer;

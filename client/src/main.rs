@@ -7,7 +7,7 @@ use rustcraft_shared::heron::prelude::*;
 use bevy_console::{AddConsoleCommand, ConsoleCommand, ConsolePlugin};
 use bevy_discord_presence::config::{RPCConfig, RPCPlugin};
 use rustcraft_shared::{protocol::Protocol, shared_config, Channels};
-use rustcraft_shared::{modloader::ModLoaderPlugin, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
+use rustcraft_shared::{modloader::{ModLoaderPlugin, run_foreign_libraries}, voxelplugin::VoxelPlugin, localeplugin::LocalePlugin};
 use crate::systems::{events, init, input, sync, tick};
 
 mod command_history; //hack
@@ -63,10 +63,13 @@ fn main() {
     app.add_plugin(ConsolePlugin);
 
     // Discord Rich Presence
-    app.add_plugin(RPCPlugin(RPCConfig {
-        app_id: 987633651728666645,
-        show_time: true
-    }));
+    //app.add_plugin(RPCPlugin(RPCConfig {
+    //    app_id: 987633651728666645,
+    //    show_time: true
+    //}));
+
+    // Never call this more than once, and never right before app.start.
+    run_foreign_libraries(&mut app, false);
        
     // Start the game
     app.run();
