@@ -87,9 +87,7 @@ impl PackageTable {
                                     table.push(RustcraftPackage { path: folder, config: RustcraftPackageConfig { id, name, desc, authors, packageversion, gameversionreq, libentrypoint, dependencies, incompatibilities }});
                                 }
                                 Err(error_message) => {
-                                    let mut message_contents = String::from("Invalid package.toml ");
-                                    message_contents.push_str(format!("{}", error_message).as_str());
-                                    error!("{}", message_contents)
+                                    error!("Invalid package.toml: {}", error_message)
                                 }
                             }
                         }
