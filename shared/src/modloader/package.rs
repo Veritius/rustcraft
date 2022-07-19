@@ -5,10 +5,12 @@ use serde::Deserialize;
 use glob::glob;
 use toml::value::{Table, Array};
 use log::{warn, info, error};
+use libloading::Library;
 
 // A array of the currently installed packages
 pub struct PackageTable {
-    pub table: Vec<RustcraftPackage>
+    pub table: Vec<RustcraftPackage>,
+    pub libraries: Vec<Library>
 }
 
 impl PackageTable {
@@ -104,7 +106,8 @@ impl PackageTable {
 
         // TODO: Check dependencies/incompatibilities
 
-        let packagetable = PackageTable { table };
+        let libraries = Vec::new();
+        let packagetable = PackageTable { table, libraries };
         return packagetable;
     }
 }
