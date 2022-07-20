@@ -50,20 +50,35 @@ pub fn run_foreign_libraries(app: &mut App, is_server: bool) {
         }
     }
 
-    let packagelibraries = &mut packagemanager.libraries;
+    // Drop packagemanager
+    let packagemanager = "";
+    let mut packagelibraries = Vec::<Library>::new();
 
     // Load external libraries
     for path in paths {
         debug!("Loading library {}", path);
         unsafe {
             let lib = Library::new(path).unwrap();
+            packagelibraries.push(lib);
+            let lib = packagelibraries.last().unwrap();
             let entrypoint: Symbol<EntryPointFunc> = lib.get(b"entry_point").unwrap();
-            // THIS IS BROKEN
-            //entrypoint(app);
-            //packagelibraries.push(lib);
+            entrypoint(app);
             debug!("Loaded library successfully");
         }
     }
+
+    // Get packagemanager again
+    let mut packagemanager = app.world.get_resource_mut::<PackageTable>().expect("No package table found!");
+    packagemanager.libraries.append(&mut packagelibraries);
 }
 
-pub type EntryPointFunc = unsafe fn(app: &mut App);
+//Entry point function, called on dynamic libraries in packages
+//Function should be: entry_point(app: &mut App) -> String
+//where the String is the name of the package
+//
+//Looks like this: (example taken from packages/rustcraft_core/lib/server/src/lib.rs)
+//fn entry_point(app: &mut App) -> String {
+//    app.add_plugin(RustcraftCoreServer);
+//    String::from("RustcraftCoreServer")
+//}
+pub type EntryPointFunc = unsafe fn(app: &mut App) -> String;

@@ -1,7 +1,8 @@
 use rustcraft_shared::bevy::app::{App, Plugin};
 
-fn bevy_entry_point() {
-
+fn entry_point(app: &mut App) -> String {
+    app.add_plugin(RustcraftCoreClient);
+    String::from("RustcraftCoreClient")
 }
 
 pub struct RustcraftCoreClient;
