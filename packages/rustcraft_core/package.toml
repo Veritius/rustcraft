@@ -2,12 +2,8 @@ id = "rustcraft.core"
 name = "rustcraft-core-package-name"
 desc = "rustcraft-core-package-desc"
 authors = ["Veritius"]
-gameversionreq = "0.1.0"
+version = "0.1.0"
 gameversionrange = { min = "0.1.0", max = "0.1.0" }
-libentrypoint = {
-    shared = "",
-    server = "",
-    client = ""
-}
+libentrypoint = { shared = "", server = "", client = "" }
 dependencies = []
 incompatibilities = []

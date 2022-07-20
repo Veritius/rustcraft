@@ -54,7 +54,7 @@ id = "jimmysmod.decorations"
 name = "jimmysmod-decorations-package-name"
 desc = "jimmysmod-decorations-package-desc"
 authors = ["Jimmy"]
-packageversion = "1.7.2"
+version = "1.7.2"
 gameversionreq = "1.7.*"
 libentrypoint = { shared = "jimmysmod_shared", server = "jimmysmod_client", client = "jimmysmod_server" }
 dependencies = ["jimmysmod.core"]

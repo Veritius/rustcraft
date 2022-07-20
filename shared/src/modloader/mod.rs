@@ -29,14 +29,14 @@ pub fn run_foreign_libraries(app: &mut App, is_server: bool) {
 
         // Shared
         match shared {
-            Some(path) => { paths.push(format!("{}/lib/{}", package.path, path)); }
+            Some(path) => { paths.push(format!("{}/lib/{}", package.path, path)); println!("{}", path); }
             None => {}
         }
 
         if is_server {
             // Server
             match server {
-                Some(path) => { paths.push(format!("{}/lib/{}", package.path, path)); }
+                Some(path) => { paths.push(format!("{}/lib/{}", package.path, path)); println!("{}", path); }
                 None => {}
             }
         }
@@ -44,7 +44,7 @@ pub fn run_foreign_libraries(app: &mut App, is_server: bool) {
         {
             // Client
             match client {
-                Some(path) => { paths.push(format!("{}/lib/{}", package.path, path)); }
+                Some(path) => { paths.push(format!("{}/lib/{}", package.path, path)); println!("{}", path); }
                 None => {}
             }
         }
@@ -56,14 +56,14 @@ pub fn run_foreign_libraries(app: &mut App, is_server: bool) {
 
     // Load external libraries
     for path in paths {
-        debug!("Loading library {}", path);
+        println!("Loading library {}", path);
         unsafe {
             let lib = Library::new(path).unwrap();
             packagelibraries.push(lib);
             let lib = packagelibraries.last().unwrap();
             let entrypoint: Symbol<EntryPointFunc> = lib.get(b"entry_point").unwrap();
             entrypoint(app);
-            debug!("Loaded library successfully");
+            println!("Loaded library successfully");
         }
     }
 

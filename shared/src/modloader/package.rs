@@ -37,9 +37,9 @@ impl PackageTable {
                                     let desc = deser_package_data.desc;
                                     let mut authors = Vec::new();
                                     for item in deser_package_data.authors {
-                                        authors.push(item.to_string());
+                                        authors.push(String::from(item.as_str().unwrap()));
                                     }
-                                    let packageversion = Version::parse(&deser_package_data.packageversion).expect(format!("Invalid version field in {:#?}", &package_file).as_str());
+                                    let version = Version::parse(&deser_package_data.packageversion).expect(format!("Invalid version field in {:#?}", &package_file).as_str());
                                     let gameversionreq = VersionReq::parse(&deser_package_data.gameversionreq).expect(format!("Invalid version field in {:#?}", &package_file).as_str());
                                     let mut libentrypoint = EntryPoints { client: None, server: None, shared: None };
                                     match &deser_package_data.libentrypoint {
@@ -48,15 +48,15 @@ impl PackageTable {
                                             let cli = lib_ep.get("client");
                                             let shr = lib_ep.get("shared");
                                             match svr {
-                                                Some(val) => { libentrypoint.server = Some(val.to_string())}
+                                                Some(val) => { libentrypoint.server = Some(String::from(val.as_str().unwrap()))}
                                                 None => {}
                                             }
                                             match cli {
-                                                Some(val) => { libentrypoint.client = Some(val.to_string())}
+                                                Some(val) => { libentrypoint.client = Some(String::from(val.as_str().unwrap()))}
                                                 None => {}
                                             }
                                             match shr {
-                                                Some(val) => { libentrypoint.shared = Some(val.to_string())}
+                                                Some(val) => { libentrypoint.shared = Some(String::from(val.as_str().unwrap()))}
                                                 None => {}
                                             }
                                         }
@@ -85,8 +85,11 @@ impl PackageTable {
                                         None => {}
                                     }
 
+                                    println!("path: {}, id: {}, name: {}, desc: {}, authors: {:?}, version: {}, req: {}, entry: {:#?}, deps: {:#?}, incom: {:#?}",
+                                    folder, id, name, desc, authors, version, gameversionreq, libentrypoint, dependencies, incompatibilities);
+
                                     // Done
-                                    table.push(RustcraftPackage { path: folder, config: RustcraftPackageConfig { id, name, desc, authors, packageversion, gameversionreq, libentrypoint, dependencies, incompatibilities }});
+                                    table.push(RustcraftPackage { path: folder, config: RustcraftPackageConfig { id, name, desc, authors, version, gameversionreq, libentrypoint, dependencies, incompatibilities }});
                                 }
                                 Err(error_message) => {
                                     error!("Invalid package.toml: {}", error_message)
@@ -117,13 +120,14 @@ pub struct RustcraftPackage {
     pub config: RustcraftPackageConfig
 }
 
+#[derive(Debug)]
 /// Config information for a package
 pub struct RustcraftPackageConfig {
     pub id: String,
     pub name: String,
     pub desc: String,
     pub authors: Vec<String>,
-    pub packageversion: Version,
+    pub version: Version,
     pub gameversionreq: VersionReq,
     pub libentrypoint: EntryPoints,
     pub dependencies: Option<Vec<String>>,
@@ -145,6 +149,7 @@ struct RustcraftPackageConfigDeser {
     incompatibilities: Option<Array>,
 }
 
+#[derive(Debug)]
 pub struct EntryPoints {
     pub client: Option<String>,
     pub server: Option<String>,
