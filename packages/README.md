@@ -1,3 +1,5 @@
+**Loading external libraries is *not* a complete or even properly working feature! I don't recommend using it in any way.**
+
 # Official Packages
 This directory contains some official packages for the game. Feel free to use them as a template for your own packages.
 
