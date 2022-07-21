@@ -59,8 +59,6 @@ incompatibilities = ["davesmod.decorations"]
 
 **Further reading:** [Semantic Versioning](https://semver.org/), [Version Requirement](https://docs.rs/semver/latest/semver/struct.VersionReq.html)
 
-**Safety is not ensured.** Modders should ensure their own code is memory and thread safe, as the game cannot check at runtime.
-
 ## assets
 The `assets` directory stores any assets that the game will load.
 
