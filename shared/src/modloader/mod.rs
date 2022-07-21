@@ -51,7 +51,7 @@ pub fn run_foreign_libraries(app: &mut App, is_server: bool) {
     }
 
     // Drop packagemanager
-    let _packagemanager = "";
+    drop(packagemanager);
     let mut packagelibraries = Vec::<Library>::new();
 
     // Load external libraries
