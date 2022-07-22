@@ -1,9 +1,6 @@
 use std::{collections::BTreeMap, ops::{Rem, Div}};
-
 use bevy::ecs::{component::Component, entity::Entity};
 use ndarray::Array3;
-use num_traits::{Zero, Float};
-
 use super::voxel::Voxel;
 
 /// A world's chunk table and methods for interacting with voxels
