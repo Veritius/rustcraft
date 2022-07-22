@@ -1,3 +1,5 @@
+**Loading external libraries is *not* a complete or even properly working feature! I don't recommend using it in any way.**
+
 # Official Packages
 This directory contains some official packages for the game. Feel free to use them as a template for your own packages.
 
@@ -5,10 +7,6 @@ This directory contains some official packages for the game. Feel free to use th
 ```
 packages
 └── example_package_alpha
-    ├── lib
-    │   ├── jimmysmod_client.so
-    │   ├── jimmysmod_server.so
-    │   └── jimmysmod_shared.so
     ├── assets
     │   ├── models
     │   │   └── cabbage.obj
@@ -40,11 +38,10 @@ Mandatory fields:
 - `name`: A localised package name (Fluent ID)
 - `desc`: A localised package description (Fluent ID)
 - `authors`: A list of authors (strings)
-- `packageversion`: The version of the package (SemVer compliant)
+- `version`: The version of the package (SemVer compliant)
 - `gameversionrange`: Restricts the package to running within a specific range of game versions
 
 Optional fields:
-- `libentrypoint`: Entry points for shared, server, and client packages.
 - `dependencies`: A list of packages that this package depends on.
 - `incompatibilities`: A list of packages that this package will refuse to function with.
 
@@ -56,20 +53,11 @@ desc = "jimmysmod-decorations-package-desc"
 authors = ["Jimmy"]
 version = "1.7.2"
 gameversionreq = "1.7.*"
-libentrypoint = { shared = "jimmysmod_shared", server = "jimmysmod_client", client = "jimmysmod_server" }
 dependencies = ["jimmysmod.core"]
 incompatibilities = ["davesmod.decorations"]
 ```
 
 **Further reading:** [Semantic Versioning](https://semver.org/), [Version Requirement](https://docs.rs/semver/latest/semver/struct.VersionReq.html)
-
-## lib
-The `lib` directory contains libraries that the game will load in at runtime.
-- Libraries in the `shared` directory will be loaded on both the server and client.
-- Libraries in the `server` directory will be loaded on only the server.
-- Libraries in the `client` directory will be loaded on only the client.
-
-**Safety is not ensured.** Modders should ensure their own code is memory and thread safe, as the game cannot check at runtime.
 
 ## assets
 The `assets` directory stores any assets that the game will load.

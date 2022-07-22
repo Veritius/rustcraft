@@ -3,6 +3,7 @@ use bevy::app::{App, Plugin};
 mod chunk;
 mod voxel;
 mod events;
+mod mesh;
 
 use voxel::VoxelDataTable;
 use chunk::ChunkManager;
