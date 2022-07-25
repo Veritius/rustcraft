@@ -1,7 +1,9 @@
-use std::{collections::BTreeMap, ops::{Rem, Div}};
-use bevy::ecs::{component::Component, entity::Entity};
+use std::{collections::{BTreeMap, btree_map}, ops::{Rem, Div}};
+use bevy::{ecs::{component::Component, entity::Entity}, prelude::Commands};
 use ndarray::Array3;
 use super::voxel::Voxel;
+
+pub type ChunkPosition = (i32, i32, i32);
 
 /// A world's chunk table and methods for interacting with voxels
 pub struct ChunkManager {
@@ -64,14 +66,75 @@ impl ChunkTable {
             None => { return None; }
         }
     }
+
+    pub fn add_chunk(&mut self, mut commands: Commands, x: i32, y: i32, z: i32) {
+        let mut entcommands = commands.spawn();
+        let entity = entcommands.id();
+
+        let mut chunk = Chunk {
+            entity,
+            voxels: [[[None; 16]; 16]; 16]
+        };
+        
+        entcommands.insert(ChunkComponent { chunk: (x, y, z) });
+        let mut tz = BTreeMap::new();
+        tz.insert(z, Some(chunk));
+        let mut ty = BTreeMap::new();
+        ty.insert(y, tz);
+        self.tbl.insert(x, ty);
+    }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct Chunk {
     /// World representaton of the chunk
     pub entity: Entity,
-    pub voxels: [[[Voxel; 16]; 16]; 16]
+    pub voxels: [[[Option<Voxel>; 16]; 16]; 16]
+}
+
+impl Chunk {
+    // TODO: Make this return a Result like this: Result<Option<Voxel>, Err>
+    pub fn get_voxel(&self, x: usize, y: usize, z: usize) -> Option<Voxel> {
+        let xa = self.voxels.into_iter().nth(x);
+        match xa {
+            Some(xav) => {
+                let ya = xav.into_iter().nth(y);
+                match ya {
+                    Some(yav) => {
+                        let za = yav.into_iter().nth(z);
+                        match za {
+                            Some(zav) => {
+                                return zav;
+                            }
+                            None => { return None; }
+                        }
+                    }
+                    None => { return None; }
+                }
+            }
+            None => { return None; }
+        }
+    }
+
+    pub fn set_voxel(&mut self, x: usize, y: usize, z: usize, to: Option<Voxel>) {
+        let xa = self.voxels.into_iter().nth(x);
+        match xa {
+            Some(xav) => {
+                let ya = xav.into_iter().nth(y);
+                match ya {
+                    Some(mut yav) => {
+                        yav[z] = to;
+                    }
+                    None => { return; }
+                }
+            }
+            None => { return; }
+        }
+    }
 }
 
 #[derive(Component)]
 /// Chunk information
-struct ChunkComponent {}
+struct ChunkComponent {
+    pub chunk: ChunkPosition
+}

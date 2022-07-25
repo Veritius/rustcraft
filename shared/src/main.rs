@@ -48,7 +48,25 @@ fn main() {
 
     // Never call this more than once, and never right before app.start.
     run_foreign_libraries(&mut app, false);
+
+    app.add_startup_system(spawn_camera);
        
     // Start the game
     app.run();
+}
+
+fn spawn_camera(mut commands: Commands) {
+    commands.spawn().insert_bundle(PerspectiveCameraBundle {
+        transform: Transform::from_xyz(-50.0, 25.0, 50.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default() 
+    });
+    commands.spawn().insert_bundle(PointLightBundle {
+        point_light: PointLight {
+            intensity: 1500.0,
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_xyz(0.0, 0.0, 10.0),
+        ..default()
+    });
 }
