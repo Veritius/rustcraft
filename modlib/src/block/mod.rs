@@ -1,11 +1,13 @@
 use bevy::prelude::Entity;
 
-pub mod defaults;
 pub mod entity;
 pub mod traits;
 pub mod registry;
 
+#[derive(Default, Clone)]
 pub enum Block {
+    #[default]
+    Empty,
     Entity(Entity),
     Generic(BlockId),
 }
