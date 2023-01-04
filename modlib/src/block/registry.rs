@@ -17,8 +17,17 @@ impl BlockRegistry {
     }
     
     pub fn register_new<T: 'static + BlockDefinition>(&mut self) -> BlockId {
+        let new_def = T::new();
+
+        // Check for collisions
+        for (_key, value) in self.registry.iter() {
+            if value.deref().id() == new_def.id() {
+                panic!("Block ID collision occurred for \"{}\"", new_def.id());
+            }
+        }
+
         let id = BlockId(self.last_assigned_id);
-        self.registry.insert(id, Box::new(T::new()));
+        self.registry.insert(id, Box::new(new_def));
         self.last_assigned_id += 1;
         return id;
     }
