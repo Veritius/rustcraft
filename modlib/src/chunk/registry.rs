@@ -1,11 +1,11 @@
 use std::collections::BTreeMap;
 use bevy::prelude::{Resource, Entity};
 
-type ChunkCoordinate = (u32, u32, u32);
+pub type ChunkCoordinate = (i32, i32, i32);
 
 #[derive(Resource)]
 pub struct ChunkRegistry {
-    registry: BTreeMap<u32, BTreeMap<u32, BTreeMap<u32, Entity>>>,
+    registry: BTreeMap<i32, BTreeMap<i32, BTreeMap<i32, Entity>>>,
 }
 
 impl ChunkRegistry {
@@ -50,15 +50,30 @@ impl ChunkRegistry {
                         }
                     },
                     None => {
-                        return Err(ChunkOperationError::NoChunkInPosition(coord))
+                        let mut layer_3 = BTreeMap::new();
+                        if let Some(to) = to {
+                            layer_3.insert(coord.2, to);
+                        }
+                        one.insert(coord.0, layer_3);
+                        Ok(())
                     },
                 }
             },
-            None => { return Err(ChunkOperationError::NoChunkInPosition(coord)) },
+            None => {
+                let mut layer_3 = BTreeMap::new();
+                if let Some(to) = to {
+                    layer_3.insert(coord.2, to);
+                }
+                let mut layer_2 = BTreeMap::new();
+                layer_2.insert(coord.1, layer_3);
+                self.registry.insert(coord.0, layer_2);
+                Ok(())
+            },
         }
     }
 }
 
+#[derive(Debug)]
 pub enum ChunkOperationError {
     NoChunkInPosition(ChunkCoordinate),
     ChunkAlreadyPresent(ChunkCoordinate),

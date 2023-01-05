@@ -4,7 +4,7 @@ pub mod entity;
 pub mod traits;
 pub mod registry;
 
-#[derive(Default, Clone)]
+#[derive(Debug, Default, Clone)]
 pub enum Block {
     #[default]
     Empty,
@@ -12,7 +12,7 @@ pub enum Block {
     Generic(BlockId),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BlockId(u16);
 
 impl BlockId {

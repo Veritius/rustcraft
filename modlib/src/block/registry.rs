@@ -32,13 +32,11 @@ impl BlockRegistry {
         return id;
     }
 
-    #[allow(dead_code)]
-    fn get_by_id(&self, id: BlockId) -> Option<&Box<dyn BlockDefinition>> {
+    pub fn get_by_id(&self, id: BlockId) -> Option<&Box<dyn BlockDefinition>> {
         self.registry.get(&id)
     }
 
-    #[allow(dead_code)]
-    fn get_by_type<T: BlockDefinition>(&self) -> Option<BlockId> {
+    pub fn get_by_type<T: BlockDefinition>(&self) -> Option<BlockId> {
         for (key, value) in self.registry.iter() {
             if value.deref().id() == T::new().id() {
                 return Some(*key)

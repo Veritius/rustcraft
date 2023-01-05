@@ -4,6 +4,6 @@ use super::Chunk;
 
 #[derive(Bundle)]
 pub struct ChunkBundle {
-    chunk: Chunk,
-    pbr: PbrBundle,
+    pub chunk: Chunk,
+    pub pbr: PbrBundle,
 }
