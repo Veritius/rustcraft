@@ -1,3 +1,5 @@
+pub mod resource;
+
 use bevy::prelude::Component;
 use ndarray::Array3;
 use crate::block::Block;
