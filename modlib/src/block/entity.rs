@@ -1,7 +1,7 @@
 use bevy::prelude::Component;
-use block_mesh::VoxelVisibility;
+use crate::chunk::meshing::MeshingVisibility;
 
 #[derive(Component)]
 pub struct BlockEntity {
-    pub visibility: VoxelVisibility,
+    pub visibility: MeshingVisibility,
 }

@@ -1,6 +1,5 @@
 use bevy::prelude::{App, ResMut, Color};
-use block_mesh::VoxelVisibility;
-
+use crate::chunk::meshing::MeshingVisibility;
 use super::registry::BlockRegistry;
 
 pub trait BlockDefinition: 'static + Send + Sync {
@@ -8,7 +7,7 @@ pub trait BlockDefinition: 'static + Send + Sync {
     fn id(&self) -> &'static str;
     fn name(&self) -> &'static str;
     fn color(&self) -> Color;
-    fn visibility(&self) -> VoxelVisibility;
+    fn visibility(&self) -> MeshingVisibility;
 }
 
 pub trait AddBlock {

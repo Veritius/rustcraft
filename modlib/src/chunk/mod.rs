@@ -1,4 +1,6 @@
-pub mod resource;
+pub mod meshing;
+pub mod bundle;
+pub mod registry;
 
 use bevy::prelude::Component;
 use ndarray::Array3;

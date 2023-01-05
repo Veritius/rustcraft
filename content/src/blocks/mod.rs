@@ -1,6 +1,8 @@
 use bevy::prelude::Color;
-use block_mesh::VoxelVisibility;
-use rustcraft_modlib::block::traits::BlockDefinition;
+use rustcraft_modlib::{
+    block::traits::BlockDefinition,
+    chunk::meshing::MeshingVisibility
+};
 
 pub struct Dirt;
 impl BlockDefinition for Dirt {
@@ -8,7 +10,7 @@ impl BlockDefinition for Dirt {
     fn id(&self) -> &'static str { "vanilla_dirt" }
     fn name(&self) -> &'static str { "Dirt" }
     fn color(&self) -> Color { Color::BEIGE }
-    fn visibility(&self) -> VoxelVisibility { VoxelVisibility::Opaque }
+    fn visibility(&self) -> MeshingVisibility { MeshingVisibility::Opaque }
 }
 
 pub struct Stone;
@@ -17,5 +19,5 @@ impl BlockDefinition for Stone {
     fn id(&self) -> &'static str { "vanilla_stone" }
     fn name(&self) -> &'static str { "Stone" }
     fn color(&self) -> Color { Color::GRAY }
-    fn visibility(&self) -> VoxelVisibility { VoxelVisibility::Opaque }
+    fn visibility(&self) -> MeshingVisibility { MeshingVisibility::Opaque }
 }

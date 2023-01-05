@@ -9,6 +9,12 @@ pub struct ChunkRegistry {
 }
 
 impl ChunkRegistry {
+    pub fn new() -> Self {
+        Self {
+            registry: BTreeMap::new(),
+        }
+    }
+
     pub fn get(&self, coord: ChunkCoordinate) -> Result<Option<&Entity>, ChunkOperationError> {
         match self.registry.get(&coord.0) {
             Some(one) => {
