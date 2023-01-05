@@ -58,8 +58,9 @@ pub fn remesh_chunk_system(
             }
             //
             //let mut vertices: = vec![];
-        }
 
-        commands.entity(chunk_entityid).remove::<RemeshChunkMarker>();
+            // Remove marker component so it isn't processed again unnecessarily.
+            commands.entity(chunk_entityid).remove::<RemeshChunkMarker>();
+        }
     }
 }
