@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use ndarray::Axis;
 use crate::block::{registry::BlockRegistry, Block, entity::BlockEntity};
-use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE};
+use super::{registry::{ChunkRegistry, ChunkCoordinate}, Chunk, CHUNK_SIZE};
 
 /// Used for generating a mesh for a chunk.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -31,6 +31,14 @@ pub fn remesh_chunk_system(
     for (chunk_entityid, chunk_data, mesh_handle, chunk_remesh_marker) in chunks.iter() {
         if let Some(_) = chunk_remesh_marker {
             let c_pos = chunk_data.get_position();
+            
+            // TODO: These numbers are almost definitely wrong, check them later.
+            let chunk_up = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 + 1));
+            let chunk_down = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 - 1));
+            let chunk_left = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 + 1, c_pos.2));
+            let chunk_right = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 - 1, c_pos.2));
+            let chunk_fwd = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 + 1, c_pos.1, c_pos.2));
+            let chunk_back = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 - 1, c_pos.1, c_pos.2));
 
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
@@ -62,5 +70,24 @@ pub fn remesh_chunk_system(
             // Remove marker component so it isn't processed again unnecessarily.
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>();
         }
+    }
+}
+
+fn get_from_chunk_registry<'a>(registry: &Res<ChunkRegistry>, query: &'a Query<(Entity, &Chunk, &Handle<Mesh>, Option<&RemeshChunkMarker>)>, coord: ChunkCoordinate) -> Option<&'a Chunk> {
+    match registry.get(coord) {
+        Ok(result) => {
+            match result {
+                Some(entity) => {
+                    match query.get(*entity) {
+                        Ok(success) => {
+                            Some(success.1)
+                        },
+                        Err(_) => None,
+                    }
+                },
+                None => None,
+            }
+        },
+        Err(_) => None,
     }
 }
