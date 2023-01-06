@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 use ndarray::Axis;
 use crate::block::{registry::BlockRegistry, Block, entity::BlockEntity};
 use super::{registry::{ChunkRegistry, ChunkCoordinate}, Chunk, CHUNK_SIZE};
@@ -33,12 +33,14 @@ pub fn remesh_chunk_system(
             let c_pos = chunk_data.get_position();
             
             // TODO: These numbers are almost definitely wrong, check them later.
-            let chunk_up = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 + 1));
-            let chunk_down = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 - 1));
-            let chunk_left = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 + 1, c_pos.2));
-            let chunk_right = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 - 1, c_pos.2));
-            let chunk_fwd = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 + 1, c_pos.1, c_pos.2));
-            let chunk_back = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 - 1, c_pos.1, c_pos.2));
+            // let chunk_up = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 + 1));
+            // let chunk_down = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 - 1));
+            // let chunk_left = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 + 1, c_pos.2));
+            // let chunk_right = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 - 1, c_pos.2));
+            // let chunk_fwd = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 + 1, c_pos.1, c_pos.2));
+            // let chunk_back = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 - 1, c_pos.1, c_pos.2));
+
+            let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
@@ -61,11 +63,47 @@ pub fn remesh_chunk_system(
                                 block_registry.get_by_id(*blockid).expect(&format!("Block ID {:?} didn't have an entry in the registry!", blockid)).visibility()
                             },
                         };
+
+
+                        // Temporary inefficient implementation just to see if everything works.
+                        match visibility {
+                            MeshingVisibility::Opaque | MeshingVisibility::Translucent => {
+                                // Top faces
+                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+                                    [1.0, 1.0, 1.0], [1.0, -1.0, 1.0], [-1.0, 1.0, 1.0],
+                                    [1.0, -1.0, 1.0], [-1.0, -1.0, 1.0], [-1.0, 1.0, 1.0]
+                                ]);
+                                // Bottom faces
+                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+                                    [-1.0, -1.0, -1.0], [1.0, -1.0, -1.0], [1.0, 1.0, -1.0],
+                                    [-1.0, -1.0, -1.0], [-1.0, 1.0, -1.0], [1.0, 1.0, -1.0],
+                                ]);
+                                // Left faces
+                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+                                    [-1.0, -1.0, 1.0], [1.0, -1.0, 1.0], [-1.0, -1.0, -1.0],
+                                    [-1.0, -1.0, -1.0], [1.0, -1.0, 1.0], [1.0, -1.0, -1.0],
+                                ]);
+                                // Right faces
+                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+                                    [-1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, -1.0],
+                                    [1.0, 1.0, -1.0], [-1.0, 1.0, -1.0], [-1.0, 1.0, 1.0],
+                                ]);
+                                // Front faces
+                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+                                    [1.0, -1.0, 1.0], [1.0, 1.0, 1.0], [1.0, -1.0, -1.0],
+                                    [1.0, -1.0, -1.0], [1.0, 1.0, -1.0], [1.0, 1.0, 1.0],
+                                ]);
+                                // Back faces
+                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+                                    [-1.0, -1.0, 1.0], [-1.0, 1.0, -1.0], [-1.0, -1.0, 1.0],
+                                    [-1.0, -1.0, 1.0], [-1.0, 1.0, 1.0], [-1.0, 1.0, -1.0],
+                                ]);
+                            },
+                            MeshingVisibility::Invisible => { continue },
+                        }
                     }
                 }
             }
-            //
-            //let mut vertices: = vec![];
 
             // Remove marker component so it isn't processed again unnecessarily.
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>();
@@ -73,21 +111,21 @@ pub fn remesh_chunk_system(
     }
 }
 
-fn get_from_chunk_registry<'a>(registry: &Res<ChunkRegistry>, query: &'a Query<(Entity, &Chunk, &Handle<Mesh>, Option<&RemeshChunkMarker>)>, coord: ChunkCoordinate) -> Option<&'a Chunk> {
-    match registry.get(coord) {
-        Ok(result) => {
-            match result {
-                Some(entity) => {
-                    match query.get(*entity) {
-                        Ok(success) => {
-                            Some(success.1)
-                        },
-                        Err(_) => None,
-                    }
-                },
-                None => None,
-            }
-        },
-        Err(_) => None,
-    }
-}
+// fn get_from_chunk_registry<'a>(registry: &Res<ChunkRegistry>, query: &'a Query<(Entity, &Chunk, &Handle<Mesh>, Option<&RemeshChunkMarker>)>, coord: ChunkCoordinate) -> Option<&'a Chunk> {
+//     match registry.get(coord) {
+//         Ok(result) => {
+//             match result {
+//                 Some(entity) => {
+//                     match query.get(*entity) {
+//                         Ok(success) => {
+//                             Some(success.1)
+//                         },
+//                         Err(_) => None,
+//                     }
+//                 },
+//                 None => None,
+//             }
+//         },
+//         Err(_) => None,
+//     }
+// }
