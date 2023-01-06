@@ -86,35 +86,43 @@ pub fn remesh_chunk_system(
                                 positions.append(&mut vec![
                                     IDX_G, IDX_F, IDX_B,
                                     IDX_G, IDX_C, IDX_B]);
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 4 + indices_idx, 5 + indices_idx]);
+                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
 
                                 // back side
                                 positions.append(&mut vec![
                                     IDX_D, IDX_A, IDX_E,
                                     IDX_D, IDX_H, IDX_E]);
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 4 + indices_idx, 5 + indices_idx]);
+                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
 
-                                // // left side
-                                // positions.append(&mut vec![
-                                //     IDX_C, IDX_D, IDX_H,
-                                //     IDX_C, IDX_G, IDX_H]);
+                                // left side
+                                positions.append(&mut vec![
+                                    IDX_C, IDX_D, IDX_H,
+                                    IDX_C, IDX_G, IDX_H]);
+                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                indices_idx += 6;
 
-                                // // right side
-                                // positions.append(&mut vec![
-                                //     IDX_B, IDX_A, IDX_E,
-                                //     IDX_B, IDX_F, IDX_E]);
+                                // right side (this is the fucked one)
+                                positions.append(&mut vec![
+                                    IDX_E, IDX_A, IDX_B,
+                                    IDX_E, IDX_F, IDX_B]);
+                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                indices_idx += 6;
 
-                                // // top side
-                                // positions.append(&mut vec![
-                                //     IDX_E, IDX_F, IDX_G,
-                                //     IDX_E, IDX_H, IDX_G]);
+                                // top side
+                                positions.append(&mut vec![
+                                    IDX_E, IDX_F, IDX_G,
+                                    IDX_E, IDX_H, IDX_G]);
+                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                indices_idx += 6;
 
-                                // // bottom side
-                                // positions.append(&mut vec![
-                                //     IDX_A, IDX_D, IDX_C,
-                                //     IDX_A, IDX_B, IDX_C]);
+                                // bottom side
+                                positions.append(&mut vec![
+                                    IDX_A, IDX_D, IDX_C,
+                                    IDX_A, IDX_B, IDX_C]);
+                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                indices_idx += 6;
                             },
                             MeshingVisibility::Invisible => { continue },
                         }
