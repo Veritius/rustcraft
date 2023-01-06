@@ -48,9 +48,13 @@ pub fn remesh_chunk_system(
             let mut indices = vec![];
             // let mut normals = vec![];
 
-            for x in 0..1 {
-                for y in 0..1 {
-                    for z in 0..1 {
+            for x in 0..CHUNK_SIZE {
+                for y in 0..CHUNK_SIZE {
+                    for z in 0..CHUNK_SIZE {
+                        let offset_x: i8 = x as i8 - 8;
+                        let offset_y: i8 = y as i8 - 8;
+                        let offset_z: i8 = z as i8 - 8;
+                        
                         let block = chunk_data.get_block(x, y, z);
                         let visibility = match block {
                             Block::Empty => MeshingVisibility::Opaque, // temporary!!!!!
@@ -84,44 +88,50 @@ pub fn remesh_chunk_system(
                                 const IDX_H: [f32; 3] = [-1.0, 1.0, -1.0];
 
                                 // front side
-                                positions.append(&mut vec![
+                                positions.append(&mut offset(vec![
                                     IDX_G, IDX_F, IDX_B,
-                                    IDX_G, IDX_C, IDX_B]);
+                                    IDX_G, IDX_C, IDX_B], 
+                                    offset_x, offset_y, offset_z));
                                 indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
 
                                 // back side
-                                positions.append(&mut vec![
+                                positions.append(&mut offset(vec![
                                     IDX_D, IDX_A, IDX_E,
-                                    IDX_D, IDX_H, IDX_E]);
+                                    IDX_D, IDX_H, IDX_E], 
+                                    offset_x, offset_y, offset_z));
                                 indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
 
                                 // left side
-                                positions.append(&mut vec![
+                                positions.append(&mut offset(vec![
                                     IDX_C, IDX_D, IDX_H,
-                                    IDX_C, IDX_G, IDX_H]);
+                                    IDX_C, IDX_G, IDX_H], 
+                                    offset_x, offset_y, offset_z));
                                 indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
 
                                 // right side (this is the fucked one)
-                                positions.append(&mut vec![
+                                positions.append(&mut offset(vec![
                                     IDX_E, IDX_A, IDX_B,
-                                    IDX_E, IDX_F, IDX_B]);
+                                    IDX_E, IDX_F, IDX_B], 
+                                    offset_x, offset_y, offset_z));
                                 indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
 
                                 // top side
-                                positions.append(&mut vec![
+                                positions.append(&mut offset(vec![
                                     IDX_E, IDX_F, IDX_G,
-                                    IDX_E, IDX_H, IDX_G]);
+                                    IDX_E, IDX_H, IDX_G], 
+                                    offset_x, offset_y, offset_z));
                                 indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
 
                                 // bottom side
-                                positions.append(&mut vec![
+                                positions.append(&mut offset(vec![
                                     IDX_A, IDX_D, IDX_C,
-                                    IDX_A, IDX_B, IDX_C]);
+                                    IDX_A, IDX_B, IDX_C], 
+                                    offset_x, offset_y, offset_z));
                                 indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
                                 indices_idx += 6;
                             },
@@ -141,6 +151,18 @@ pub fn remesh_chunk_system(
                 .remove::<RemeshChunkMarker>();
         }
     }
+}
+
+fn offset(positions: Vec<[f32; 3]>, offset_x: i8, offset_y: i8, offset_z: i8) -> Vec<[f32; 3]> {
+    let mut new_positions = vec![];
+    for position in positions {
+        let mut position = position;
+        position[0] += offset_x as f32;
+        position[1] += offset_y as f32;
+        position[2] += offset_z as f32;
+        new_positions.push(position);
+    }
+    new_positions
 }
 
 // fn get_from_chunk_registry<'a>(registry: &Res<ChunkRegistry>, query: &'a Query<(Entity, &Chunk, &Handle<Mesh>, Option<&RemeshChunkMarker>)>, coord: ChunkCoordinate) -> Option<&'a Chunk> {
