@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 bevy = "0.9.1"
 rustcraft-modlib = { path = "../modlib" }
+bevy_flycam = "0.9"

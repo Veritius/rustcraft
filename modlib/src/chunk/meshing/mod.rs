@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
+use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh}};
 use ndarray::Axis;
 use crate::block::{registry::BlockRegistry, Block, entity::BlockEntity};
 use super::{registry::{ChunkRegistry, ChunkCoordinate}, Chunk, CHUNK_SIZE};
@@ -26,9 +26,9 @@ pub fn remesh_chunk_system(
     block_registry: Res<BlockRegistry>,
     chunk_registry: Res<ChunkRegistry>,
     blocks: Query<(Entity, &BlockEntity)>,
-    chunks: Query<(Entity, &Chunk, &Handle<Mesh>, Option<&RemeshChunkMarker>)>,
+    chunks: Query<(Entity, &Chunk, Option<&RemeshChunkMarker>)>,
 ) {
-    for (chunk_entityid, chunk_data, mesh_handle, chunk_remesh_marker) in chunks.iter() {
+    for (chunk_entityid, chunk_data, chunk_remesh_marker) in chunks.iter() {
         if let Some(_) = chunk_remesh_marker {
             let c_pos = chunk_data.get_position();
             
@@ -42,12 +42,15 @@ pub fn remesh_chunk_system(
 
             let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
+            let mut positions = vec![];
+            let mut normals = vec![];
+
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
                     for z in 0..CHUNK_SIZE {
                         let block = chunk_data.get_block(x, y, z);
                         let visibility = match block {
-                            crate::block::Block::Empty => MeshingVisibility::Invisible,
+                            crate::block::Block::Empty => MeshingVisibility::Opaque,
                             crate::block::Block::Entity(entityid) => {
                                 match blocks.get(*entityid) {
                                     Ok((_entity, block)) => {
@@ -68,36 +71,40 @@ pub fn remesh_chunk_system(
                         // Temporary inefficient implementation just to see if everything works.
                         match visibility {
                             MeshingVisibility::Opaque | MeshingVisibility::Translucent => {
-                                // Top faces
-                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
-                                    [1.0, 1.0, 1.0], [1.0, -1.0, 1.0], [-1.0, 1.0, 1.0],
-                                    [1.0, -1.0, 1.0], [-1.0, -1.0, 1.0], [-1.0, 1.0, 1.0]
-                                ]);
-                                // Bottom faces
-                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
-                                    [-1.0, -1.0, -1.0], [1.0, -1.0, -1.0], [1.0, 1.0, -1.0],
-                                    [-1.0, -1.0, -1.0], [-1.0, 1.0, -1.0], [1.0, 1.0, -1.0],
-                                ]);
-                                // Left faces
-                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
-                                    [-1.0, -1.0, 1.0], [1.0, -1.0, 1.0], [-1.0, -1.0, -1.0],
-                                    [-1.0, -1.0, -1.0], [1.0, -1.0, 1.0], [1.0, -1.0, -1.0],
-                                ]);
-                                // Right faces
-                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
-                                    [-1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, -1.0],
-                                    [1.0, 1.0, -1.0], [-1.0, 1.0, -1.0], [-1.0, 1.0, 1.0],
-                                ]);
-                                // Front faces
-                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
-                                    [1.0, -1.0, 1.0], [1.0, 1.0, 1.0], [1.0, -1.0, -1.0],
-                                    [1.0, -1.0, -1.0], [1.0, 1.0, -1.0], [1.0, 1.0, 1.0],
-                                ]);
-                                // Back faces
-                                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
-                                    [-1.0, -1.0, 1.0], [-1.0, 1.0, -1.0], [-1.0, -1.0, 1.0],
-                                    [-1.0, -1.0, 1.0], [-1.0, 1.0, 1.0], [-1.0, 1.0, -1.0],
-                                ]);
+                                const IDX_A: [f32; 3] = [-1.0, -1.0, -1.0];
+                                const IDX_B: [f32; 3] = [1.0, -1.0, -1.0];
+                                const IDX_C: [f32; 3] = [1.0, 1.0, -1.0];
+                                const IDX_D: [f32; 3] = [-1.0, 1.0, -1.0];
+                                const IDX_E: [f32; 3] = [-1.0, -1.0, 1.0];
+                                const IDX_F: [f32; 3] = [1.0, -1.0, 1.0];
+                                const IDX_G: [f32; 3] = [1.0, 1.0, 1.0];
+                                const IDX_H: [f32; 3] = [-1.0, 1.0, 1.0];
+
+                                let mut vertices = vec![];
+                                
+                                // front side
+                                vertices.append(&mut vec![IDX_G, IDX_F, IDX_B]);
+                                vertices.append(&mut vec![IDX_G, IDX_C, IDX_B]);
+                                // back side
+                                vertices.append(&mut vec![IDX_D, IDX_A, IDX_E]);
+                                vertices.append(&mut vec![IDX_D, IDX_H, IDX_E]);
+                                // left side
+                                vertices.append(&mut vec![IDX_C, IDX_D, IDX_H]);
+                                vertices.append(&mut vec![IDX_C, IDX_G, IDX_H]);
+                                // right side
+                                vertices.append(&mut vec![IDX_B, IDX_A, IDX_E]);
+                                vertices.append(&mut vec![IDX_B, IDX_F, IDX_E]);
+                                // top side
+                                vertices.append(&mut vec![IDX_E, IDX_F, IDX_G]);
+                                vertices.append(&mut vec![IDX_E, IDX_H, IDX_G]);
+                                // bottom side
+                                vertices.append(&mut vec![IDX_A, IDX_D, IDX_C]);
+                                vertices.append(&mut vec![IDX_A, IDX_B, IDX_C]);
+
+                                for v in vertices.iter() {
+                                    positions.push(*v);
+                                    normals.push(*v);
+                                }
                             },
                             MeshingVisibility::Invisible => { continue },
                         }
@@ -105,8 +112,13 @@ pub fn remesh_chunk_system(
                 }
             }
 
-            // Remove marker component so it isn't processed again unnecessarily.
-            commands.entity(chunk_entityid).remove::<RemeshChunkMarker>();
+            mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+            mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+
+            // Update mesh and remove marker component
+            commands.entity(chunk_entityid)
+                .insert(meshes.add(mesh))
+                .remove::<RemeshChunkMarker>();
         }
     }
 }

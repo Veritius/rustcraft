@@ -1,4 +1,5 @@
 use bevy::{prelude::App, DefaultPlugins};
+use bevy_flycam::PlayerPlugin;
 use blocks::{Dirt, Stone};
 use rustcraft_modlib::{BlockRegistryPlugin, block::traits::AddBlock, ChunkedWorldPlugin};
 
@@ -8,6 +9,7 @@ fn main() {
     let mut app = App::new();
 
     app.add_plugins(DefaultPlugins);
+    app.add_plugin(PlayerPlugin);
     
     app.add_plugin(BlockRegistryPlugin);
     app.add_plugin(ChunkedWorldPlugin);
