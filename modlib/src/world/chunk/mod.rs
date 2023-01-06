@@ -4,7 +4,7 @@ pub mod registry;
 
 use bevy::prelude::Component;
 use ndarray::{Array3, ArrayView3};
-use crate::block::Block;
+use crate::world::block::Block;
 use self::registry::ChunkCoordinate;
 
 pub const CHUNK_SIZE: usize = 16;

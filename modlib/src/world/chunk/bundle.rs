@@ -1,5 +1,4 @@
 use bevy::prelude::{Bundle, PbrBundle};
-
 use super::Chunk;
 
 #[derive(Bundle)]

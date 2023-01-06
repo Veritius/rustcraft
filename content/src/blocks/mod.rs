@@ -1,5 +1,5 @@
 use bevy::prelude::Color;
-use rustcraft_modlib::{
+use rustcraft_modlib::world::{
     block::traits::BlockDefinition,
     chunk::meshing::MeshingVisibility
 };

@@ -1,7 +1,7 @@
 use bevy::{prelude::App, DefaultPlugins};
 use bevy_flycam::PlayerPlugin;
 use blocks::{Dirt, Stone};
-use rustcraft_modlib::{BlockRegistryPlugin, block::traits::AddBlock, ChunkedWorldPlugin};
+use rustcraft_modlib::{BlockRegistryPlugin, world::block::traits::AddBlock, ChunkedWorldPlugin};
 
 pub mod blocks;
 

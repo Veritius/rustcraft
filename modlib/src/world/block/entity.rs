@@ -1,5 +1,5 @@
 use bevy::prelude::Component;
-use crate::chunk::meshing::MeshingVisibility;
+use crate::world::chunk::meshing::MeshingVisibility;
 
 #[derive(Component)]
 pub struct BlockEntity {

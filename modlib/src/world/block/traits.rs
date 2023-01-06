@@ -1,5 +1,5 @@
 use bevy::prelude::{App, ResMut, Color};
-use crate::chunk::meshing::MeshingVisibility;
+use crate::world::chunk::meshing::MeshingVisibility;
 use super::registry::BlockRegistry;
 
 pub trait BlockDefinition: 'static + Send + Sync {

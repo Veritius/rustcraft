@@ -1,9 +1,9 @@
 use bevy::prelude::{Plugin, Commands, ResMut, PbrBundle};
-use block::registry::BlockRegistry;
-use chunk::{registry::ChunkRegistry, meshing::{remesh_chunk_system, RemeshChunkMarker}, bundle::ChunkBundle, Chunk};
+use world::{
+    block::registry::BlockRegistry,
+    chunk::{registry::ChunkRegistry, meshing::{remesh_chunk_system, RemeshChunkMarker}, bundle::ChunkBundle, Chunk}, WorldMap};
 
-pub mod block;
-pub mod chunk;
+pub mod world;
 
 pub struct BlockRegistryPlugin;
 impl Plugin for BlockRegistryPlugin {
