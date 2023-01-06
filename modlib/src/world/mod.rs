@@ -26,7 +26,7 @@ impl WorldMapHelpers<'_, '_> {
     /// Gets a block from any coordinates in the world. Returns `Some` if the chunk is loaded, `None` if not.
     pub fn get_block(&self, pos: IVec3) -> Option<Block> {
         let chunk_offset = pos / 16;
-        let block_offset = pos % 16;
+        let block_offset = (pos + IVec3::splat(16)) % 16;
 
         let chunk = match self.chunk_registry.get(chunk_offset.into()) {
             Ok(chunk) => {

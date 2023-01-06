@@ -13,7 +13,7 @@ pub enum Block {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct BlockId(u16);
+pub struct BlockId(pub u16);
 
 impl BlockId {
     pub const EMPTY: BlockId = BlockId(0);

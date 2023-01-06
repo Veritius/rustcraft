@@ -51,91 +51,115 @@ pub fn remesh_chunk_system(
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
                     for z in 0..CHUNK_SIZE {
+                        // Temporary inefficient implementation just to see if everything works.
+
                         let offset_x: i8 = x as i8 - 8;
                         let offset_y: i8 = y as i8 - 8;
                         let offset_z: i8 = z as i8 - 8;
                         
                         let block = chunk_data.get_block(x, y, z);
-                        let visibility = match block {
-                            Block::Empty => MeshingVisibility::Opaque, // temporary!!!!!
-                            Block::Entity(entityid) => {
-                                match blocks.get(*entityid) {
-                                    Ok((_entity, block)) => {
-                                        block.visibility
-                                    },
-                                    Err(_) => {
-                                        warn!("Entity id {:?} was stored in a chunk but wasn't available in a query", entityid);
-                                        MeshingVisibility::Invisible
-                                    },
+                        let visibility = get_visibility(block, &blocks, &block_registry);
+
+                        for idx in 0..6u8 {
+                            let mut offset = match idx {
+                                0 => IVec3 { x: 0, y: 1, z: 0 }, // top
+                                1 => IVec3 { x: 0, y: -1, z: 0 }, // bottom
+                                2 => IVec3 { x: -1, y: 0, z: 0 }, // left
+                                3 => IVec3 { x: 1, y: 0, z: 0 }, // right
+                                4 => IVec3 { x: 0, y: 0, z: -1 }, // front
+                                5 => IVec3 { x: 0, y: 0, z: 1 }, // back
+                                _ => panic!("Cosmic ray detected")
+                            };
+                            
+                            offset += IVec3 { x: c_pos.0 * CHUNK_SIZE as i32, y: c_pos.1 * CHUNK_SIZE as i32, z: c_pos.2 * CHUNK_SIZE as i32};
+
+                            let other_visibility = match world_map.get_block(offset) {
+                                Some(block) => {
+                                    get_visibility(&block, &blocks, &block_registry)
+                                },
+                                None => {
+                                    MeshingVisibility::Invisible
+                                },
+                            };
+
+                            let create_face = match (visibility, other_visibility) {
+                                (MeshingVisibility::Opaque, MeshingVisibility::Opaque) => false,
+                                (MeshingVisibility::Opaque, MeshingVisibility::Translucent) => true,
+                                (MeshingVisibility::Opaque, MeshingVisibility::Invisible) => true,
+                                (MeshingVisibility::Translucent, MeshingVisibility::Opaque) => true,
+                                (MeshingVisibility::Translucent, MeshingVisibility::Translucent) => true,
+                                (MeshingVisibility::Translucent, MeshingVisibility::Invisible) => true,
+                                // All other options are visibility == Invisible, so we just return false
+                                _ => false,
+                            };
+                            println!("{:?} adj. {:?}: {}", block, world_map.get_block(offset), create_face);
+                            
+                            // If we're not creating a face, don't bother
+                            if !create_face { continue }
+
+                            // Consts for each vertex on a cube
+                            const IDX_A: [f32; 3] = [-1.0, -1.0, 1.0];
+                            const IDX_B: [f32; 3] = [1.0, -1.0, 1.0];
+                            const IDX_C: [f32; 3] = [1.0, -1.0, -1.0];
+                            const IDX_D: [f32; 3] = [-1.0, -1.0, -1.0];
+                            const IDX_E: [f32; 3] = [-1.0, 1.0, 1.0];
+                            const IDX_F: [f32; 3] = [1.0, 1.0, 1.0];
+                            const IDX_G: [f32; 3] = [1.0, 1.0, -1.0];
+                            const IDX_H: [f32; 3] = [-1.0, 1.0, -1.0];
+                            
+                            match idx {
+                                0 => {
+                                    // top side
+                                    positions.append(&mut offset_verts(vec![
+                                        IDX_E, IDX_F, IDX_G,
+                                        IDX_E, IDX_H, IDX_G],
+                                        offset_x, offset_y, offset_z));
+                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                    indices_idx += 6;
+                                },
+                                1 => {
+                                    positions.append(&mut offset_verts(vec![
+                                        IDX_A, IDX_D, IDX_C,
+                                        IDX_A, IDX_B, IDX_C],
+                                        offset_x, offset_y, offset_z));
+                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                    indices_idx += 6;
+                                },
+                                2 => {
+                                    positions.append(&mut offset_verts(vec![
+                                        IDX_C, IDX_D, IDX_H,
+                                        IDX_C, IDX_G, IDX_H],
+                                        offset_x, offset_y, offset_z));
+                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                    indices_idx += 6;
+                                },
+                                3 => {
+                                    positions.append(&mut offset_verts(vec![
+                                        IDX_E, IDX_A, IDX_B,
+                                        IDX_E, IDX_F, IDX_B],
+                                        offset_x, offset_y, offset_z));
+                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                    indices_idx += 6;
+                                },
+                                4 => {
+                                    // front side
+                                    positions.append(&mut offset_verts(vec![
+                                        IDX_G, IDX_F, IDX_B,
+                                        IDX_G, IDX_C, IDX_B],
+                                        offset_x, offset_y, offset_z));
+                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                    indices_idx += 6;
                                 }
-                            },
-                            Block::Generic(blockid) => {
-                                block_registry.get_by_id(*blockid).expect(&format!("Block ID {:?} didn't have an entry in the registry!", blockid)).visibility()
-                            },
-                        };
-
-
-                        // Temporary inefficient implementation just to see if everything works.
-                        match visibility {
-                            MeshingVisibility::Opaque | MeshingVisibility::Translucent => {
-                                const IDX_A: [f32; 3] = [-1.0, -1.0, 1.0];
-                                const IDX_B: [f32; 3] = [1.0, -1.0, 1.0];
-                                const IDX_C: [f32; 3] = [1.0, -1.0, -1.0];
-                                const IDX_D: [f32; 3] = [-1.0, -1.0, -1.0];
-                                const IDX_E: [f32; 3] = [-1.0, 1.0, 1.0];
-                                const IDX_F: [f32; 3] = [1.0, 1.0, 1.0];
-                                const IDX_G: [f32; 3] = [1.0, 1.0, -1.0];
-                                const IDX_H: [f32; 3] = [-1.0, 1.0, -1.0];
-
-                                // front side
-                                positions.append(&mut offset(vec![
-                                    IDX_G, IDX_F, IDX_B,
-                                    IDX_G, IDX_C, IDX_B], 
-                                    offset_x, offset_y, offset_z));
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                indices_idx += 6;
-
-                                // back side
-                                positions.append(&mut offset(vec![
-                                    IDX_D, IDX_A, IDX_E,
-                                    IDX_D, IDX_H, IDX_E], 
-                                    offset_x, offset_y, offset_z));
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                indices_idx += 6;
-
-                                // left side
-                                positions.append(&mut offset(vec![
-                                    IDX_C, IDX_D, IDX_H,
-                                    IDX_C, IDX_G, IDX_H], 
-                                    offset_x, offset_y, offset_z));
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                indices_idx += 6;
-
-                                // right side (this is the fucked one)
-                                positions.append(&mut offset(vec![
-                                    IDX_E, IDX_A, IDX_B,
-                                    IDX_E, IDX_F, IDX_B], 
-                                    offset_x, offset_y, offset_z));
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                indices_idx += 6;
-
-                                // top side
-                                positions.append(&mut offset(vec![
-                                    IDX_E, IDX_F, IDX_G,
-                                    IDX_E, IDX_H, IDX_G], 
-                                    offset_x, offset_y, offset_z));
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                indices_idx += 6;
-
-                                // bottom side
-                                positions.append(&mut offset(vec![
-                                    IDX_A, IDX_D, IDX_C,
-                                    IDX_A, IDX_B, IDX_C], 
-                                    offset_x, offset_y, offset_z));
-                                indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                indices_idx += 6;
-                            },
-                            MeshingVisibility::Invisible => { continue },
+                                5 => {
+                                    positions.append(&mut offset_verts(vec![
+                                        IDX_D, IDX_A, IDX_E,
+                                        IDX_D, IDX_H, IDX_E],
+                                        offset_x, offset_y, offset_z));
+                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
+                                    indices_idx += 6;
+                                },
+                                _ => panic!("Cosmic ray detected")
+                            };
                         }
                     }
                 }
@@ -153,7 +177,7 @@ pub fn remesh_chunk_system(
     }
 }
 
-fn offset(positions: Vec<[f32; 3]>, offset_x: i8, offset_y: i8, offset_z: i8) -> Vec<[f32; 3]> {
+fn offset_verts(positions: Vec<[f32; 3]>, offset_x: i8, offset_y: i8, offset_z: i8) -> Vec<[f32; 3]> {
     let mut new_positions = vec![];
     for position in positions {
         let mut position = position;
@@ -163,6 +187,26 @@ fn offset(positions: Vec<[f32; 3]>, offset_x: i8, offset_y: i8, offset_z: i8) ->
         new_positions.push(position);
     }
     new_positions
+}
+
+fn get_visibility(block: &Block, blocks: &Query<(Entity, &BlockEntity)>, block_registry: &Res<BlockRegistry>) -> MeshingVisibility {
+    match block {
+        Block::Empty => MeshingVisibility::Invisible,
+        Block::Entity(entityid) => {
+            match blocks.get(*entityid) {
+                Ok((_entity, block)) => {
+                    block.visibility
+                },
+                Err(_) => {
+                    warn!("Entity id {:?} was stored in a chunk but wasn't available in a query", entityid);
+                    MeshingVisibility::Invisible
+                },
+            }
+        },
+        Block::Generic(blockid) => {
+            block_registry.get_by_id(*blockid).expect(&format!("Block ID {:?} didn't have an entry in the registry!", blockid)).visibility()
+        },
+    }
 }
 
 // fn get_from_chunk_registry<'a>(registry: &Res<ChunkRegistry>, query: &'a Query<(Entity, &Chunk, &Handle<Mesh>, Option<&RemeshChunkMarker>)>, coord: ChunkCoordinate) -> Option<&'a Chunk> {

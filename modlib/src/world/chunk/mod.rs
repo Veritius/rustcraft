@@ -33,6 +33,12 @@ impl Chunk {
         self.array.view()
     }
 
+    /// Returns a mutable reference to the internal array storing block data.
+    /// Be careful with this - it can cause problems!
+    pub fn array_mut(&mut self) -> &mut Array3<Block> {
+        &mut self.array
+    }
+
     pub fn get_position(&self) -> ChunkCoordinate {
         self.position
     }
