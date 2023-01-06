@@ -1,7 +1,7 @@
 use bevy::prelude::{Plugin, Commands, ResMut, PbrBundle};
 use world::{
     block::registry::BlockRegistry,
-    chunk::{registry::ChunkRegistry, meshing::{remesh_chunk_system, RemeshChunkMarker}, bundle::ChunkBundle, Chunk}, WorldMap};
+    chunk::{registry::ChunkRegistry, meshing::{remesh_chunk_system, RemeshChunkMarker}, bundle::ChunkBundle, Chunk}, WorldMapHelpers};
 
 pub mod world;
 

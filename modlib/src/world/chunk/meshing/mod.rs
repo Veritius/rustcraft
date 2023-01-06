@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::{self, Indices}}};
 use ndarray::Axis;
-use crate::world::{block::{registry::BlockRegistry, Block, entity::BlockEntity}, WorldMap};
+use crate::world::{block::{registry::BlockRegistry, Block, entity::BlockEntity}, WorldMapHelpers};
 use super::{registry::{ChunkRegistry, ChunkCoordinate}, Chunk, CHUNK_SIZE};
 
 /// Used for generating a mesh for a chunk.
@@ -25,14 +25,10 @@ pub fn remesh_chunk_system(
     mut meshes: ResMut<Assets<Mesh>>,
     block_registry: Res<BlockRegistry>,
     chunk_registry: Res<ChunkRegistry>,
-    world_map: WorldMap,
+    world_map: WorldMapHelpers,
     blocks: Query<(Entity, &BlockEntity)>,
     chunks: Query<(Entity, &Chunk, Option<&RemeshChunkMarker>)>,
 ) {
-    println!("test for 0 0 0: {:?}", world_map.get_block(IVec3 { x: 0, y: 0, z: 0 }));
-    println!("test for 0 1 0: {:?}", world_map.get_block(IVec3 { x: 0, y: 1, z: 0 }));
-    println!("test for -52 5 -12312: {:?}", world_map.get_block(IVec3 { x: -52, y: 5, z: -12312 }));
-
     for (chunk_entityid, chunk_data, chunk_remesh_marker) in chunks.iter() {
         if let Some(_) = chunk_remesh_marker {
             let c_pos = chunk_data.get_position();
