@@ -1,7 +1,6 @@
-use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::{self, Indices}}};
-use ndarray::Axis;
+use bevy::{prelude::*, render::{render_resource::PrimitiveTopology}};
 use crate::world::{block::{registry::BlockRegistry, Block, entity::BlockEntity}, WorldMapHelpers};
-use super::{registry::{ChunkRegistry, ChunkCoordinate}, Chunk, CHUNK_SIZE};
+use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE};
 
 /// Used for generating a mesh for a chunk.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -29,70 +28,68 @@ pub fn remesh_chunk_system(
     blocks: Query<(Entity, &BlockEntity)>,
     chunks: Query<(Entity, &Chunk, Option<&RemeshChunkMarker>)>,
 ) {
-    for (chunk_entityid, chunk_data, chunk_remesh_marker) in chunks.iter() {
+    for (chunk_entityid, this_chunk, chunk_remesh_marker) in chunks.iter() {
         if let Some(_) = chunk_remesh_marker {
-            let c_pos = chunk_data.get_position();
+            let this_chunk_position = this_chunk.get_position();
             
-            // TODO: These numbers are almost definitely wrong, check them later.
-            // let chunk_up = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 + 1));
-            // let chunk_down = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1, c_pos.2 - 1));
-            // let chunk_left = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 + 1, c_pos.2));
-            // let chunk_right = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0, c_pos.1 - 1, c_pos.2));
-            // let chunk_fwd = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 + 1, c_pos.1, c_pos.2));
-            // let chunk_back = get_from_chunk_registry(&chunk_registry, &chunks, (c_pos.0 - 1, c_pos.1, c_pos.2));
+            let chunk_package = (
+                this_chunk,
+                chunk_registry.get((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)).unwrap_or(None),
+                chunk_registry.get((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)).unwrap_or(None),
+                chunk_registry.get((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)).unwrap_or(None),
+                chunk_registry.get((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)).unwrap_or(None),
+                chunk_registry.get((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)).unwrap_or(None),
+                chunk_registry.get((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)).unwrap_or(None),
+            );
 
             let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
             let mut positions = vec![];
             // let mut normals = vec![];
 
-            for x in 0..CHUNK_SIZE {
-                for y in 0..CHUNK_SIZE {
-                    for z in 0..CHUNK_SIZE {
+            for x in 0..CHUNK_SIZE as i32 {
+                for y in 0..CHUNK_SIZE as i32 {
+                    for z in 0..CHUNK_SIZE as i32 {
                         // Temporary inefficient implementation just to see if everything works.
 
-                        let offset_x: i8 = x as i8 - 8;
-                        let offset_y: i8 = y as i8 - 8;
-                        let offset_z: i8 = z as i8 - 8;
+                        let offset_x: i32 = x as i32 - 8;
+                        let offset_y: i32 = y as i32 - 8;
+                        let offset_z: i32 = z as i32 - 8;
                         
-                        let block = chunk_data.get_block(x, y, z);
-                        let visibility = get_visibility(block, &blocks, &block_registry);
+                        // unnecessary usize to i32 to usize conversion lol
+                        let this_block = this_chunk.get_block(x as usize, y as usize, z as usize);
+                        let this_visibility = get_visibility(this_block, &blocks, &block_registry);
 
                         for idx in 0..6u8 {
-                            let mut offset = match idx {
-                                0 => IVec3 { x: 0, y: 1, z: 0 }, // top
-                                1 => IVec3 { x: 0, y: -1, z: 0 }, // bottom
-                                2 => IVec3 { x: -1, y: 0, z: 0 }, // left
-                                3 => IVec3 { x: 1, y: 0, z: 0 }, // right
-                                4 => IVec3 { x: 0, y: 0, z: -1 }, // front
-                                5 => IVec3 { x: 0, y: 0, z: 1 }, // back
-                                _ => panic!("Cosmic ray detected")
+                            let other_block = match idx {
+                                // above
+                                0 => efficient_get_block(IVec3 { x, y: y + 1, z }, &chunk_registry, chunk_package),
+                                // below
+                                1 => efficient_get_block(IVec3 { x, y: y - 1, z }, &chunk_registry, chunk_package),
+                                // left
+                                2 => efficient_get_block(IVec3 { x: x + 1, y, z }, &chunk_registry, chunk_package),
+                                // right
+                                3 => efficient_get_block(IVec3 { x: x - 1, y, z }, &chunk_registry, chunk_package),
+                                // forward
+                                4 => efficient_get_block(IVec3 { x, y, z: z - 1 }, &chunk_registry, chunk_package),
+                                // backward
+                                5 => efficient_get_block(IVec3 { x, y, z: z + 1 }, &chunk_registry, chunk_package),
+                                // explode
+                                _ => panic!("Cosmic ray detected!"),
                             };
-                            
-                            offset += IVec3 { x: c_pos.0 * CHUNK_SIZE as i32, y: c_pos.1 * CHUNK_SIZE as i32, z: c_pos.2 * CHUNK_SIZE as i32};
+                            let other_visibility = get_visibility(&other_block, &blocks, &block_registry);
 
-                            let other_visibility = match world_map.get_block(offset) {
-                                Some(block) => {
-                                    get_visibility(&block, &blocks, &block_registry)
-                                },
-                                None => {
-                                    MeshingVisibility::Invisible
-                                },
-                            };
-
-                            let create_face = match (visibility, other_visibility) {
+                            // This section decides whether a face should be generated or not
+                            if match (this_visibility, other_visibility) {
                                 (MeshingVisibility::Opaque, MeshingVisibility::Opaque) => false,
                                 (MeshingVisibility::Opaque, MeshingVisibility::Translucent) => true,
                                 (MeshingVisibility::Opaque, MeshingVisibility::Invisible) => true,
-                                (MeshingVisibility::Translucent, MeshingVisibility::Opaque) => true,
-                                (MeshingVisibility::Translucent, MeshingVisibility::Translucent) => true,
+                                (MeshingVisibility::Translucent, MeshingVisibility::Opaque) => false,
+                                (MeshingVisibility::Translucent, MeshingVisibility::Translucent) => false,
                                 (MeshingVisibility::Translucent, MeshingVisibility::Invisible) => true,
-                                // All other options are visibility == Invisible, so we just return false
+                                // All other options start with us being invisible, so we don't bother.
                                 _ => false,
-                            };
-                            
-                            // If we're not creating a face, don't bother
-                            if !create_face { continue }
+                            } == false { continue }
 
                             // Consts for each vertex on a cube
                             const IDX_A: [f32; 3] = [0.0, 0.0, 1.0];
@@ -165,7 +162,7 @@ pub fn remesh_chunk_system(
     }
 }
 
-fn offset_verts(positions: Vec<[f32; 3]>, offset_x: i8, offset_y: i8, offset_z: i8) -> Vec<[f32; 3]> {
+fn offset_verts(positions: Vec<[f32; 3]>, offset_x: i32, offset_y: i32, offset_z: i32) -> Vec<[f32; 3]> {
     let mut new_positions = vec![];
     for position in positions {
         let mut position = position;
@@ -197,21 +194,6 @@ fn get_visibility(block: &Block, blocks: &Query<(Entity, &BlockEntity)>, block_r
     }
 }
 
-// fn get_from_chunk_registry<'a>(registry: &Res<ChunkRegistry>, query: &'a Query<(Entity, &Chunk, &Handle<Mesh>, Option<&RemeshChunkMarker>)>, coord: ChunkCoordinate) -> Option<&'a Chunk> {
-//     match registry.get(coord) {
-//         Ok(result) => {
-//             match result {
-//                 Some(entity) => {
-//                     match query.get(*entity) {
-//                         Ok(success) => {
-//                             Some(success.1)
-//                         },
-//                         Err(_) => None,
-//                     }
-//                 },
-//                 None => None,
-//             }
-//         },
-//         Err(_) => None,
-//     }
-// }
+fn efficient_get_block(relative_coords: IVec3, registry: &ChunkRegistry, chunks: (&Chunk, Option<&Entity>, Option<&Entity>, Option<&Entity>, Option<&Entity>, Option<&Entity>, Option<&Entity>)) -> Block {
+    Block::Empty
+}
