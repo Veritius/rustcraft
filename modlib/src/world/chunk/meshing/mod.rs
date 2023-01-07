@@ -34,12 +34,12 @@ pub fn remesh_chunk_system(
             
             let chunk_package = (
                 this_chunk,
-                chunk_registry.get((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)).unwrap_or(None),
-                chunk_registry.get((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)).unwrap_or(None),
-                chunk_registry.get((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)).unwrap_or(None),
-                chunk_registry.get((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)).unwrap_or(None),
-                chunk_registry.get((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)).unwrap_or(None),
-                chunk_registry.get((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)).unwrap_or(None),
+                quick_get_chunk(&chunk_registry, &chunks, this_chunk_position, (0, 1, 0)),
+                quick_get_chunk(&chunk_registry, &chunks, this_chunk_position, (0, -1, 0)),
+                quick_get_chunk(&chunk_registry, &chunks, this_chunk_position, (1, 0, 0)),
+                quick_get_chunk(&chunk_registry, &chunks, this_chunk_position, (-1, 0, 0)),
+                quick_get_chunk(&chunk_registry, &chunks, this_chunk_position, (0, 0, -1)),
+                quick_get_chunk(&chunk_registry, &chunks, this_chunk_position, (0, 0, 1)),
             );
 
             let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
@@ -55,6 +55,26 @@ pub fn remesh_chunk_system(
                         let offset_x: i32 = x as i32 - 8;
                         let offset_y: i32 = y as i32 - 8;
                         let offset_z: i32 = z as i32 - 8;
+
+                        fn get_visibility(block: &Block, blocks: &Query<(Entity, &BlockEntity)>, block_registry: &Res<BlockRegistry>) -> MeshingVisibility {
+                            match block {
+                                Block::Empty => MeshingVisibility::Invisible,
+                                Block::Entity(entityid) => {
+                                    match blocks.get(*entityid) {
+                                        Ok((_entity, block)) => {
+                                            block.visibility
+                                        },
+                                        Err(_) => {
+                                            warn!("Entity id {:?} was stored in a chunk but wasn't available in a query", entityid);
+                                            MeshingVisibility::Invisible
+                                        },
+                                    }
+                                },
+                                Block::Generic(blockid) => {
+                                    block_registry.get_by_id(*blockid).expect(&format!("Block ID {:?} didn't have an entry in the registry!", blockid)).visibility()
+                                },
+                            }
+                        }
                         
                         // unnecessary usize to i32 to usize conversion lol
                         let this_block = this_chunk.get_block(x as usize, y as usize, z as usize);
@@ -63,17 +83,17 @@ pub fn remesh_chunk_system(
                         for idx in 0..6u8 {
                             let other_block = match idx {
                                 // above
-                                0 => efficient_get_block(IVec3 { x, y: y + 1, z }, &chunk_registry, chunk_package),
+                                0 => efficient_get_block(IVec3 { x, y: y + 1, z }, chunk_package),
                                 // below
-                                1 => efficient_get_block(IVec3 { x, y: y - 1, z }, &chunk_registry, chunk_package),
+                                1 => efficient_get_block(IVec3 { x, y: y - 1, z }, chunk_package),
                                 // left
-                                2 => efficient_get_block(IVec3 { x: x + 1, y, z }, &chunk_registry, chunk_package),
+                                2 => efficient_get_block(IVec3 { x: x + 1, y, z }, chunk_package),
                                 // right
-                                3 => efficient_get_block(IVec3 { x: x - 1, y, z }, &chunk_registry, chunk_package),
+                                3 => efficient_get_block(IVec3 { x: x - 1, y, z }, chunk_package),
                                 // forward
-                                4 => efficient_get_block(IVec3 { x, y, z: z - 1 }, &chunk_registry, chunk_package),
+                                4 => efficient_get_block(IVec3 { x, y, z: z - 1 }, chunk_package),
                                 // backward
-                                5 => efficient_get_block(IVec3 { x, y, z: z + 1 }, &chunk_registry, chunk_package),
+                                5 => efficient_get_block(IVec3 { x, y, z: z + 1 }, chunk_package),
                                 // explode
                                 _ => panic!("Cosmic ray detected!"),
                             };
@@ -174,26 +194,120 @@ fn offset_verts(positions: Vec<[f32; 3]>, offset_x: i32, offset_y: i32, offset_z
     new_positions
 }
 
-fn get_visibility(block: &Block, blocks: &Query<(Entity, &BlockEntity)>, block_registry: &Res<BlockRegistry>) -> MeshingVisibility {
-    match block {
-        Block::Empty => MeshingVisibility::Invisible,
-        Block::Entity(entityid) => {
-            match blocks.get(*entityid) {
-                Ok((_entity, block)) => {
-                    block.visibility
+fn quick_get_chunk<'q>(registry: &ChunkRegistry, chunk_query: &'q Query<(Entity, &Chunk, Option<&RemeshChunkMarker>)>, chunk_pos: (i32, i32, i32), offset: (i32, i32, i32)) -> Option<&'q Chunk> {
+    match registry.get((chunk_pos.0 + offset.0, chunk_pos.1 + offset.1, chunk_pos.2 + offset.2)) {
+        Ok(value) => {
+            match value {
+                Some(value) => {
+                    match chunk_query.get(*value) {
+                        Ok(value) => Some(value.1),
+                        Err(_) => None,
+                    }
                 },
-                Err(_) => {
-                    warn!("Entity id {:?} was stored in a chunk but wasn't available in a query", entityid);
-                    MeshingVisibility::Invisible
-                },
+                None => None,
             }
         },
-        Block::Generic(blockid) => {
-            block_registry.get_by_id(*blockid).expect(&format!("Block ID {:?} didn't have an entry in the registry!", blockid)).visibility()
-        },
+        Err(_) => None,
     }
 }
 
-fn efficient_get_block(relative_coords: IVec3, registry: &ChunkRegistry, chunks: (&Chunk, Option<&Entity>, Option<&Entity>, Option<&Entity>, Option<&Entity>, Option<&Entity>, Option<&Entity>)) -> Block {
-    Block::Empty
+fn efficient_get_block(relative_coords: IVec3, chunks: (&Chunk, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>)) -> Block {
+    let chunk_size = CHUNK_SIZE as i32 - 1;
+    // top
+    if relative_coords.y > chunk_size {
+        let chunk = chunks.1;
+        let coords = IVec3 {
+            x: relative_coords.x.clamp(0, chunk_size),
+            y: relative_coords.y - chunk_size,
+            z: relative_coords.z.clamp(0, chunk_size),
+        };
+        match chunk {
+            Some(chunk) => {
+                return chunk.get_block(coords.x as usize, coords.y as usize, coords.z as usize).clone()
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    // bottom
+    if relative_coords.y < 0 {
+        let chunk = chunks.2;
+        let coords = IVec3 {
+            x: relative_coords.x.clamp(0, chunk_size),
+            y: relative_coords.y + chunk_size,
+            z: relative_coords.z.clamp(0, chunk_size),
+        };
+        match chunk {
+            Some(chunk) => {
+                return chunk.get_block(coords.x as usize, coords.y as usize, coords.z as usize).clone()
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    // left
+    if relative_coords.x < 0 {
+        let chunk = chunks.3;
+        let coords = IVec3 {
+            x: relative_coords.x + chunk_size,
+            y: relative_coords.y.clamp(0, chunk_size),
+            z: relative_coords.z.clamp(0, chunk_size),
+        };
+        match chunk {
+            Some(chunk) => {
+                return chunk.get_block(coords.x as usize, coords.y as usize, coords.z as usize).clone()
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    // right
+    if relative_coords.x > chunk_size {
+        let chunk = chunks.4;
+        let coords = IVec3 {
+            x: relative_coords.x - chunk_size,
+            y: relative_coords.y.clamp(0, chunk_size),
+            z: relative_coords.z.clamp(0, chunk_size),
+        };
+        match chunk {
+            Some(chunk) => {
+                return chunk.get_block(coords.x as usize, coords.y as usize, coords.z as usize).clone()
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    // front
+    if relative_coords.z > chunk_size {
+        let chunk = chunks.5;
+        let coords = IVec3 {
+            x: relative_coords.x.clamp(0, 16),
+            y: relative_coords.y.clamp(0, chunk_size),
+            z: relative_coords.z - chunk_size,
+        };
+        match chunk {
+            Some(chunk) => {
+                return chunk.get_block(coords.x as usize, coords.y as usize, coords.z as usize).clone()
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    // back
+    if relative_coords.z < 0 {
+        let chunk = chunks.6;
+        let coords = IVec3 {
+            x: relative_coords.x.clamp(0, 16),
+            y: relative_coords.y.clamp(0, 16),
+            z: relative_coords.z.clamp(0, 16),
+        };
+        match chunk {
+            Some(chunk) => {
+                return chunk.get_block(coords.x as usize, coords.y as usize, coords.z as usize).clone()
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    chunks.0.get_block(relative_coords.x as usize, relative_coords.y as usize, relative_coords.z as usize).clone()
 }
