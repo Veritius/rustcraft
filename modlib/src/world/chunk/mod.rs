@@ -7,6 +7,7 @@ use ndarray::{Array3, ArrayView3};
 use crate::world::block::Block;
 use self::registry::ChunkCoordinate;
 
+// It's not recommended you change this value. It'll probably work, but no guarantees - it's only tested with 16.
 pub const CHUNK_SIZE: usize = 16;
 
 #[derive(Component)]
