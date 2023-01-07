@@ -44,8 +44,6 @@ pub fn remesh_chunk_system(
             let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
             let mut positions = vec![];
-            let mut indices_idx: u32 = 0u32;
-            let mut indices = vec![];
             // let mut normals = vec![];
 
             for x in 0..CHUNK_SIZE {
@@ -111,51 +109,43 @@ pub fn remesh_chunk_system(
                                     // top side
                                     positions.append(&mut offset_verts(vec![
                                         IDX_E, IDX_F, IDX_G,
-                                        IDX_E, IDX_H, IDX_G],
+                                        IDX_E, IDX_G, IDX_H],
                                         offset_x, offset_y, offset_z));
-                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                    indices_idx += 6;
                                 },
                                 1 => {
+                                    // bottom side
                                     positions.append(&mut offset_verts(vec![
                                         IDX_A, IDX_D, IDX_C,
-                                        IDX_A, IDX_B, IDX_C],
+                                        IDX_A, IDX_C, IDX_B],
                                         offset_x, offset_y, offset_z));
-                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                    indices_idx += 6;
                                 },
                                 2 => {
+                                    // left side
                                     positions.append(&mut offset_verts(vec![
                                         IDX_C, IDX_D, IDX_H,
-                                        IDX_C, IDX_G, IDX_H],
+                                        IDX_C, IDX_H, IDX_G],
                                         offset_x, offset_y, offset_z));
-                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                    indices_idx += 6;
                                 },
                                 3 => {
+                                    // right side
                                     positions.append(&mut offset_verts(vec![
                                         IDX_E, IDX_A, IDX_B,
-                                        IDX_E, IDX_F, IDX_B],
+                                        IDX_E, IDX_B, IDX_F],
                                         offset_x, offset_y, offset_z));
-                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                    indices_idx += 6;
                                 },
                                 4 => {
                                     // front side
                                     positions.append(&mut offset_verts(vec![
                                         IDX_G, IDX_F, IDX_B,
-                                        IDX_G, IDX_C, IDX_B],
+                                        IDX_G, IDX_B, IDX_C],
                                         offset_x, offset_y, offset_z));
-                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                    indices_idx += 6;
                                 }
                                 5 => {
+                                    // back side
                                     positions.append(&mut offset_verts(vec![
                                         IDX_D, IDX_A, IDX_E,
-                                        IDX_D, IDX_H, IDX_E],
+                                        IDX_D, IDX_E, IDX_H],
                                         offset_x, offset_y, offset_z));
-                                    indices.append(&mut vec![0 + indices_idx, 1 + indices_idx, 2 + indices_idx, 3 + indices_idx, 5 + indices_idx, 4 + indices_idx]);
-                                    indices_idx += 6;
                                 },
                                 _ => panic!("Cosmic ray detected")
                             };
@@ -164,7 +154,6 @@ pub fn remesh_chunk_system(
                 }
             }
 
-            mesh.set_indices(Some(Indices::U32(indices)));
             mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
             // mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
 
