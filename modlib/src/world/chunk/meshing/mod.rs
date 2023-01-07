@@ -92,22 +92,21 @@ pub fn remesh_chunk_system(
                                 // All other options are visibility == Invisible, so we just return false
                                 _ => false,
                             };
-                            println!("{:?} adj. {:?}: {}", block, world_map.get_block(offset), create_face);
                             
                             // If we're not creating a face, don't bother
                             if !create_face { continue }
 
                             // Consts for each vertex on a cube
-                            const IDX_A: [f32; 3] = [-1.0, -1.0, 1.0];
-                            const IDX_B: [f32; 3] = [1.0, -1.0, 1.0];
-                            const IDX_C: [f32; 3] = [1.0, -1.0, -1.0];
-                            const IDX_D: [f32; 3] = [-1.0, -1.0, -1.0];
-                            const IDX_E: [f32; 3] = [-1.0, 1.0, 1.0];
+                            const IDX_A: [f32; 3] = [0.0, 0.0, 1.0];
+                            const IDX_B: [f32; 3] = [1.0, 0.0, 1.0];
+                            const IDX_C: [f32; 3] = [1.0, 0.0, 0.0];
+                            const IDX_D: [f32; 3] = [0.0, 0.0, 0.0];
+                            const IDX_E: [f32; 3] = [0.0, 1.0, 1.0];
                             const IDX_F: [f32; 3] = [1.0, 1.0, 1.0];
-                            const IDX_G: [f32; 3] = [1.0, 1.0, -1.0];
-                            const IDX_H: [f32; 3] = [-1.0, 1.0, -1.0];
+                            const IDX_G: [f32; 3] = [1.0, 1.0, 0.0];
+                            const IDX_H: [f32; 3] = [0.0, 1.0, 0.0];
                             
-                            match idx {
+                            match idx { 
                                 0 => {
                                     // top side
                                     positions.append(&mut offset_verts(vec![
