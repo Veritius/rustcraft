@@ -132,7 +132,7 @@ pub fn remesh_chunk_system(
                                         offset_x, offset_y, offset_z));
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
-                                    colors.append(&mut vec![[0.9, 0.1, 0.1, 1.0]; 6]);
+                                    colors.append(&mut vec![[1.0, 0.0, 0.0, 1.0]; 6]);
                                     
                                 },
                                 1 => {
@@ -143,7 +143,7 @@ pub fn remesh_chunk_system(
                                         offset_x, offset_y, offset_z));
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
-                                    colors.append(&mut vec![[0.1, 0.1, 0.9, 1.0]; 6]);
+                                    colors.append(&mut vec![[0.0, 0.0, 1.0, 1.0]; 6]);
                                 },
                                 2 => {
                                     // left side (green)
@@ -153,7 +153,7 @@ pub fn remesh_chunk_system(
                                         offset_x, offset_y, offset_z));
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
-                                    colors.append(&mut vec![[0.1, 0.9, 0.1, 1.0]; 6]);;
+                                    colors.append(&mut vec![[0.0, 1.0, 0.0, 1.0]; 6]);;
                                 },
                                 3 => {
                                     // right side (yellow)
@@ -163,7 +163,7 @@ pub fn remesh_chunk_system(
                                         offset_x, offset_y, offset_z));
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
-                                    colors.append(&mut vec![[0.9, 0.9, 0.1, 1.0]; 6]);
+                                    colors.append(&mut vec![[1.0, 1.0, 1.0, 1.0]; 6]);
                                 },
                                 4 => {
                                     // front side (purple)
@@ -173,7 +173,7 @@ pub fn remesh_chunk_system(
                                         offset_x, offset_y, offset_z));
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
-                                    colors.append(&mut vec![[0.6, 0.1, 0.9, 1.0]; 6]);
+                                    colors.append(&mut vec![[1.0, 0.0, 1.0, 1.0]; 6]);
                                 }
                                 5 => {
                                     // back side (teal)
@@ -183,7 +183,7 @@ pub fn remesh_chunk_system(
                                         offset_x, offset_y, offset_z));
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
-                                    colors.append(&mut vec![[0.1, 0.9, 0.6, 1.0]; 6]);
+                                    colors.append(&mut vec![[0.0, 1.0, 1.0, 1.0]; 6]);
                                 },
                                 _ => panic!("Cosmic ray detected")
                             };

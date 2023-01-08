@@ -26,21 +26,31 @@ fn main() {
     app.add_block::<Stone>();
 
     app.add_startup_system(sus_entry_system);
+    app.add_system(wireframe_toggle_system);
 
     app.run();
 }
 
 fn sus_entry_system(
-    mut wireframe_config: ResMut<WireframeConfig>,
     mut commands: Commands,
     mut registry: ResMut<ChunkRegistry>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    wireframe_config.global = true;
-
     commands.insert_resource(AmbientLight {
         color: Color::WHITE.into(),
-        brightness: 0.1
+        brightness: 0.25
+    });
+
+    commands.spawn(PointLightBundle {
+        transform: Transform {
+            translation: Vec3::new(0.0, 19.0, 0.0),
+            ..default()
+        },
+        point_light: PointLight {
+            intensity: 100000.0,
+            ..default()
+        },
+        ..default()
     });
 
     let material = materials.add(Color::rgb(0.3, 0.6, 0.4).into());
@@ -74,5 +84,18 @@ fn sus_entry_system(
         };
         let id = commands.spawn((ChunkBundle { chunk, pbr }, RemeshChunkMarker)).id();
         registry.set(coords, Some(id)).unwrap();
+    }
+}
+
+fn wireframe_toggle_system(
+    keys: Res<Input<KeyCode>>,
+    mut wireframe_config: ResMut<WireframeConfig>,
+) {
+    if keys.just_pressed(KeyCode::H) {
+        if wireframe_config.global {
+            wireframe_config.global = false;
+        } else {
+            wireframe_config.global = true;
+        }
     }
 }
