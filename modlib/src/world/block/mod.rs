@@ -4,7 +4,7 @@ pub mod entity;
 pub mod traits;
 pub mod registry;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum Block {
     #[default]
     Empty,

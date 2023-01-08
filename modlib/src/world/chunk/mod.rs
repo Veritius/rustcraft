@@ -3,7 +3,6 @@ pub mod bundle;
 pub mod registry;
 
 use bevy::prelude::Component;
-use ndarray::{Array3, ArrayView3};
 use crate::world::block::Block;
 use self::registry::ChunkCoordinate;
 
@@ -13,30 +12,28 @@ pub const CHUNK_SIZE: usize = 16;
 #[derive(Component)]
 pub struct Chunk {
     position: ChunkCoordinate,
-    array: Array3<Block>,
+    array: [[[Block; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE],
 }
 
 impl Chunk {
     pub fn new(at_coordinates: ChunkCoordinate) -> Self {
-        Self { position: at_coordinates, array: Array3::<Block>::default((CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)) }
+        Self { position: at_coordinates, array: [[[Block::Empty; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE] }
     }
 
     pub fn get_block(&self, x: usize, y: usize, z: usize) -> &Block {
-        self.array.get((x, y, z)).expect("Tried to access out of bounds index in chunk")
+        &self.array[x][y][z]
     }
 
     pub fn set_block(&mut self, x: usize, y: usize, z: usize, to: Block) {
         // there's probably a set method or something but I can't find it
-        *self.array.get_mut((x, y, z)).expect("Tried to access out of bounds index in chunk") = to;
+        self.array[x][y][z] = to;
     }
 
-    pub fn array_view(&self) -> ArrayView3<Block> {
-        self.array.view()
+    pub fn get_array(&self) -> &[[[Block; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE] {
+        &self.array
     }
 
-    /// Returns a mutable reference to the internal array storing block data.
-    /// Be careful with this - it can cause problems!
-    pub fn array_mut(&mut self) -> &mut Array3<Block> {
+    pub fn get_array_mut(&mut self) -> &mut [[[Block; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE] {
         &mut self.array
     }
 
