@@ -38,19 +38,17 @@ fn sus_entry_system(
 ) {
     wireframe_config.global = true;
 
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
-            intensity: 5000.0,
-            shadows_enabled: true,
-            ..default()
-        },
-        transform: Transform::from_xyz(0.0, 48.0, 0.0),
-        ..default()
+    commands.insert_resource(AmbientLight {
+        color: Color::WHITE.into(),
+        brightness: 0.1
     });
 
     let material = materials.add(Color::rgb(0.3, 0.6, 0.4).into());
 
-    for coords in [(0,0,0), (0,1,0), (1,0,0), (0,0,1), (1,1,0)] {
+    for coords in [
+        (1,0,1), (0,0,1), (-1,0,1),
+        (1,0,0), (0,0,0), (-1,0,0),
+        (1,0,-1), (0,0,-1), (-1,0,-1)] {
         let mut chunk = Chunk::new(coords);
         for x in 0..CHUNK_SIZE {
             for y in 0..CHUNK_SIZE {

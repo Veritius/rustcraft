@@ -45,7 +45,9 @@ pub fn remesh_chunk_system(
             let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
             let mut positions = vec![];
-            // let mut normals = vec![];
+            let mut normals = vec![];
+            let mut uv_0 = vec![];
+            let mut colors = vec![];
 
             for x in 0..CHUNK_SIZE as i32 {
                 for y in 0..CHUNK_SIZE as i32 {
@@ -123,46 +125,65 @@ pub fn remesh_chunk_system(
                             
                             match idx { 
                                 0 => {
-                                    // top side
+                                    // top side (red)
                                     positions.append(&mut offset_verts(vec![
                                         IDX_E, IDX_F, IDX_G,
                                         IDX_E, IDX_G, IDX_H],
                                         offset_x, offset_y, offset_z));
+                                    normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                                    uv_0.append(&mut vec![[0.0, 0.0]; 6]);
+                                    colors.append(&mut vec![[0.9, 0.1, 0.1, 1.0]; 6]);
+                                    
                                 },
                                 1 => {
-                                    // bottom side
+                                    // bottom side (blue)
                                     positions.append(&mut offset_verts(vec![
                                         IDX_A, IDX_D, IDX_C,
                                         IDX_A, IDX_C, IDX_B],
                                         offset_x, offset_y, offset_z));
+                                    normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                                    uv_0.append(&mut vec![[0.0, 0.0]; 6]);
+                                    colors.append(&mut vec![[0.1, 0.1, 0.9, 1.0]; 6]);
                                 },
                                 2 => {
-                                    // left side
+                                    // left side (green)
                                     positions.append(&mut offset_verts(vec![
                                         IDX_C, IDX_D, IDX_H,
                                         IDX_C, IDX_H, IDX_G],
                                         offset_x, offset_y, offset_z));
+                                    normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                                    uv_0.append(&mut vec![[0.0, 0.0]; 6]);
+                                    colors.append(&mut vec![[0.1, 0.9, 0.1, 1.0]; 6]);;
                                 },
                                 3 => {
-                                    // right side
+                                    // right side (yellow)
                                     positions.append(&mut offset_verts(vec![
                                         IDX_E, IDX_A, IDX_B,
                                         IDX_E, IDX_B, IDX_F],
                                         offset_x, offset_y, offset_z));
+                                    normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                                    uv_0.append(&mut vec![[0.0, 0.0]; 6]);
+                                    colors.append(&mut vec![[0.9, 0.9, 0.1, 1.0]; 6]);
                                 },
                                 4 => {
-                                    // front side
+                                    // front side (purple)
                                     positions.append(&mut offset_verts(vec![
                                         IDX_G, IDX_F, IDX_B,
                                         IDX_G, IDX_B, IDX_C],
                                         offset_x, offset_y, offset_z));
+                                    normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                                    uv_0.append(&mut vec![[0.0, 0.0]; 6]);
+                                    colors.append(&mut vec![[0.6, 0.1, 0.9, 1.0]; 6]);
                                 }
                                 5 => {
-                                    // back side
+                                    // back side (teal)
                                     positions.append(&mut offset_verts(vec![
                                         IDX_D, IDX_A, IDX_E,
                                         IDX_D, IDX_E, IDX_H],
                                         offset_x, offset_y, offset_z));
+                                    normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                                    uv_0.append(&mut vec![[0.0, 0.0]; 6]);
+                                    colors.append(&mut vec![[0.1, 0.9, 0.6, 1.0]; 6]);
                                 },
                                 _ => panic!("Cosmic ray detected")
                             };
@@ -172,7 +193,9 @@ pub fn remesh_chunk_system(
             }
 
             mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
-            // mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+            mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+            mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uv_0);
+            mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
 
             // Update mesh and remove marker component
             commands.entity(chunk_entityid)
