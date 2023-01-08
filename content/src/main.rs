@@ -78,9 +78,9 @@ fn sus_entry_system(
         let mut pbr = PbrBundle::default();
         pbr.material = material.clone();
         pbr.transform.translation = Vec3 {
-            x: 16.0 * coords.0 as f32,
-            y: 16.0 * coords.1 as f32,
-            z: 16.0 * coords.2 as f32,
+            x: CHUNK_SIZE as f32 * coords.0 as f32,
+            y: CHUNK_SIZE as f32 * coords.1 as f32,
+            z: CHUNK_SIZE as f32 * coords.2 as f32,
         };
         let id = commands.spawn((ChunkBundle { chunk, pbr }, RemeshChunkMarker)).id();
         registry.set(coords, Some(id)).unwrap();
