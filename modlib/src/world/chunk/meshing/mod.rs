@@ -133,7 +133,6 @@ pub fn remesh_chunk_system(
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
                                     colors.append(&mut vec![[1.0, 0.0, 0.0, 1.0]; 6]);
-                                    
                                 },
                                 1 => {
                                     // bottom side (blue)
@@ -153,7 +152,7 @@ pub fn remesh_chunk_system(
                                         offset_x, offset_y, offset_z));
                                     normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                                     uv_0.append(&mut vec![[0.0, 0.0]; 6]);
-                                    colors.append(&mut vec![[0.0, 1.0, 0.0, 1.0]; 6]);;
+                                    colors.append(&mut vec![[0.0, 1.0, 0.0, 1.0]; 6]);
                                 },
                                 3 => {
                                     // right side (yellow)
