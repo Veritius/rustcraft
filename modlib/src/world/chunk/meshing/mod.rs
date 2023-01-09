@@ -38,14 +38,23 @@ pub fn remesh_chunk_system(
             for x in 0..CHUNK_SIZE as i32 {
                 for y in 0..CHUNK_SIZE as i32 {
                     for z in 0..CHUNK_SIZE as i32 {
-                            const POS_IDX_A: [f32; 3] = [-0.5, -0.5, -0.5]; // Bottom left near
-                            const POS_IDX_B: [f32; 3] = [0.5, -0.5, -0.5]; // Bottom right near
-                            const POS_IDX_C: [f32; 3] = [0.5, -0.5, 0.5]; // Bottom right far
-                            const POS_IDX_D: [f32; 3] = [-0.5, -0.5, 0.5]; // Bottom left far
-                            const POS_IDX_E: [f32; 3] = [-0.5, 0.5, -0.5]; // Top left near
-                            const POS_IDX_F: [f32; 3] = [0.5, 0.5, -0.5]; // Top right near
-                            const POS_IDX_G: [f32; 3] = [0.5, 0.5, 0.5]; // Bottom right far
-                            const POS_IDX_H: [f32; 3] = [-0.5, 0.5, 0.5]; // Bottom left far
+                            //    H-----------G    Each corner of the cube is a const with a letter from A to H.
+                            //   /|          /|    This little ASCII diagram tells you which corner of the cube the const is.
+                            //  / |         / |    Look at https://bevy-cheatbook.github.io/features/coords.html to see
+                            // E-----------F  |    what coordinate system Bevy uses and which axis is what.
+                            // |  |        |  |
+                            // |  D--------|--C
+                            // | /         | /
+                            // |/          |/
+                            // A-----------B
+                            const POS_IDX_A: [f32; 3] = [-0.5, -0.5, -0.5];
+                            const POS_IDX_B: [f32; 3] = [0.5, -0.5, -0.5];
+                            const POS_IDX_C: [f32; 3] = [0.5, -0.5, 0.5];
+                            const POS_IDX_D: [f32; 3] = [-0.5, -0.5, 0.5];
+                            const POS_IDX_E: [f32; 3] = [-0.5, 0.5, -0.5];
+                            const POS_IDX_F: [f32; 3] = [0.5, 0.5, -0.5];
+                            const POS_IDX_G: [f32; 3] = [0.5, 0.5, 0.5];
+                            const POS_IDX_H: [f32; 3] = [-0.5, 0.5, 0.5];
                         }
                     }
                 }
