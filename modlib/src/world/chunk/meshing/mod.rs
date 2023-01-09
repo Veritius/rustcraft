@@ -189,7 +189,63 @@ fn offset_verts(positions: Vec<[f32; 3]>, offset: (i32, i32, i32)) -> Vec<[f32; 
 }
 
 fn smart_get_block(relative_position: IVec3, chunk_tuple: (&Chunk, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>)) -> Block {
-    Block::Empty
+    const ADJUSTED_CHUNK_SIZE: i32 = CHUNK_SIZE as i32 - 1;
+
+    if relative_position.y > ADJUSTED_CHUNK_SIZE {
+        match chunk_tuple.1 {
+            Some(chunk) => {
+                return *chunk.get_block(relative_position.x as usize, (relative_position.y - ADJUSTED_CHUNK_SIZE) as usize, relative_position.z as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+    
+    if relative_position.y < 0 {
+        match chunk_tuple.2 {
+            Some(chunk) => {
+                return *chunk.get_block(relative_position.x as usize, (relative_position.y + ADJUSTED_CHUNK_SIZE) as usize, relative_position.z as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    if relative_position.x > ADJUSTED_CHUNK_SIZE {
+        match chunk_tuple.3 {
+            Some(chunk) => {
+                return *chunk.get_block((relative_position.x - ADJUSTED_CHUNK_SIZE) as usize, relative_position.y as usize, relative_position.z as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    if relative_position.x < 0 {
+        match chunk_tuple.4 {
+            Some(chunk) => {
+                return *chunk.get_block((relative_position.x + ADJUSTED_CHUNK_SIZE) as usize, relative_position.y as usize, relative_position.z as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    if relative_position.z > ADJUSTED_CHUNK_SIZE {
+        match chunk_tuple.5 {
+            Some(chunk) => {
+                return *chunk.get_block(relative_position.x as usize, relative_position.y as usize, (relative_position.z - ADJUSTED_CHUNK_SIZE) as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    if relative_position.z < 0 {
+        match chunk_tuple.6 {
+            Some(chunk) => {
+                return *chunk.get_block(relative_position.x as usize, relative_position.y as usize, (relative_position.z + ADJUSTED_CHUNK_SIZE) as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    *chunk_tuple.0.get_block(relative_position.x as usize, relative_position.y as usize, relative_position.z as usize)
 }
 
 fn get_block_visibility(block: &Block, registry: &BlockRegistry, query: &Query<(Entity, &BlockEntity)>) -> MeshingVisibility {
