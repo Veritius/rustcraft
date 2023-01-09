@@ -59,55 +59,55 @@ pub fn remesh_chunk_system(
                         const POS_IDX_G: [f32; 3] = [0.5, 0.5, 0.5];
                         const POS_IDX_H: [f32; 3] = [-0.5, 0.5, 0.5];
 
-                        // Back face
+                        // Back face (yellow)
                         positions.append(&mut offset_verts(vec![
-                            POS_IDX_E, POS_IDX_A, POS_IDX_B,
+                            POS_IDX_A, POS_IDX_E, POS_IDX_B,
                             POS_IDX_E, POS_IDX_F, POS_IDX_B,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[1.0, 0.0, 0.0, 1.0]; 6]);
-
-                        // Front face
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_H, POS_IDX_D, POS_IDX_C,
-                            POS_IDX_H, POS_IDX_G, POS_IDX_C,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[0.0, 1.0, 0.0, 1.0]; 6]);
-
-                        // Left face
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_E, POS_IDX_H, POS_IDX_D,
-                            POS_IDX_E, POS_IDX_A, POS_IDX_D,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[0.0, 0.0, 1.0, 1.0]; 6]);
-
-                        // Right face
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_F, POS_IDX_G, POS_IDX_C,
-                            POS_IDX_F, POS_IDX_B, POS_IDX_C,
                         ], offset));
                         normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                         uvs.append(&mut vec![[0.0, 0.0]; 6]);
                         colors.append(&mut vec![[1.0, 1.0, 0.0, 1.0]; 6]);
 
-                        // Top face
+                        // Front face (green)
                         positions.append(&mut offset_verts(vec![
-                            POS_IDX_H, POS_IDX_G, POS_IDX_F,
-                            POS_IDX_H, POS_IDX_E, POS_IDX_F,
+                            POS_IDX_H, POS_IDX_D, POS_IDX_C,
+                            POS_IDX_G, POS_IDX_H, POS_IDX_C,
+                        ], offset));
+                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                        colors.append(&mut vec![[0.0, 1.0, 0.0, 1.0]; 6]);
+
+                        // Left face (cyan)
+                        positions.append(&mut offset_verts(vec![
+                            POS_IDX_H, POS_IDX_E, POS_IDX_D,
+                            POS_IDX_E, POS_IDX_A, POS_IDX_D,
                         ], offset));
                         normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                         uvs.append(&mut vec![[0.0, 0.0]; 6]);
                         colors.append(&mut vec![[0.0, 1.0, 1.0, 1.0]; 6]);
 
-                        // Bottom face
+                        // Right face (blue)
+                        positions.append(&mut offset_verts(vec![
+                            POS_IDX_F, POS_IDX_G, POS_IDX_C,
+                            POS_IDX_B, POS_IDX_F, POS_IDX_C,
+                        ], offset));
+                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                        colors.append(&mut vec![[0.0, 0.0, 1.0, 1.0]; 6]);
+
+                        // Top face (red)
+                        positions.append(&mut offset_verts(vec![
+                            POS_IDX_H, POS_IDX_G, POS_IDX_F,
+                            POS_IDX_E, POS_IDX_H, POS_IDX_F,
+                        ], offset));
+                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                        colors.append(&mut vec![[1.0, 0.0, 0.0, 1.0]; 6]);
+
+                        // Bottom face (magenta)
                         positions.append(&mut offset_verts(vec![
                             POS_IDX_D, POS_IDX_A, POS_IDX_B,
-                            POS_IDX_D, POS_IDX_C, POS_IDX_B,
+                            POS_IDX_C, POS_IDX_D, POS_IDX_B,
                         ], offset));
                         normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                         uvs.append(&mut vec![[0.0, 0.0]; 6]);
