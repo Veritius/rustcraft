@@ -1,8 +1,6 @@
-use std::marker::PhantomData;
-
 use bevy::{prelude::*, ecs::system::SystemParam};
 use self::{
-    chunk::{registry::ChunkRegistry, Chunk},
+    chunk::{registry::{ChunkRegistry, ChunkCoordinate}, Chunk},
     block::{
         registry::BlockRegistry,
         Block, entity::BlockEntity
@@ -18,8 +16,6 @@ pub struct WorldMapHelpers<'w, 's> {
     chunk_registry: Res<'w, ChunkRegistry>,
     blocks: Query<'w, 's, (Entity, &'static BlockEntity)>,
     chunks: Query<'w, 's, (Entity, &'static Chunk)>,
-    #[system_param(ignore)]
-    phantom: PhantomData<&'s ()>,
 }
 
 impl WorldMapHelpers<'_, '_> {
@@ -40,5 +36,22 @@ impl WorldMapHelpers<'_, '_> {
 
         let chunk = self.chunks.get(*chunk).expect("Chunk was in registry but not in query!").1;
         Some(chunk.get_block(block_offset.x as usize, block_offset.y as usize, block_offset.z as usize).clone())
+    }
+
+    pub fn get_chunk_or_none(&self, coord: ChunkCoordinate) -> Option<&Chunk> {
+        match self.chunk_registry.get(coord) {
+            Ok(entity_opt) => {
+                match entity_opt {
+                    Some(entity) => {
+                        match self.chunks.get(*entity) {
+                            Ok(query_result) => Some(query_result.1),
+                            Err(_) => None,
+                        }
+                    },
+                    None => None,
+                }
+            },
+            Err(_) => None,
+        }
     }
 }
