@@ -14,6 +14,20 @@ pub enum MeshingVisibility {
     Invisible,
 }
 
+impl MeshingVisibility {
+    pub fn is_visible_against(&self, other: &MeshingVisibility) -> bool {
+        match (self, other) {
+            (MeshingVisibility::Invisible, _) => false,
+            (MeshingVisibility::Opaque, MeshingVisibility::Opaque) => false,
+            (MeshingVisibility::Opaque, MeshingVisibility::Translucent) => true,
+            (MeshingVisibility::Opaque, MeshingVisibility::Invisible) => true,
+            (MeshingVisibility::Translucent, MeshingVisibility::Opaque) => false,
+            (MeshingVisibility::Translucent, MeshingVisibility::Translucent) => false,
+            (MeshingVisibility::Translucent, MeshingVisibility::Invisible) => false,
+        }
+    }
+}
+
 /// Added to chunks to indicate the need to regenerate their mesh.
 #[derive(Component)]
 pub struct RemeshChunkMarker;
@@ -30,6 +44,17 @@ pub fn remesh_chunk_system(
 ) {
     for (chunk_entityid, this_chunk, chunk_remesh_marker) in chunks.iter() {
         if let Some(_) = chunk_remesh_marker {
+            let this_chunk_position = this_chunk.get_position();
+            let chunk_tuple = (
+                this_chunk,
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)), // up
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)), // down
+                world_map.get_chunk_or_none((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)), // left
+                world_map.get_chunk_or_none((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)), // right
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)), // forward
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)), // back
+            );
+
             let mut positions = vec![];
             let mut normals = vec![];
             let mut uvs = vec![];
@@ -59,59 +84,80 @@ pub fn remesh_chunk_system(
                         const POS_IDX_G: [f32; 3] = [0.5, 0.5, 0.5];
                         const POS_IDX_H: [f32; 3] = [-0.5, 0.5, 0.5];
 
+                        let this_block_pos = IVec3 { x, y, z };
+                        let this_block = *this_chunk.get_block(x as usize, y as usize, z as usize);
+
                         // Back face (yellow)
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_A, POS_IDX_E, POS_IDX_B,
-                            POS_IDX_E, POS_IDX_F, POS_IDX_B,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[1.0, 1.0, 0.0, 1.0]; 6]);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 1, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
+                            positions.append(&mut offset_verts(vec![
+                                POS_IDX_A, POS_IDX_E, POS_IDX_B,
+                                POS_IDX_E, POS_IDX_F, POS_IDX_B,
+                            ], offset));
+                            normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                            uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                            colors.append(&mut vec![[1.0, 1.0, 0.0, 1.0]; 6]);
+                        }
 
                         // Front face (green)
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_H, POS_IDX_D, POS_IDX_C,
-                            POS_IDX_G, POS_IDX_H, POS_IDX_C,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[0.0, 1.0, 0.0, 1.0]; 6]);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: -1, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
+                            positions.append(&mut offset_verts(vec![
+                                POS_IDX_H, POS_IDX_D, POS_IDX_C,
+                                POS_IDX_G, POS_IDX_H, POS_IDX_C,
+                            ], offset));
+                            normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                            uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                            colors.append(&mut vec![[0.0, 1.0, 0.0, 1.0]; 6]);
+                        }
 
                         // Left face (cyan)
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_H, POS_IDX_E, POS_IDX_D,
-                            POS_IDX_E, POS_IDX_A, POS_IDX_D,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[0.0, 1.0, 1.0, 1.0]; 6]);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
+                            positions.append(&mut offset_verts(vec![
+                                POS_IDX_H, POS_IDX_E, POS_IDX_D,
+                                POS_IDX_E, POS_IDX_A, POS_IDX_D,
+                            ], offset));
+                            normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                            uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                            colors.append(&mut vec![[0.0, 1.0, 1.0, 1.0]; 6]);
+                        }
 
                         // Right face (blue)
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_F, POS_IDX_G, POS_IDX_C,
-                            POS_IDX_B, POS_IDX_F, POS_IDX_C,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[0.0, 0.0, 1.0, 1.0]; 6]);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: -1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
+                            positions.append(&mut offset_verts(vec![
+                                POS_IDX_F, POS_IDX_G, POS_IDX_C,
+                                POS_IDX_B, POS_IDX_F, POS_IDX_C,
+                            ], offset));
+                            normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                            uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                            colors.append(&mut vec![[0.0, 0.0, 1.0, 1.0]; 6]);
+                        }
 
                         // Top face (red)
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_H, POS_IDX_G, POS_IDX_F,
-                            POS_IDX_E, POS_IDX_H, POS_IDX_F,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[1.0, 0.0, 0.0, 1.0]; 6]);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: -1 }, chunk_tuple), &block_registry, &blocks);
+                        if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
+                            positions.append(&mut offset_verts(vec![
+                                POS_IDX_H, POS_IDX_G, POS_IDX_F,
+                                POS_IDX_E, POS_IDX_H, POS_IDX_F,
+                            ], offset));
+                            normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                            uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                            colors.append(&mut vec![[1.0, 0.0, 0.0, 1.0]; 6]);
+                        }
 
                         // Bottom face (magenta)
-                        positions.append(&mut offset_verts(vec![
-                            POS_IDX_D, POS_IDX_A, POS_IDX_B,
-                            POS_IDX_C, POS_IDX_D, POS_IDX_B,
-                        ], offset));
-                        normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
-                        uvs.append(&mut vec![[0.0, 0.0]; 6]);
-                        colors.append(&mut vec![[1.0, 0.0, 1.0, 1.0]; 6]);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: 1 }, chunk_tuple), &block_registry, &blocks);
+                        if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
+                            positions.append(&mut offset_verts(vec![
+                                POS_IDX_D, POS_IDX_A, POS_IDX_B,
+                                POS_IDX_C, POS_IDX_D, POS_IDX_B,
+                            ], offset));
+                            normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
+                            uvs.append(&mut vec![[0.0, 0.0]; 6]);
+                            colors.append(&mut vec![[1.0, 0.0, 1.0, 1.0]; 6]);
+                        }
                     }
                 }
             }
@@ -140,4 +186,28 @@ fn offset_verts(positions: Vec<[f32; 3]>, offset: (i32, i32, i32)) -> Vec<[f32; 
         new_positions.push(position);
     }
     new_positions
+}
+
+fn smart_get_block(relative_position: IVec3, chunk_tuple: (&Chunk, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>)) -> Block {
+    Block::Empty
+}
+
+fn get_block_visibility(block: &Block, registry: &BlockRegistry, query: &Query<(Entity, &BlockEntity)>) -> MeshingVisibility {
+    match block {
+        Block::Empty => MeshingVisibility::Invisible,
+        Block::Entity(entityid) => {
+            match query.get(*entityid) {
+                Ok(query_result) => query_result.1.visibility,
+                Err(_) => MeshingVisibility::Invisible,
+            }
+        },
+        Block::Generic(blockid) => {
+            match registry.get_by_id(*blockid) {
+                Some(result) => {
+                    result.visibility()
+                },
+                None => MeshingVisibility::Invisible,
+            }
+        },
+    }
 }
