@@ -47,12 +47,12 @@ pub fn remesh_chunk_system(
             let this_chunk_position = this_chunk.get_position();
             let chunk_tuple = (
                 this_chunk,
-                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)), // up
-                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)), // down
                 world_map.get_chunk_or_none((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)), // left
                 world_map.get_chunk_or_none((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)), // right
-                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)), // forward
-                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)), // back
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)), // up
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)), // down
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)), // forward
+                world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)), // back
             );
 
             let mut positions = vec![];
@@ -75,6 +75,13 @@ pub fn remesh_chunk_system(
                         // |/          |/
                         // A-----------B
 
+                        // FRONT FACE: [GCF,FCB] [0,0,1]
+                        // BACK FACE: [HED,DEA] [0,0,-1]
+                        // RIGHT FACE: [AEB,EFB] [1,0,0]
+                        // LEFT FACE: [HDC,CGH] [-1,0,0]
+                        // TOP FACE: [EHF,GFH] [0,1,0]
+                        // BOTTOM FACE: [DAB,CDB] [0,-1,0]
+
                         const POS_IDX_A: [f32; 3] = [-0.5, -0.5, -0.5];
                         const POS_IDX_B: [f32; 3] = [0.5, -0.5, -0.5];
                         const POS_IDX_C: [f32; 3] = [0.5, -0.5, 0.5];
@@ -88,11 +95,11 @@ pub fn remesh_chunk_system(
                         let this_block = *this_chunk.get_block(x as usize, y as usize, z as usize);
 
                         // Back face (yellow)
-                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 1, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: -1 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_A, POS_IDX_E, POS_IDX_B,
-                                POS_IDX_E, POS_IDX_F, POS_IDX_B,
+                                POS_IDX_H, POS_IDX_E, POS_IDX_D,
+                                POS_IDX_D, POS_IDX_E, POS_IDX_A,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -100,11 +107,11 @@ pub fn remesh_chunk_system(
                         }
 
                         // Front face (green)
-                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: -1, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: 1 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_H, POS_IDX_D, POS_IDX_C,
-                                POS_IDX_G, POS_IDX_H, POS_IDX_C,
+                                POS_IDX_G, POS_IDX_C, POS_IDX_F,
+                                POS_IDX_F, POS_IDX_C, POS_IDX_B,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -112,11 +119,11 @@ pub fn remesh_chunk_system(
                         }
 
                         // Left face (cyan)
-                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: -1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_H, POS_IDX_E, POS_IDX_D,
-                                POS_IDX_E, POS_IDX_A, POS_IDX_D,
+                                POS_IDX_H, POS_IDX_D, POS_IDX_C,
+                                POS_IDX_C, POS_IDX_G, POS_IDX_H,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -124,11 +131,11 @@ pub fn remesh_chunk_system(
                         }
 
                         // Right face (blue)
-                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: -1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_F, POS_IDX_G, POS_IDX_C,
-                                POS_IDX_B, POS_IDX_F, POS_IDX_C,
+                                POS_IDX_A, POS_IDX_E, POS_IDX_B,
+                                POS_IDX_E, POS_IDX_F, POS_IDX_B,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -136,11 +143,11 @@ pub fn remesh_chunk_system(
                         }
 
                         // Top face (red)
-                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: -1 }, chunk_tuple), &block_registry, &blocks);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 1, z: 0 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_H, POS_IDX_G, POS_IDX_F,
                                 POS_IDX_E, POS_IDX_H, POS_IDX_F,
+                                POS_IDX_G, POS_IDX_F, POS_IDX_H,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -148,7 +155,7 @@ pub fn remesh_chunk_system(
                         }
 
                         // Bottom face (magenta)
-                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: 1 }, chunk_tuple), &block_registry, &blocks);
+                        let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: -1, z: 0 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
                                 POS_IDX_D, POS_IDX_A, POS_IDX_B,
@@ -191,8 +198,33 @@ fn offset_verts(positions: Vec<[f32; 3]>, offset: (i32, i32, i32)) -> Vec<[f32; 
 fn smart_get_block(relative_position: IVec3, chunk_tuple: (&Chunk, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>)) -> Block {
     const ADJUSTED_CHUNK_SIZE: i32 = CHUNK_SIZE as i32 - 1;
 
-    if relative_position.y > ADJUSTED_CHUNK_SIZE {
+    // FRONT FACE: [GCF,FCB] [0,0,1]
+    // BACK FACE: [HED,DEA] [0,0,-1]
+    // RIGHT FACE: [AEB,EFB] [1,0,0]
+    // LEFT FACE: [HDC,CGH] [-1,0,0]
+    // TOP FACE: [EHF,GFH] [0,1,0]
+    // BOTTOM FACE: [DAB,CDB] [0,-1,0]
+
+    if relative_position.x > ADJUSTED_CHUNK_SIZE {
         match chunk_tuple.1 {
+            Some(chunk) => {
+                return *chunk.get_block((relative_position.x - ADJUSTED_CHUNK_SIZE) as usize, relative_position.y as usize, relative_position.z as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+    
+    if relative_position.x < 0 {
+        match chunk_tuple.2 {
+            Some(chunk) => {
+                return *chunk.get_block((relative_position.x + ADJUSTED_CHUNK_SIZE) as usize,  relative_position.y as usize, relative_position.z as usize);
+            },
+            None => { return Block::Empty },
+        }
+    }
+
+    if relative_position.y > ADJUSTED_CHUNK_SIZE {
+        match chunk_tuple.3 {
             Some(chunk) => {
                 return *chunk.get_block(relative_position.x as usize, (relative_position.y - ADJUSTED_CHUNK_SIZE) as usize, relative_position.z as usize);
             },
@@ -201,32 +233,14 @@ fn smart_get_block(relative_position: IVec3, chunk_tuple: (&Chunk, Option<&Chunk
     }
     
     if relative_position.y < 0 {
-        match chunk_tuple.2 {
-            Some(chunk) => {
-                return *chunk.get_block(relative_position.x as usize, (relative_position.y + ADJUSTED_CHUNK_SIZE) as usize, relative_position.z as usize);
-            },
-            None => { return Block::Empty },
-        }
-    }
-
-    if relative_position.x > ADJUSTED_CHUNK_SIZE {
-        match chunk_tuple.3 {
-            Some(chunk) => {
-                return *chunk.get_block((relative_position.x - ADJUSTED_CHUNK_SIZE) as usize, relative_position.y as usize, relative_position.z as usize);
-            },
-            None => { return Block::Empty },
-        }
-    }
-
-    if relative_position.x < 0 {
         match chunk_tuple.4 {
             Some(chunk) => {
-                return *chunk.get_block((relative_position.x + ADJUSTED_CHUNK_SIZE) as usize, relative_position.y as usize, relative_position.z as usize);
+                return *chunk.get_block(relative_position.x as usize,  (relative_position.y + ADJUSTED_CHUNK_SIZE) as usize, relative_position.z as usize);
             },
             None => { return Block::Empty },
         }
     }
-
+    
     if relative_position.z > ADJUSTED_CHUNK_SIZE {
         match chunk_tuple.5 {
             Some(chunk) => {
@@ -235,11 +249,11 @@ fn smart_get_block(relative_position: IVec3, chunk_tuple: (&Chunk, Option<&Chunk
             None => { return Block::Empty },
         }
     }
-
+    
     if relative_position.z < 0 {
         match chunk_tuple.6 {
             Some(chunk) => {
-                return *chunk.get_block(relative_position.x as usize, relative_position.y as usize, (relative_position.z + ADJUSTED_CHUNK_SIZE) as usize);
+                return *chunk.get_block(relative_position.x as usize,  relative_position.y as usize, (relative_position.z + ADJUSTED_CHUNK_SIZE) as usize);
             },
             None => { return Block::Empty },
         }
