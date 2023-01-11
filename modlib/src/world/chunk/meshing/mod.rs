@@ -75,10 +75,10 @@ pub fn remesh_chunk_system(
                         // |/          |/
                         // A-----------B
 
-                        // FRONT FACE: [GCF,FCB] [0,0,1]
-                        // BACK FACE: [HED,DEA] [0,0,-1]
-                        // RIGHT FACE: [AEB,EFB] [1,0,0]
-                        // LEFT FACE: [HDC,CGH] [-1,0,0]
+                        // FRONT FACE: [HDC,CGH] [0,0,1]
+                        // BACK FACE: [AEB,EFB] [0,0,-1]
+                        // RIGHT FACE: [GCF,FCB] [1,0,0]
+                        // LEFT FACE: [HED,DEA] [-1,0,0]
                         // TOP FACE: [EHF,GFH] [0,1,0]
                         // BOTTOM FACE: [DAB,CDB] [0,-1,0]
 
@@ -98,8 +98,8 @@ pub fn remesh_chunk_system(
                         let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: -1 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_H, POS_IDX_E, POS_IDX_D,
-                                POS_IDX_D, POS_IDX_E, POS_IDX_A,
+                                POS_IDX_A, POS_IDX_E, POS_IDX_B,
+                                POS_IDX_E, POS_IDX_F, POS_IDX_B,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -110,8 +110,8 @@ pub fn remesh_chunk_system(
                         let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 0, y: 0, z: 1 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_G, POS_IDX_C, POS_IDX_F,
-                                POS_IDX_F, POS_IDX_C, POS_IDX_B,
+                                POS_IDX_H, POS_IDX_D, POS_IDX_C,
+                                POS_IDX_C, POS_IDX_G, POS_IDX_H,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -122,8 +122,8 @@ pub fn remesh_chunk_system(
                         let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: -1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_H, POS_IDX_D, POS_IDX_C,
-                                POS_IDX_C, POS_IDX_G, POS_IDX_H,
+                                POS_IDX_H, POS_IDX_E, POS_IDX_D,
+                                POS_IDX_D, POS_IDX_E, POS_IDX_A,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
@@ -134,8 +134,8 @@ pub fn remesh_chunk_system(
                         let other_visibility = get_block_visibility(&smart_get_block(this_block_pos + IVec3 { x: 1, y: 0, z: 0 }, chunk_tuple), &block_registry, &blocks);
                         if get_block_visibility(&this_block, &block_registry, &blocks).is_visible_against(&other_visibility) {
                             positions.append(&mut offset_verts(vec![
-                                POS_IDX_A, POS_IDX_E, POS_IDX_B,
-                                POS_IDX_E, POS_IDX_F, POS_IDX_B,
+                                POS_IDX_G, POS_IDX_C, POS_IDX_F,
+                                POS_IDX_F, POS_IDX_C, POS_IDX_B,
                             ], offset));
                             normals.append(&mut vec![[0.0, 1.0, 0.0]; 6]);
                             uvs.append(&mut vec![[0.0, 0.0]; 6]);
