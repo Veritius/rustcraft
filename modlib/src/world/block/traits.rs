@@ -4,7 +4,7 @@ use super::registry::BlockRegistry;
 
 pub trait BlockDefinition: 'static + Send + Sync {
     fn new() -> Self where Self: Sized;
-    fn id(&self) -> &'static str;
+    fn str_id(&self) -> &'static str;
     fn name(&self) -> &'static str;
     fn color(&self) -> Color;
     fn visibility(&self) -> MeshingVisibility;

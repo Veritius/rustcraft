@@ -6,7 +6,7 @@ use bevy::{
     }
 };
 use bevy_flycam::PlayerPlugin;
-use blocks::{Dirt, Stone};
+use blocks::*;
 use rand::Rng;
 use rustcraft_modlib::{BlockRegistryPlugin, world::{block::{traits::AddBlock, BlockId, Block}, chunk::{registry::ChunkRegistry, Chunk, bundle::ChunkBundle, meshing::RemeshChunkMarker, CHUNK_SIZE}}, ChunkedWorldPlugin};
 
@@ -22,7 +22,9 @@ fn main() {
     app.add_plugin(BlockRegistryPlugin);
     app.add_plugin(ChunkedWorldPlugin);
 
+    app.add_block::<Grass>();
     app.add_block::<Dirt>();
+    app.add_block::<Sand>();
     app.add_block::<Stone>();
 
     app.add_startup_system(sus_entry_system);

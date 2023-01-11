@@ -1,5 +1,5 @@
 use std::{collections::BTreeMap, ops::Deref};
-use bevy::prelude::Resource;
+use bevy::prelude::{Resource, debug, info};
 use super::{traits::BlockDefinition, BlockId};
 
 #[derive(Resource)]
@@ -21,12 +21,13 @@ impl BlockRegistry {
 
         // Check for collisions
         for (_key, value) in self.registry.iter() {
-            if value.deref().id() == new_def.id() {
-                panic!("Block ID collision occurred for \"{}\"", new_def.id());
+            if value.deref().str_id() == new_def.str_id() {
+                panic!("Block ID collision occurred for \"{}\"", new_def.str_id());
             }
         }
 
         let id = BlockId(self.last_assigned_id);
+        info!("Registered new block {} ({}) under {}", new_def.name(), new_def.str_id(), id.0);
         self.registry.insert(id, Box::new(new_def));
         self.last_assigned_id += 1;
         return id;
@@ -38,7 +39,7 @@ impl BlockRegistry {
 
     pub fn get_by_type<T: BlockDefinition>(&self) -> Option<BlockId> {
         for (key, value) in self.registry.iter() {
-            if value.deref().id() == T::new().id() {
+            if value.deref().str_id() == T::new().str_id() {
                 return Some(*key)
             }
         }
