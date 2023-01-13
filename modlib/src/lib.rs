@@ -11,6 +11,7 @@ use world::{
 };
 
 pub mod world;
+pub mod debug;
 
 pub struct BlockRegistryPlugin;
 impl Plugin for BlockRegistryPlugin {

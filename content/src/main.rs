@@ -14,7 +14,8 @@ use rustcraft_modlib::{
         chunk::loader::LoadChunkMessage,
         generation::WorldGenPlugin
     },
-    ChunkedWorldPlugin
+    ChunkedWorldPlugin,
+    debug::DebugMenuPlugin
 };
 
 pub mod blocks;
@@ -23,6 +24,7 @@ fn main() {
     let mut app = App::new();
 
     app.add_plugins(DefaultPlugins);
+    app.add_plugin(DebugMenuPlugin);
     app.add_plugin(WireframePlugin);
     app.add_plugin(NoCameraPlayerPlugin);
     
@@ -70,9 +72,9 @@ fn funny_startup_system(
             ..default()
         },
     ));
-    for x in -8..8 {
-        for y in -3..3 {
-            for z in -8..8 {
+    for x in -16..16 {
+        for y in -8..8 {
+            for z in -16..16 {
                 event_writer.send(LoadChunkMessage(IVec3 { x, y, z }));
             }
         }
