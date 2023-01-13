@@ -3,7 +3,7 @@ use world::{
     block::registry::BlockRegistry,
     chunk::{
         registry::ChunkRegistry,
-        meshing::remesh_chunk_system
+        meshing::remesh_chunk_system, loader::{LoadChunkMessage, UnloadChunkMessage},
     }
 };
 
@@ -19,6 +19,9 @@ impl Plugin for BlockRegistryPlugin {
 pub struct ChunkedWorldPlugin;
 impl Plugin for ChunkedWorldPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
+        app.add_event::<UnloadChunkMessage>();
+        app.add_event::<LoadChunkMessage>();
+        
         app.insert_resource(ChunkRegistry::new());
         app.add_system(remesh_chunk_system);
     }

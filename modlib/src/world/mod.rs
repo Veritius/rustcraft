@@ -9,6 +9,7 @@ use self::{
 
 pub mod block;
 pub mod chunk;
+pub mod generation;
 
 #[derive(SystemParam)]
 pub struct WorldMapHelpers<'w, 's> {

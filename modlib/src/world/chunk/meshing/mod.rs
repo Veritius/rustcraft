@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology}};
 use crate::world::{block::{registry::BlockRegistry, Block, entity::BlockEntity}, WorldMapHelpers};
-use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE};
+use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE, CHUNK_SIZE_I32};
 
 /// Used for generating a mesh for a chunk.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -60,9 +60,9 @@ pub fn remesh_chunk_system(
             let mut uvs = vec![];
             let mut colors = vec![];
 
-            for x in 0..CHUNK_SIZE as i32 {
-                for y in 0..CHUNK_SIZE as i32 {
-                    for z in 0..CHUNK_SIZE as i32 {
+            for x in 0..CHUNK_SIZE_I32 {
+                for y in 0..CHUNK_SIZE_I32 {
+                    for z in 0..CHUNK_SIZE_I32 {
                         let offset = (x as i32 - 8, y as i32 - 8, z as i32 - 8);
 
                         //    H-----------G    Each corner of the cube is a const with a letter from A to H.
@@ -196,7 +196,7 @@ fn offset_verts(positions: Vec<[f32; 3]>, offset: (i32, i32, i32)) -> Vec<[f32; 
 }
 
 fn smart_get_block(relative_position: IVec3, chunk_tuple: (&Chunk, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>, Option<&Chunk>)) -> Block {
-    const ADJUSTED_CHUNK_SIZE: i32 = CHUNK_SIZE as i32 - 1;
+    const ADJUSTED_CHUNK_SIZE: i32 = CHUNK_SIZE_I32 - 1;
 
     // FRONT FACE: [GCF,FCB] [0,0,1]
     // BACK FACE: [HED,DEA] [0,0,-1]

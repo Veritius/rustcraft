@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use bevy::prelude::{Resource, Entity};
+use bevy::prelude::{Resource, Entity, warn};
 
 pub type ChunkCoordinate = (i32, i32, i32);
 
@@ -71,10 +71,27 @@ impl ChunkRegistry {
             },
         }
     }
+
+    /// Like `set` but doesn't give any result, rather it logs when there's an error and carries on.
+    pub fn set_uncaring(&mut self, coord: ChunkCoordinate, to: Option<Entity>) {
+        match self.set(coord, to) {
+            Ok(_) => {},
+            Err(error) => { warn!("Failed to set chunk coordinate at {:?}: {:?}", coord, error) },
+        }
+    }
 }
 
 #[derive(Debug)]
 pub enum ChunkOperationError {
     NoChunkInPosition(ChunkCoordinate),
     ChunkAlreadyPresent(ChunkCoordinate),
+}
+
+impl std::fmt::Display for ChunkOperationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ChunkOperationError::NoChunkInPosition(coord) => { f.write_str(&format!("No chunk in position {:?}", coord)) },
+            ChunkOperationError::ChunkAlreadyPresent(coord) => { f.write_str(&format!("Chunk already present at {:?}", coord)) },
+        }
+    }
 }

@@ -1,5 +1,5 @@
 use std::{collections::BTreeMap, ops::Deref};
-use bevy::prelude::{Resource, debug, info};
+use bevy::prelude::{Resource, info};
 use super::{traits::BlockDefinition, BlockId};
 
 #[derive(Resource)]

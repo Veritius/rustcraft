@@ -1,6 +1,7 @@
 pub mod meshing;
 pub mod bundle;
 pub mod registry;
+pub mod loader;
 
 use bevy::prelude::Component;
 use crate::world::block::Block;
@@ -8,6 +9,10 @@ use self::registry::ChunkCoordinate;
 
 // It's not recommended you change this value. It'll probably work, but no guarantees - it's only tested with 16.
 pub const CHUNK_SIZE: usize = 16;
+
+// Derivative consts to make repeating `as f32` and such unnecessary.
+pub const CHUNK_SIZE_F32: f32 = CHUNK_SIZE as f32;
+pub const CHUNK_SIZE_I32: i32 = CHUNK_SIZE as i32;
 
 #[derive(Component)]
 pub struct Chunk {
