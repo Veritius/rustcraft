@@ -17,8 +17,8 @@ use super::{
     }
 };
 
-const WORLD_GEN_SEED: u32 = 4293413;
-const PERLIN_MODIFIER: f32 = 0.06639428;
+const WORLD_GEN_SEED: u32 = 241231;
+const PERLIN_MODIFIER: f32 = 0.026639428;
 
 pub struct WorldGenPlugin;
 impl Plugin for WorldGenPlugin {
