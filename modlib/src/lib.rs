@@ -1,4 +1,5 @@
 use bevy::prelude::{Plugin, IntoSystemDescriptor};
+use rand::Rng;
 use world::{
     block::registry::BlockRegistry,
     chunk::{
@@ -6,7 +7,7 @@ use world::{
         meshing::{chunk_remesh_dispatch_system, chunk_remesh_polling_system},
         loader::{LoadChunkMessage, UnloadChunkMessage},
         SystemLabels as ChunkSystemLabels,
-    }
+    },
 };
 
 pub mod world;

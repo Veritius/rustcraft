@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, tasks::{Task, AsyncComputeTaskPool}};
+use futures_lite::future;
 use noise::{Perlin, NoiseFn};
 use super::{
     chunk::{
@@ -6,8 +7,7 @@ use super::{
         CHUNK_SIZE_F32,
         CHUNK_SIZE_I32,
         loader::LoadChunkMessage,
-        registry::ChunkRegistry,
-        bundle::ChunkBundle,
+        registry::{ChunkRegistry, ChunkState},
         meshing::RemeshChunkMarker,
         Chunk,
     },
@@ -17,41 +17,61 @@ use super::{
     }
 };
 
-const WORLD_GEN_SEED: u32 = 241231;
+#[derive(SystemLabel)]
+pub enum SystemLabels {
+    ChunkGenerationDispatchSystem,
+    ChunkGenerationPollingSystem,
+}
+
+#[derive(Component)]
+pub struct BeingGenerated(Task<Chunk>);
+
+// TODO: Make this able to be changed
+const WORLD_GEN_SEED: u32 = 53252345;
 const PERLIN_MODIFIER: f32 = 0.026639428;
 
 pub struct WorldGenPlugin;
 impl Plugin for WorldGenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(chunk_gen_system);
+        app.add_system(generation_dispatch_system
+            .label(SystemLabels::ChunkGenerationDispatchSystem));
+        app.add_system(generation_polling_system
+            .label(SystemLabels::ChunkGenerationPollingSystem)
+            .after(SystemLabels::ChunkGenerationDispatchSystem));
     }
 }
 
-fn chunk_gen_system(
+fn generation_dispatch_system(
     mut commands: Commands,
     mut gen_events: EventReader<LoadChunkMessage>,
     mut chunk_registry: ResMut<ChunkRegistry>,
 ) {
+    let task_pool = AsyncComputeTaskPool::get();
     for event in gen_events.iter() {
-        let mut chunk = Chunk::new(event.0.into());
-        let perlin = Perlin::new(WORLD_GEN_SEED);
+        let chunk_position = event.0.clone();
+        let task: Task<Chunk> = task_pool.spawn(async move {
+            let mut chunk = Chunk::new(chunk_position.into());
+            let perlin = Perlin::new(WORLD_GEN_SEED);
 
-        for x in 0..CHUNK_SIZE {
-            for y in 0..CHUNK_SIZE {
-                for z in 0..CHUNK_SIZE {
-                    let mut pick_coords = Vec3 {
-                        x: x as f32 + (event.0.x * CHUNK_SIZE_I32) as f32,
-                        y: y as f32 + (event.0.y * CHUNK_SIZE_I32) as f32,
-                        z: z as f32 + (event.0.z * CHUNK_SIZE_I32) as f32,
-                    };
-                    pick_coords *= Vec3::splat(PERLIN_MODIFIER);
+            for x in 0..CHUNK_SIZE {
+                for y in 0..CHUNK_SIZE {
+                    for z in 0..CHUNK_SIZE {
+                        let mut pick_coords = Vec3 {
+                            x: x as f32 + (chunk_position.x * CHUNK_SIZE_I32) as f32,
+                            y: y as f32 + (chunk_position.y * CHUNK_SIZE_I32) as f32,
+                            z: z as f32 + (chunk_position.z * CHUNK_SIZE_I32) as f32,
+                        };
+                        pick_coords *= Vec3::splat(PERLIN_MODIFIER);
 
-                    let value = perlin.get([pick_coords.x as f64, pick_coords.y as f64, pick_coords.z as f64]);
-                    let block = if value >= 0.5 { Block::Generic(BlockId(1)) } else { Block::empty() };
-                    chunk.set_block(x, y, z, block);
+                        let value = perlin.get([pick_coords.x as f64, pick_coords.y as f64, pick_coords.z as f64]);
+                        let block = if value >= 0.5 { Block::Generic(BlockId(1)) } else { Block::empty() };
+                        chunk.set_block(x, y, z, block);
+                    }
                 }
             }
-        }
+
+            chunk
+        });
 
         let mut pbr = PbrBundle::default();
         pbr.transform.translation = Vec3 {
@@ -60,7 +80,20 @@ fn chunk_gen_system(
             z: CHUNK_SIZE_F32 * event.0.z as f32,
         };
 
-        let ent = commands.spawn(ChunkBundle { chunk, pbr }).insert(RemeshChunkMarker).id();
-        chunk_registry.set_uncaring(event.0.into(), Some(ent));
+        commands.spawn((pbr, BeingGenerated(task)));
+        chunk_registry.set(event.0.into(), ChunkState::BeingGenerated);
+    }
+}
+
+fn generation_polling_system(
+    mut commands: Commands,
+    mut chunk_registry: ResMut<ChunkRegistry>,
+    mut query: Query<(Entity, &mut BeingGenerated)>
+) {
+    for (entity, mut chunk) in query.iter_mut() {
+        if let Some(chunk) = future::block_on(future::poll_once(&mut chunk.0)) {
+            chunk_registry.set(chunk.get_position(), ChunkState::Present(entity));
+            commands.entity(entity).remove::<BeingGenerated>().insert(chunk).insert(RemeshChunkMarker);
+        }
     }
 }

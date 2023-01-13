@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ecs::system::SystemParam};
 use self::{
-    chunk::{registry::{ChunkRegistry, ChunkCoordinate}, Chunk},
+    chunk::{registry::{ChunkRegistry, ChunkCoordinate, ChunkState}, Chunk},
     block::{
         registry::BlockRegistry,
         Block, entity::BlockEntity
@@ -26,33 +26,23 @@ impl WorldMapHelpers<'_, '_> {
         let block_offset = (pos + IVec3::splat(16)) % 16;
 
         let chunk = match self.chunk_registry.get(chunk_offset.into()) {
-            Ok(chunk) => {
-                match chunk {
-                    Some(chunk) => chunk,
-                    None => { return None },
-                }
-            },
-            Err(_) => { return None },
+            ChunkState::Present(entity) => entity,
+            _ => { return None }
         };
 
-        let chunk = self.chunks.get(*chunk).expect("Chunk was in registry but not in query!").1;
+        let chunk = self.chunks.get(chunk).expect("Chunk was in registry but not in query!").1;
         Some(chunk.get_block(block_offset.x as usize, block_offset.y as usize, block_offset.z as usize).clone())
     }
 
     pub fn get_chunk_or_none(&self, coord: ChunkCoordinate) -> Option<&Chunk> {
         match self.chunk_registry.get(coord) {
-            Ok(entity_opt) => {
-                match entity_opt {
-                    Some(entity) => {
-                        match self.chunks.get(*entity) {
-                            Ok(query_result) => Some(query_result.1),
-                            Err(_) => None,
-                        }
-                    },
-                    None => None,
+            ChunkState::Present(entity) => {
+                match self.chunks.get(entity) {
+                    Ok(query_result) => Some(query_result.1),
+                    Err(_) => None,
                 }
             },
-            Err(_) => None,
+            _ => None,
         }
     }
 }
