@@ -4,6 +4,7 @@ use rustcraft_modlib::world::{
     chunk::meshing::MeshingVisibility
 };
 
+#[derive(Clone)]
 pub struct Grass;
 impl BlockDefinition for Grass {
     fn new() -> Self where Self: Sized { Self {} }
@@ -13,6 +14,7 @@ impl BlockDefinition for Grass {
     fn visibility(&self) -> MeshingVisibility { MeshingVisibility::Opaque }
 }
 
+#[derive(Clone)]
 pub struct Dirt;
 impl BlockDefinition for Dirt {
     fn new() -> Self where Self: Sized { Self {} }
@@ -22,6 +24,7 @@ impl BlockDefinition for Dirt {
     fn visibility(&self) -> MeshingVisibility { MeshingVisibility::Opaque }
 }
 
+#[derive(Clone)]
 pub struct Sand;
 impl BlockDefinition for Sand {
     fn new() -> Self where Self: Sized { Self {} }
@@ -31,6 +34,7 @@ impl BlockDefinition for Sand {
     fn visibility(&self) -> MeshingVisibility { MeshingVisibility::Opaque }
 }
 
+#[derive(Clone)]
 pub struct Stone;
 impl BlockDefinition for Stone {
     fn new() -> Self where Self: Sized { Self {} }

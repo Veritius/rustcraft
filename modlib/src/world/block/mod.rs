@@ -4,12 +4,22 @@ pub mod entity;
 pub mod traits;
 pub mod registry;
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum Block {
-    #[default]
-    Empty,
-    Entity(Entity),
     Generic(BlockId),
+    Entity(Entity),
+}
+
+impl Block {
+    pub fn empty() -> Self {
+        Self::Generic(BlockId(0))
+    }
+}
+
+impl Default for Block {
+    fn default() -> Self {
+        Self::Generic(BlockId(0))
+    }
 }
 
 impl From<BlockId> for Block {

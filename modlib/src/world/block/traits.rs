@@ -1,8 +1,9 @@
 use bevy::prelude::{App, ResMut, Color};
+use dyn_clone::DynClone;
 use crate::world::chunk::meshing::MeshingVisibility;
 use super::registry::BlockRegistry;
 
-pub trait BlockDefinition: 'static + Send + Sync {
+pub trait BlockDefinition: 'static + Send + Sync + DynClone {
     fn new() -> Self where Self: Sized;
     fn str_id(&self) -> &'static str;
     fn name(&self) -> &'static str;

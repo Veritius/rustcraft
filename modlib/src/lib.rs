@@ -1,9 +1,11 @@
-use bevy::prelude::Plugin;
+use bevy::prelude::{Plugin, IntoSystemDescriptor};
 use world::{
     block::registry::BlockRegistry,
     chunk::{
         registry::ChunkRegistry,
-        meshing::remesh_chunk_system, loader::{LoadChunkMessage, UnloadChunkMessage},
+        meshing::{chunk_remesh_dispatch_system, chunk_remesh_polling_system},
+        loader::{LoadChunkMessage, UnloadChunkMessage},
+        SystemLabels as ChunkSystemLabels,
     }
 };
 
@@ -23,6 +25,10 @@ impl Plugin for ChunkedWorldPlugin {
         app.add_event::<LoadChunkMessage>();
         
         app.insert_resource(ChunkRegistry::new());
-        app.add_system(remesh_chunk_system);
+        app.add_system(chunk_remesh_dispatch_system
+            .label(ChunkSystemLabels::ChunkMeshingDispatchSystem));
+        app.add_system(chunk_remesh_polling_system
+            .label(ChunkSystemLabels::ChunkMeshingPollingSystem)
+            .after(ChunkSystemLabels::ChunkMeshingDispatchSystem));
     }
 }

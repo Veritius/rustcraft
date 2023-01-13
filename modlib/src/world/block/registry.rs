@@ -1,5 +1,7 @@
 use std::{collections::BTreeMap, ops::Deref};
-use bevy::prelude::{Resource, info};
+use bevy::prelude::{Resource, info, Color};
+use crate::world::chunk::meshing::MeshingVisibility;
+
 use super::{traits::BlockDefinition, BlockId};
 
 #[derive(Resource)]
@@ -8,12 +10,29 @@ pub struct BlockRegistry {
     registry: BTreeMap<BlockId, Box<dyn BlockDefinition>>,
 }
 
+impl Clone for BlockRegistry {
+    fn clone(&self) -> Self {
+        let mut new_registry: BTreeMap<BlockId, Box<dyn BlockDefinition>> = BTreeMap::new();
+
+        for entry in self.registry.iter() {
+            new_registry.insert(*entry.0, dyn_clone::clone_box(&**entry.1));
+        }
+
+        Self {
+            last_assigned_id: self.last_assigned_id.clone(),
+            registry: new_registry,
+        }
+    }
+}
+
 impl BlockRegistry {
     pub fn new() -> Self {
-        Self {
+        let mut v_self = Self {
             last_assigned_id: 0,
             registry: BTreeMap::new(),
-        }
+        };
+        v_self.register_new::<Air>();
+        v_self
     }
     
     pub fn register_new<T: 'static + BlockDefinition>(&mut self) -> BlockId {
@@ -22,7 +41,7 @@ impl BlockRegistry {
         // Check for collisions
         for (_key, value) in self.registry.iter() {
             if value.deref().str_id() == new_def.str_id() {
-                panic!("Block ID collision occurred for \"{}\"", new_def.str_id());
+                panic!("Block string ID collision occurred for \"{}\"", new_def.str_id());
             }
         }
 
@@ -45,4 +64,20 @@ impl BlockRegistry {
         }
         return None
     }
+
+    pub fn get_inner_registry(&self) -> &BTreeMap<BlockId, Box<dyn BlockDefinition>> {
+        &self.registry
+    }
 }
+
+#[derive(Clone, Copy)]
+pub struct Air;
+impl BlockDefinition for Air {
+    fn new() -> Self where Self: Sized { Self {} }
+    fn str_id(&self) -> &'static str { "engine_empty" }
+    fn name(&self) -> &'static str { "Air" }
+    fn color(&self) -> Color { Color::NONE }
+    fn visibility(&self) -> MeshingVisibility { MeshingVisibility::Invisible }
+}
+
+pub type Empty = Air;
