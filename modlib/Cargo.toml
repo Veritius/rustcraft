@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 bevy = "0.9.1"
 rand = "0.8.5"
-block-mesh = "0.2.0"
 noise = "0.8.2"
 dyn-clone = "1.0.10"
 futures-lite = "1.4.0"

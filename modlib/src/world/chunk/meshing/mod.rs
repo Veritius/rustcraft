@@ -1,10 +1,11 @@
 use std::{collections::BTreeMap, ops::Deref, task::Poll};
 
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::Indices}, tasks::{AsyncComputeTaskPool, Task}};
-use block_mesh::{ndshape::{ConstShape3u8, ConstShape, ConstShape3u16, ConstShape3u32}, greedy_quads, RIGHT_HANDED_Y_UP_CONFIG, GreedyQuadsBuffer, Voxel, MergeVoxel, VoxelVisibility};
 use futures_lite::{FutureExt, future};
-use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
+use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32, meshing::meshers::greedy_mesh}};
 use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32};
+
+mod meshers;
 
 /// Used for generating a mesh for a chunk.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -16,16 +17,6 @@ pub enum MeshingVisibility {
     /// Does not produce faces at all, and allows faces to be produced for other blocks.
     /// This may also be used for blocks that have their own meshes and should not be included in the chunk mesh generation, i.e. entities.
     Invisible,
-}
-
-impl From<MeshingVisibility> for VoxelVisibility {
-    fn from(value: MeshingVisibility) -> Self {
-        match value {
-            MeshingVisibility::Opaque => VoxelVisibility::Opaque,
-            MeshingVisibility::Translucent => VoxelVisibility::Translucent,
-            MeshingVisibility::Invisible => VoxelVisibility::Empty,
-        }
-    }
 }
 
 impl MeshingVisibility {
@@ -50,6 +41,7 @@ pub struct RemeshChunkMarker;
 #[derive(Component)]
 pub struct BeingRemeshed(Task<Mesh>);
 
+const SHAPE_SIZE_USIZE: usize = CHUNK_SIZE + 2;
 const UV_SCALE: f32 = 1.0 / CHUNK_SIZE as f32;
 
 pub fn chunk_remesh_dispatch_system(
@@ -74,8 +66,6 @@ pub fn chunk_remesh_dispatch_system(
             let down_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)); // down
             let forward_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)); // forward
             let back_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)); // back
-
-            const SHAPE_SIZE_USIZE: usize = CHUNK_SIZE + 2;
                 
             let mut intermediate_array = [[[BlockId(0); SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE];
 
@@ -117,88 +107,10 @@ pub fn chunk_remesh_dispatch_system(
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {
                 // TODO: Figure out a solution that doesn't involve cloning the entire block registry
-                const SHAPE_SIZE_U32: u32 = CHUNK_SIZE_U32 + 2;
-                type ChunkShape = ConstShape3u32<SHAPE_SIZE_U32, SHAPE_SIZE_U32, SHAPE_SIZE_U32>;
-
-                #[derive(Clone, Copy)]
-                struct VoxelCapsule<'r> {
-                    id: BlockId,
-                    reg: &'r BlockRegistry,
-                }
-
-                impl Voxel for VoxelCapsule<'_> {
-                    fn get_visibility(&self) -> block_mesh::VoxelVisibility {
-                        match self.reg.get_by_id(self.id) {
-                            Some(res) => { res.visibility().into() },
-                            None => { VoxelVisibility::Empty },
-                        }
-                    }
-                }
-
-                impl MergeVoxel for VoxelCapsule<'_> {
-                    type MergeValue = BlockId;
-
-                    fn merge_value(&self) -> Self::MergeValue {
-                        self.id
-                    }
-                }
             
-                let mut voxels = [VoxelCapsule { id: BlockId(65535), reg: &registry }; ChunkShape::SIZE as usize];
-                for x in 0..SHAPE_SIZE_U32 {
-                    for y in 0..SHAPE_SIZE_U32 {
-                        for z in 0..SHAPE_SIZE_U32 {
-                            let i = ChunkShape::linearize([x, y, z]);
-                            let block_id = intermediate_array[x as usize][y as usize][z as usize];
-                            voxels[i as usize] = VoxelCapsule { id: block_id, reg: &registry };
-                        }
-                    }
-                }
-
-                let faces = RIGHT_HANDED_Y_UP_CONFIG.faces;
-
-                let mut buffer = GreedyQuadsBuffer::new(voxels.len());
-                greedy_quads(
-                    &voxels,
-                    &ChunkShape {},
-                    [0;3],
-                    [17;3],
-                    &faces,
-                    &mut buffer,
-                );
-                
-                let num_indices = buffer.quads.num_quads() * 6;
-                let num_vertices = buffer.quads.num_quads() * 4;
-                let mut indices = Vec::with_capacity(num_indices);
-                let mut positions = Vec::with_capacity(num_vertices);
-                let mut normals = Vec::with_capacity(num_vertices);
-                let mut tex_coords = Vec::with_capacity(num_vertices);
-
-                for (group, face) in buffer.quads.groups.into_iter().zip(faces.into_iter()) {
-                    for quad in group.into_iter() {
-                        indices.extend_from_slice(&face.quad_mesh_indices(positions.len() as u32));
-                        positions.extend_from_slice(&face.quad_mesh_positions(&quad, 1.0));
-                        normals.extend_from_slice(&face.quad_mesh_normals());
-                        tex_coords.extend_from_slice(&face.tex_coords(
-                            RIGHT_HANDED_Y_UP_CONFIG.u_flip_face,
-                            true,
-                            &quad,
-                        ));
-                    }
-                }
+                greedy_mesh(&intermediate_array, &registry);
 
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
-
-                for uv in tex_coords.iter_mut() {
-                    for c in uv.iter_mut() {
-                        *c *= UV_SCALE;
-                    }
-                }
-
-                render_mesh.set_indices(Some(Indices::U32(indices)));
-                render_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
-                render_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
-                render_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, tex_coords);
-
                 render_mesh
             })));
         }     
