@@ -8,6 +8,7 @@ use world::{
         loader::{LoadChunkMessage, UnloadChunkMessage},
         SystemLabels as ChunkSystemLabels,
     },
+    debug_data_system,
 };
 
 pub mod world;
@@ -32,5 +33,8 @@ impl Plugin for ChunkedWorldPlugin {
         app.add_system(chunk_remesh_polling_system
             .label(ChunkSystemLabels::ChunkMeshingPollingSystem)
             .after(ChunkSystemLabels::ChunkMeshingDispatchSystem));
+
+        app.add_system(debug_data_system
+            .before(debug::SystemLabels::DebugMenuDisplaySystem));
     }
 }

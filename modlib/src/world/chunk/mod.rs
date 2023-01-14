@@ -3,9 +3,10 @@ pub mod bundle;
 pub mod registry;
 pub mod loader;
 
-use bevy::prelude::{Component, SystemLabel};
-use crate::world::block::Block;
+use bevy::{prelude::{Component, SystemLabel, Entity}, utils::HashMap};
 use self::registry::ChunkCoordinate;
+
+use super::block::{BlockId, Block};
 
 #[derive(SystemLabel)]
 pub enum SystemLabels {
@@ -28,29 +29,71 @@ pub const CHUNK_SIZE_I32: i32 = CHUNK_SIZE as i32;
 #[derive(Component)]
 pub struct Chunk {
     position: ChunkCoordinate,
-    array: [[[Block; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE],
+    array: [[[ChunkBlockInternal; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE],
+    entities: HashMap<u16, Entity>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum ChunkBlockInternal {
+    Generic(BlockId),
+    Entity(u16),
+}
+
+impl ChunkBlockInternal {
+    pub const EMPTY: ChunkBlockInternal = ChunkBlockInternal::Generic(BlockId::EMPTY);
+}
+
+impl Default for ChunkBlockInternal {
+    fn default() -> Self {
+        Self::Generic(BlockId(0))
+    }
+}
+
+impl From<BlockId> for ChunkBlockInternal {
+    fn from(value: BlockId) -> Self {
+        Self::Generic(value)
+    }
 }
 
 impl Chunk {
     pub fn new(at_coordinates: ChunkCoordinate) -> Self {
-        Self { position: at_coordinates, array: [[[Block::empty(); CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE] }
+        Self {
+            position: at_coordinates,
+            array: [[[ChunkBlockInternal::EMPTY; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE],
+            entities: HashMap::new(),
+        }
     }
 
-    pub fn get_block(&self, x: usize, y: usize, z: usize) -> &Block {
-        &self.array[x][y][z]
+    pub fn get_block(&self, x: usize, y: usize, z: usize) -> Block {
+        match self.array[x][y][z] {
+            ChunkBlockInternal::Generic(blockid) => Block::Generic(blockid),
+            ChunkBlockInternal::Entity(idx) => Block::Entity(*self.entities.get(&idx).expect("Entity index should have been in the the map!")),
+        }
+    }
+
+    pub fn get_generic_or_empty(&self, x: usize, y: usize, z: usize) -> BlockId {
+        match self.array[x][y][z] {
+            ChunkBlockInternal::Generic(blockid) => blockid,
+            ChunkBlockInternal::Entity(_) => BlockId::EMPTY,
+        }
     }
 
     pub fn set_block(&mut self, x: usize, y: usize, z: usize, to: Block) {
-        // there's probably a set method or something but I can't find it
-        self.array[x][y][z] = to;
-    }
-
-    pub fn get_array(&self) -> &[[[Block; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE] {
-        &self.array
-    }
-
-    pub fn get_array_mut(&mut self) -> &mut [[[Block; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE] {
-        &mut self.array
+        match to {
+            Block::Generic(blockid) => {
+                if let ChunkBlockInternal::Entity(idx) = self.array[x][y][z] {
+                    self.entities.remove(&idx);
+                }
+                self.array[x][y][z] = ChunkBlockInternal::Generic(blockid)
+            },
+            Block::Entity(entity) => {
+                for idx in 0..u16::MAX {
+                    if self.entities.contains_key(&idx) { continue; }
+                    self.entities.insert(idx, entity);
+                    self.array[x][y][z] = ChunkBlockInternal::Entity(idx);
+                }
+            },
+        }
     }
 
     pub fn get_position(&self) -> ChunkCoordinate {
@@ -60,15 +103,23 @@ impl Chunk {
 
 trait GetBlockOrEmpty {
     fn get_block_or_empty(&self, x: usize, y: usize, z: usize) -> Block;
+    fn get_generic_or_empty(&self, x: usize, y: usize, z: usize) -> BlockId;
 }
 
 impl GetBlockOrEmpty for Option<&Chunk> {
     fn get_block_or_empty(&self, x: usize, y: usize, z: usize) -> Block {
         match self {
             Some(chunk) => {
-                *chunk.get_block(x, y, z)
+                chunk.get_block(x, y, z)
             },
-            None => Block::empty(),
+            None => Block::EMPTY,
+        }
+    }
+
+    fn get_generic_or_empty(&self, x: usize, y: usize, z: usize) -> BlockId {
+        match self.get_block_or_empty(x, y, z) {
+            Block::Generic(blockid) => blockid,
+            Block::Entity(_) => BlockId::EMPTY,
         }
     }
 }

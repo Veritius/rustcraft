@@ -23,7 +23,13 @@ struct DebugMenuTextMarker;
 pub struct DebugMenuOpen;
 
 pub struct AppendDebugMenuMessage {
-    text: TextSection
+    pub(crate) text: TextSection
+}
+
+impl AppendDebugMenuMessage {
+    pub fn new(text: TextSection) -> Self {
+        Self { text }
+    }
 }
 
 fn debug_menu_startup_system(
@@ -37,9 +43,11 @@ fn debug_menu_startup_system(
         background_color: Color::NONE.into(),
         ..default()
     }).with_children(|parent| {
-        parent.spawn(TextBundle::from_section(
-            "No text",
-            TextStyle::default())).insert(DebugMenuTextMarker);
+        parent.spawn(TextBundle {
+            text: Text::from_section("No text", Default::default()),
+            visibility: Visibility::INVISIBLE,
+            ..default()
+        }).insert(DebugMenuTextMarker);
     });
 }
 
@@ -65,10 +73,11 @@ fn debug_menu_system(
         }
     }
 
-    if text_visibility.is_visible == false { return; }
+    if debug_menu.is_none() { return; }
     
     text_content.sections.clear();
     for event in text_events.iter() {
+        println!("{}", event.text.value);
         text_content.sections.push(event.text.clone());
     }
 }

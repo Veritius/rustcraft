@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, ops::Deref, task::Poll};
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::Indices}, tasks::{AsyncComputeTaskPool, Task}};
 use block_mesh::{ndshape::{ConstShape3u8, ConstShape, ConstShape3u16, ConstShape3u32}, greedy_quads, RIGHT_HANDED_Y_UP_CONFIG, GreedyQuadsBuffer, Voxel, MergeVoxel, VoxelVisibility};
 use futures_lite::{FutureExt, future};
-use crate::world::{block::{registry::BlockRegistry, Block, entity::BlockEntity, BlockId, traits::BlockDefinition}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
+use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
 use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32};
 
 /// Used for generating a mesh for a chunk.
@@ -77,13 +77,13 @@ pub fn chunk_remesh_dispatch_system(
 
             const SHAPE_SIZE_USIZE: usize = CHUNK_SIZE + 2;
                 
-            let mut intermediate_array = [[[Block::empty(); SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE];
+            let mut intermediate_array = [[[BlockId(0); SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE];
 
             // Main chunk
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
                     for z in 0..CHUNK_SIZE {
-                        intermediate_array[x+1][y+1][z+1] = *this_chunk.get_block(x, y, z);
+                        intermediate_array[x+1][y+1][z+1] = this_chunk.get_generic_or_empty(x, y, z);
                     }
                 }
             }
@@ -91,24 +91,24 @@ pub fn chunk_remesh_dispatch_system(
             // Left and right chunks
             for y in 0..CHUNK_SIZE {
                 for z in 0..CHUNK_SIZE {
-                    intermediate_array[0][y][z] = left_chunk.get_block_or_empty(0, y, z);
-                    intermediate_array[17][y][z] = right_chunk.get_block_or_empty(15, y, z);
+                    intermediate_array[0][y][z] = left_chunk.get_generic_or_empty(0, y, z);
+                    intermediate_array[17][y][z] = right_chunk.get_generic_or_empty(15, y, z);
                 }
             }
 
             // Above and below chunks
             for x in 0..CHUNK_SIZE {
                 for z in 0..CHUNK_SIZE {
-                    intermediate_array[x][0][z] = up_chunk.get_block_or_empty(x, 0, z);
-                    intermediate_array[x][17][z] = down_chunk.get_block_or_empty(x, 15, z);
+                    intermediate_array[x][0][z] = up_chunk.get_generic_or_empty(x, 0, z);
+                    intermediate_array[x][17][z] = down_chunk.get_generic_or_empty(x, 15, z);
                 }
             }
 
             // Forward and back chunks
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
-                    intermediate_array[x][y][0] = forward_chunk.get_block_or_empty(x, y, 15);
-                    intermediate_array[x][y][17] = back_chunk.get_block_or_empty(x, y, 0);
+                    intermediate_array[x][y][0] = forward_chunk.get_generic_or_empty(x, y, 15);
+                    intermediate_array[x][y][17] = back_chunk.get_generic_or_empty(x, y, 0);
                 }
             }
 
@@ -148,10 +148,7 @@ pub fn chunk_remesh_dispatch_system(
                     for y in 0..SHAPE_SIZE_U32 {
                         for z in 0..SHAPE_SIZE_U32 {
                             let i = ChunkShape::linearize([x, y, z]);
-                            let block_id = match intermediate_array[x as usize][y as usize][z as usize] {
-                                Block::Generic(id) => id,
-                                Block::Entity(_) => BlockId(0),
-                            };
+                            let block_id = intermediate_array[x as usize][y as usize][z as usize];
                             voxels[i as usize] = VoxelCapsule { id: block_id, reg: &registry };
                         }
                     }

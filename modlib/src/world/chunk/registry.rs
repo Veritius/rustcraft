@@ -39,6 +39,10 @@ impl ChunkRegistry {
             },
         }
     }
+
+    pub fn get_inner_registry(&self) -> &BTreeMap<ChunkCoordinate, ChunkState> {
+        &self.registry
+    }
 }
 
 #[derive(Debug)]

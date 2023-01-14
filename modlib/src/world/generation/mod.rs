@@ -11,10 +11,7 @@ use super::{
         meshing::RemeshChunkMarker,
         Chunk,
     },
-    block::{
-        Block,
-        BlockId
-    }
+    block::{BlockId, Block},
 };
 
 #[derive(SystemLabel)]
@@ -64,7 +61,7 @@ fn generation_dispatch_system(
                         pick_coords *= Vec3::splat(PERLIN_MODIFIER);
 
                         let value = perlin.get([pick_coords.x as f64, pick_coords.y as f64, pick_coords.z as f64]);
-                        let block = if value >= 0.5 { Block::Generic(BlockId(1)) } else { Block::empty() };
+                        let block = if value >= 0.5 { Block::Generic(BlockId(1)) } else { Block::EMPTY };
                         chunk.set_block(x, y, z, block);
                     }
                 }
