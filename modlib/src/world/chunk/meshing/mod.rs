@@ -2,7 +2,9 @@ use std::{collections::BTreeMap, ops::Deref, task::Poll};
 
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::Indices}, tasks::{AsyncComputeTaskPool, Task}};
 use futures_lite::{FutureExt, future};
-use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32, meshing::meshers::greedy_mesh}};
+use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
+use self::meshers::greedy_mesh;
+
 use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32};
 
 mod meshers;
@@ -107,10 +109,11 @@ pub fn chunk_remesh_dispatch_system(
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {
                 // TODO: Figure out a solution that doesn't involve cloning the entire block registry
-            
-                greedy_mesh(&intermediate_array, &registry);
 
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
+
+                greedy_mesh(&mut render_mesh, &intermediate_array, &registry);
+
                 render_mesh
             })));
         }     

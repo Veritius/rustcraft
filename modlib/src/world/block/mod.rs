@@ -20,3 +20,9 @@ pub struct BlockId(pub u16);
 impl BlockId {
     pub const EMPTY: BlockId = BlockId(0);
 }
+
+impl Default for BlockId {
+    fn default() -> Self {
+        Self::EMPTY
+    }
+}
