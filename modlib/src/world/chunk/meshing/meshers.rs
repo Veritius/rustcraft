@@ -1,5 +1,5 @@
 use bevy::prelude::Mesh;
-use crate::world::block::{BlockId, registry::BlockRegistry, Block};
+use crate::world::{block::{BlockId, registry::BlockRegistry, Block}, chunk::CHUNK_SIZE};
 
 use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 
@@ -37,6 +37,8 @@ pub(super) fn greedy_mesh(
                 }
             }
         }
+
+        greedy_determine_quads(&left_slice);
     }
 
     // Top and bottom
@@ -78,13 +80,7 @@ fn greedy_determine_quads(slice: &[[BlockId; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE
     let mut quads = vec![];
     let mut visited_mask = [[false; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE];
 
-    for x in 0..SHAPE_SIZE_USIZE-1 {
-        for y in 0..SHAPE_SIZE_USIZE-1 {
-            if visited_mask[x][y] == true { continue; }
-
-            visited_mask[x][y] = true;
-        }
-    }
+    
 
     quads
 }
