@@ -120,7 +120,7 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
 
             // Check rows
             let mut offset_x = 0;
-            '_row_checker: for check_x in block_x..CHUNK_SIZE {
+            for check_x in block_x..CHUNK_SIZE {
                 if slice[check_x][block_y] != current_block { break; }
                 offset_x += 1;
             }
@@ -134,8 +134,6 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
                 offset_y += 1;
             }
 
-            println!("block_x: {}, block_y: {}, offset_x: {}, offset_y: {}", block_x, block_y, offset_x, offset_y);
-
             // Mark blocks as occupied
             for occupied_x in block_x..block_x+offset_x {
                 for occupied_y in block_y..block_y+offset_y {
@@ -146,8 +144,6 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
             quads.push((current_block, [block_x as u8, block_y as u8, (block_x+offset_x) as u8, (block_y+offset_y) as u8]));
         }
     }
-
-    if quads.len() != 0 { println!("quads: {:?}", quads); }
 
     quads
 }

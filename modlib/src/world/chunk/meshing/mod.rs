@@ -69,7 +69,7 @@ pub fn chunk_remesh_dispatch_system(
             let forward_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)); // forward
             let back_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)); // back
                 
-            let mut intermediate_array = [[[BlockId(0); SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE];
+            let mut intermediate_array = [[[BlockId::EMPTY; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE];
 
             // Main chunk
             for x in 0..CHUNK_SIZE {
@@ -83,16 +83,16 @@ pub fn chunk_remesh_dispatch_system(
             // Left and right chunks
             for y in 0..CHUNK_SIZE {
                 for z in 0..CHUNK_SIZE {
-                    intermediate_array[0][y][z] = left_chunk.get_generic_or_empty(0, y, z);
-                    intermediate_array[17][y][z] = right_chunk.get_generic_or_empty(15, y, z);
+                    intermediate_array[0][y][z] = left_chunk.get_generic_or_empty(15, y, z);
+                    intermediate_array[17][y][z] = right_chunk.get_generic_or_empty(0, y, z);
                 }
             }
 
             // Above and below chunks
             for x in 0..CHUNK_SIZE {
                 for z in 0..CHUNK_SIZE {
-                    intermediate_array[x][0][z] = up_chunk.get_generic_or_empty(x, 0, z);
-                    intermediate_array[x][17][z] = down_chunk.get_generic_or_empty(x, 15, z);
+                    intermediate_array[x][0][z] = up_chunk.get_generic_or_empty(x, 15, z);
+                    intermediate_array[x][17][z] = down_chunk.get_generic_or_empty(x, 0, z);
                 }
             }
 
@@ -104,12 +104,11 @@ pub fn chunk_remesh_dispatch_system(
                 }
             }
 
+            // TODO: Figure out a solution that doesn't involve cloning the entire block registry
             let registry = block_registry.clone();
             
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {
-                // TODO: Figure out a solution that doesn't involve cloning the entire block registry
-
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
                 greedy_mesh(&mut render_mesh, &intermediate_array, &registry);
