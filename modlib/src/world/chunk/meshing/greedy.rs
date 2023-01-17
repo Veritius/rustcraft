@@ -1,11 +1,12 @@
 use bevy::{prelude::Mesh, render::mesh::Indices};
+use ndarray::{Array3, Axis};
 use crate::world::{block::{BlockId, registry::BlockRegistry, Block}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
 
 use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 
 // pub(super) fn simple_mesh(
 //     mesh: &mut Mesh,
-//     array: &[[[BlockId; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE],
+//     array: &Array3<BlockId>,
 //     registry: &BlockRegistry,
 // ) {
 //     let mut positions = vec![];
@@ -17,12 +18,10 @@ use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 /// - https://devforum.roblox.com/t/consume-everything-how-greedy-meshing-works/452717
 pub(super) fn greedy_mesh(
     mesh: &mut Mesh,
-    array: &[[[BlockId; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE]; SHAPE_SIZE_USIZE],
+    array: &Array3<BlockId>,
     registry: &BlockRegistry,
 ) {
-    // TODO: This can be optimised by not creating slices (not the Rust kind) of the array and instead accessing it better. Maybe with ndarray?
-
-    const MID_OFFSET: f32 = 0.5;
+    // TODO: This can be optimised by not copying data in the array passed in arguments. Possibly use subviews from ndarray?
 
     let mut positions = vec![];
     // let mut normals = vec![];
@@ -30,15 +29,16 @@ pub(super) fn greedy_mesh(
 
     // Left and right
     for x in 1..SHAPE_SIZE_USIZE-1 {
+        let array_subview = array.index_axis(Axis(0), x);
         let mut left_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
         let mut right_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
         for y in 1..SHAPE_SIZE_USIZE-1 {
             for z in 1..SHAPE_SIZE_USIZE-1 {
-                let this_block = array[x][y][z];
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[x-1][y][z], registry)) {
+                let this_block = array_subview[[y, z]];
+                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x-1, y, z]], registry)) {
                     left_slice[y-1][z-1] = this_block;
                 }
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[x+1][y][z], registry)) {
+                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x+1, y, z]], registry)) {
                     right_slice[y-1][z-1] = this_block;
                 }
             }
@@ -48,58 +48,107 @@ pub(super) fn greedy_mesh(
 
         for (_blockid, quad) in greedy_determine_quads(&left_slice) {
             positions.extend([
-               [x as f32 + MID_OFFSET, quad[0] as f32, quad[1] as f32],
-               [x as f32 + MID_OFFSET, quad[0] as f32, quad[3] as f32],
-               [x as f32 + MID_OFFSET, quad[2] as f32, quad[1] as f32],
-               [x as f32 + MID_OFFSET, quad[0] as f32, quad[3] as f32],
-               [x as f32 + MID_OFFSET, quad[2] as f32, quad[3] as f32],
-               [x as f32 + MID_OFFSET, quad[2] as f32, quad[1] as f32],
+               [x as f32, quad[0] as f32, quad[1] as f32],
+               [x as f32, quad[0] as f32, quad[3] as f32],
+               [x as f32, quad[2] as f32, quad[1] as f32],
+               [x as f32, quad[0] as f32, quad[3] as f32],
+               [x as f32, quad[2] as f32, quad[3] as f32],
+               [x as f32, quad[2] as f32, quad[1] as f32],
             ]);
         }
-        // for (blockid, quad) in greedy_determine_quads(&right_slice) {
-
-        // }
+        for (_blockid, quad) in greedy_determine_quads(&right_slice) {
+            positions.extend([
+               [x as f32, quad[0] as f32, quad[1] as f32],
+               [x as f32, quad[0] as f32, quad[3] as f32],
+               [x as f32, quad[2] as f32, quad[1] as f32],
+               [x as f32, quad[0] as f32, quad[3] as f32],
+               [x as f32, quad[2] as f32, quad[3] as f32],
+               [x as f32, quad[2] as f32, quad[1] as f32],
+            ]);
+        }
     }
 
-    // Top and bottom
-    // for y in 1..SHAPE_SIZE_USIZE-1 {
-    //     let mut top_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-    //     let mut btm_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-    //     for x in 1..SHAPE_SIZE_USIZE-1 {
-    //         for z in 1..SHAPE_SIZE_USIZE-1 {
-    //             let this_block = array[x][y][z];
-    //             if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[x][y-1][z], registry)) {
-    //                 top_slice[y-1][z-1] = this_block;
-    //             }
-    //             if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[x][y+1][z], registry)) {
-    //                 btm_slice[y-1][z-1] = this_block;
-    //             }
-    //         }
-    //     }
+    // Up and down
+    for y in 1..SHAPE_SIZE_USIZE-1 {
+        let array_subview = array.index_axis(Axis(1), y);
+        let mut left_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+        let mut right_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+        for x in 1..SHAPE_SIZE_USIZE-1 {
+            for z in 1..SHAPE_SIZE_USIZE-1 {
+                let this_block = array_subview[[x, z]];
+                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y-1, z]], registry)) {
+                    left_slice[x-1][z-1] = this_block;
+                }
+                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y+1, z]], registry)) {
+                    right_slice[x-1][z-1] = this_block;
+                }
+            }
+        }
 
-    //     greedy_determine_quads(&top_slice);
-    //     greedy_determine_quads(&btm_slice);
-    // }
+        let y = y - 1;
 
-    // Forward and back
-    // for z in 1..SHAPE_SIZE_USIZE-1 {
-    //     let mut fwd_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-    //     let mut back_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-    //     for x in 1..SHAPE_SIZE_USIZE-1 {
-    //         for y in 1..SHAPE_SIZE_USIZE-1 {
-    //             let this_block = array[x][y][z];
-    //             if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[x][y][z-1], registry)) {
-    //                 fwd_slice[y-1][z-1] = this_block;
-    //             }
-    //             if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[x][y][z+1], registry)) {
-    //                 back_slice[y-1][z-1] = this_block;
-    //             }
-    //         }
-    //     }
+        for (_blockid, quad) in greedy_determine_quads(&left_slice) {
+            positions.extend([
+                [quad[0] as f32, y as f32, quad[1] as f32],
+                [quad[0] as f32, y as f32, quad[3] as f32],
+                [quad[2] as f32, y as f32, quad[1] as f32],
+                [quad[0] as f32, y as f32, quad[3] as f32],
+                [quad[2] as f32, y as f32, quad[3] as f32],
+                [quad[2] as f32, y as f32, quad[1] as f32],
+            ]);
+        }
+        for (_blockid, quad) in greedy_determine_quads(&right_slice) {
+            positions.extend([
+                [quad[0] as f32, y as f32, quad[1] as f32],
+                [quad[0] as f32, y as f32, quad[3] as f32],
+                [quad[2] as f32, y as f32, quad[1] as f32],
+                [quad[0] as f32, y as f32, quad[3] as f32],
+                [quad[2] as f32, y as f32, quad[3] as f32],
+                [quad[2] as f32, y as f32, quad[1] as f32],
+            ]);
+        }
+    }
 
-    //     greedy_determine_quads(&fwd_slice);
-    //     greedy_determine_quads(&back_slice);
-    // }
+    // Forward and backward
+    for z in 1..SHAPE_SIZE_USIZE-1 {
+        let array_subview = array.index_axis(Axis(2), z);
+        let mut left_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+        let mut right_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+        for x in 1..SHAPE_SIZE_USIZE-1 {
+            for y in 1..SHAPE_SIZE_USIZE-1 {
+                let this_block = array_subview[[x, y]];
+                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y, z-1]], registry)) {
+                    left_slice[x-1][y-1] = this_block;
+                }
+                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y, z+1]], registry)) {
+                    right_slice[x-1][y-1] = this_block;
+                }
+            }
+        }
+
+        let z = z - 1;
+
+        for (_blockid, quad) in greedy_determine_quads(&left_slice) {
+            positions.extend([
+               [quad[0] as f32, quad[1] as f32, z as f32],
+               [quad[0] as f32, quad[3] as f32, z as f32],
+               [quad[2] as f32, quad[1] as f32, z as f32],
+               [quad[0] as f32, quad[3] as f32, z as f32],
+               [quad[2] as f32, quad[3] as f32, z as f32],
+               [quad[2] as f32, quad[1] as f32, z as f32],
+            ]);
+        }
+        for (_blockid, quad) in greedy_determine_quads(&right_slice) {
+            positions.extend([
+               [quad[0] as f32, quad[1] as f32, z as f32],
+               [quad[0] as f32, quad[3] as f32, z as f32],
+               [quad[2] as f32, quad[1] as f32, z as f32],
+               [quad[0] as f32, quad[3] as f32, z as f32],
+               [quad[2] as f32, quad[3] as f32, z as f32],
+               [quad[2] as f32, quad[1] as f32, z as f32],
+            ]);
+        }
+    }
 
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
 }
