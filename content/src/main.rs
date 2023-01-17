@@ -72,9 +72,9 @@ fn funny_startup_system(
             ..default()
         },
     ));
-    for x in -16..16 {
-        for y in -4..4 {
-            for z in -16..16 {
+    for x in -4..4 {
+        for y in -2..2 {
+            for z in -4..4 {
                 event_writer.send(LoadChunkMessage(IVec3 { x, y, z }));
             }
         }

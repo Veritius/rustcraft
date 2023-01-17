@@ -3,11 +3,11 @@ use std::{collections::BTreeMap, ops::Deref, task::Poll};
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::Indices}, tasks::{AsyncComputeTaskPool, Task}};
 use futures_lite::{FutureExt, future};
 use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
-use self::meshers::greedy_mesh;
+use self::greedy::greedy_mesh;
 
 use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32};
 
-mod meshers;
+mod greedy;
 
 /// Used for generating a mesh for a chunk.
 #[derive(Clone, Copy, PartialEq, Eq)]
