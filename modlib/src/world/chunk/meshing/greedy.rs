@@ -58,12 +58,12 @@ pub(super) fn greedy_mesh(
         }
         for (_blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
-               [x as f32, quad[0] as f32, quad[1] as f32],
-               [x as f32, quad[0] as f32, quad[3] as f32],
-               [x as f32, quad[2] as f32, quad[1] as f32],
-               [x as f32, quad[0] as f32, quad[3] as f32],
-               [x as f32, quad[2] as f32, quad[3] as f32],
-               [x as f32, quad[2] as f32, quad[1] as f32],
+               [x as f32 + 1.0, quad[0] as f32, quad[3] as f32],
+               [x as f32 + 1.0, quad[0] as f32, quad[1] as f32],
+               [x as f32 + 1.0, quad[2] as f32, quad[1] as f32],
+               [x as f32 + 1.0, quad[2] as f32, quad[3] as f32],
+               [x as f32 + 1.0, quad[0] as f32, quad[3] as f32],
+               [x as f32 + 1.0, quad[2] as f32, quad[1] as f32],
             ]);
         }
     }
@@ -89,22 +89,22 @@ pub(super) fn greedy_mesh(
 
         for (_blockid, quad) in greedy_determine_quads(&left_slice) {
             positions.extend([
+                [quad[0] as f32, y as f32, quad[3] as f32],
                 [quad[0] as f32, y as f32, quad[1] as f32],
-                [quad[0] as f32, y as f32, quad[3] as f32],
                 [quad[2] as f32, y as f32, quad[1] as f32],
-                [quad[0] as f32, y as f32, quad[3] as f32],
                 [quad[2] as f32, y as f32, quad[3] as f32],
+                [quad[0] as f32, y as f32, quad[3] as f32],
                 [quad[2] as f32, y as f32, quad[1] as f32],
             ]);
         }
         for (_blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
-                [quad[0] as f32, y as f32, quad[1] as f32],
-                [quad[0] as f32, y as f32, quad[3] as f32],
-                [quad[2] as f32, y as f32, quad[1] as f32],
-                [quad[0] as f32, y as f32, quad[3] as f32],
-                [quad[2] as f32, y as f32, quad[3] as f32],
-                [quad[2] as f32, y as f32, quad[1] as f32],
+                [quad[0] as f32, y as f32 + 1.0, quad[1] as f32],
+                [quad[0] as f32, y as f32 + 1.0, quad[3] as f32],
+                [quad[2] as f32, y as f32 + 1.0, quad[1] as f32],
+                [quad[0] as f32, y as f32 + 1.0, quad[3] as f32],
+                [quad[2] as f32, y as f32 + 1.0, quad[3] as f32],
+                [quad[2] as f32, y as f32 + 1.0, quad[1] as f32],
             ]);
         }
     }
@@ -140,12 +140,12 @@ pub(super) fn greedy_mesh(
         }
         for (_blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
-               [quad[0] as f32, quad[1] as f32, z as f32],
-               [quad[0] as f32, quad[3] as f32, z as f32],
-               [quad[2] as f32, quad[1] as f32, z as f32],
-               [quad[0] as f32, quad[3] as f32, z as f32],
-               [quad[2] as f32, quad[3] as f32, z as f32],
-               [quad[2] as f32, quad[1] as f32, z as f32],
+               [quad[0] as f32, quad[3] as f32, z as f32 + 1.0],
+               [quad[0] as f32, quad[1] as f32, z as f32 + 1.0],
+               [quad[2] as f32, quad[1] as f32, z as f32 + 1.0],
+               [quad[2] as f32, quad[3] as f32, z as f32 + 1.0],
+               [quad[0] as f32, quad[3] as f32, z as f32 + 1.0],
+               [quad[2] as f32, quad[1] as f32, z as f32 + 1.0],
             ]);
         }
     }
