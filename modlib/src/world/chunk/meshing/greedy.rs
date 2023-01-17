@@ -22,6 +22,8 @@ pub(super) fn greedy_mesh(
 ) {
     // TODO: This can be optimised by not creating slices (not the Rust kind) of the array and instead accessing it better. Maybe with ndarray?
 
+    const MID_OFFSET: f32 = 0.5;
+
     let mut positions = vec![];
     // let mut normals = vec![];
     // let mut uvs = vec![];
@@ -46,12 +48,12 @@ pub(super) fn greedy_mesh(
 
         for (_blockid, quad) in greedy_determine_quads(&left_slice) {
             positions.extend([
-               [x as f32, quad[0] as f32, quad[1] as f32],
-               [x as f32, quad[0] as f32, quad[3] as f32],
-               [x as f32, quad[2] as f32, quad[1] as f32],
-               [x as f32, quad[0] as f32, quad[3] as f32],
-               [x as f32, quad[2] as f32, quad[3] as f32],
-               [x as f32, quad[2] as f32, quad[1] as f32],
+               [x as f32 + MID_OFFSET, quad[0] as f32, quad[1] as f32],
+               [x as f32 + MID_OFFSET, quad[0] as f32, quad[3] as f32],
+               [x as f32 + MID_OFFSET, quad[2] as f32, quad[1] as f32],
+               [x as f32 + MID_OFFSET, quad[0] as f32, quad[3] as f32],
+               [x as f32 + MID_OFFSET, quad[2] as f32, quad[3] as f32],
+               [x as f32 + MID_OFFSET, quad[2] as f32, quad[1] as f32],
             ]);
         }
         // for (blockid, quad) in greedy_determine_quads(&right_slice) {
@@ -110,42 +112,38 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
     // Iterate each block
     for block_x in 0..CHUNK_SIZE {
         for block_y in 0..CHUNK_SIZE {
-            // Check we're not already using this block and that we're not empty
+            // Skip the block if it's already occupied by a quad or it's empty
             if occupied[block_x][block_y] || slice[block_x][block_y] == BlockId::EMPTY { continue; }
 
-            // Memorise what block we're currently on
-            let current_block_id = slice[block_x][block_y];
+            // Remember our current block type
+            let current_block = slice[block_x][block_y];
 
-            // Expand along x
+            // Check rows
             let mut offset_x = 0;
-            for check_x in 0..CHUNK_SIZE-block_x {
-                if slice[block_x+check_x][block_y] != current_block_id || occupied[block_x+check_x][block_y] { break; }
-
+            '_row_checker: for check_x in block_x..CHUNK_SIZE {
+                if slice[check_x][block_y] != current_block { break; }
                 offset_x += 1;
             }
 
-            // Expand along y
+            // Check columns
             let mut offset_y = 0;
-            'check_y: for check_y in 0..CHUNK_SIZE-block_y {
-                // Loop over the row and check it's valid
-                for r_offset_x in 0..offset_x {
-                    if occupied[block_x+r_offset_x][check_y] || slice[block_x+r_offset_x][check_y] != current_block_id {
-                        break 'check_y;
-                    }
+            'column_checker: for check_y in block_y..CHUNK_SIZE {
+                for b in block_x..block_x+offset_x {
+                    if occupied[b][check_y] || slice[b][check_y] != current_block { break 'column_checker; }
                 }
-
                 offset_y += 1;
             }
 
-            // Mark the new quad as occupied
-            for vx in block_x..block_x+offset_x {
-                for vy in block_y..block_y+offset_y {
-                    occupied[vx][vy] = true;
+            println!("block_x: {}, block_y: {}, offset_x: {}, offset_y: {}", block_x, block_y, offset_x, offset_y);
+
+            // Mark blocks as occupied
+            for occupied_x in block_x..block_x+offset_x {
+                for occupied_y in block_y..block_y+offset_y {
+                    occupied[occupied_x][occupied_y] = true;
                 }
             }
 
-            // Add to list of quads
-            quads.push((current_block_id, [block_x as u8, block_y as u8, (block_x+offset_x) as u8, (block_y+offset_y) as u8]));
+            quads.push((current_block, [block_x as u8, block_y as u8, (block_x+offset_x) as u8, (block_y+offset_y) as u8]));
         }
     }
 
