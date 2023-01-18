@@ -30,6 +30,7 @@ const PERLIN_MODIFIER: f32 = 0.026639428;
 pub struct WorldGenPlugin;
 impl Plugin for WorldGenPlugin {
     fn build(&self, app: &mut App) {
+        app.add_startup_system(worldgen_setup_system);
         app.add_system(generation_dispatch_system
             .label(SystemLabels::ChunkGenerationDispatchSystem));
         app.add_system(generation_polling_system
@@ -38,10 +39,26 @@ impl Plugin for WorldGenPlugin {
     }
 }
 
+#[derive(Resource)]
+struct ChunkMaterialHandle(Handle<StandardMaterial>);
+
+fn worldgen_setup_system(
+    mut commands: Commands,
+    mut assets: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.insert_resource(ChunkMaterialHandle(
+        assets.add(StandardMaterial {
+            base_color: Color::WHITE,
+            ..default()
+        })
+    ));
+}
+
 fn generation_dispatch_system(
     mut commands: Commands,
     mut gen_events: EventReader<LoadChunkMessage>,
     mut chunk_registry: ResMut<ChunkRegistry>,
+    chunk_mat: Res<ChunkMaterialHandle>,
 ) {
     let task_pool = AsyncComputeTaskPool::get();
     for event in gen_events.iter() {
@@ -71,6 +88,7 @@ fn generation_dispatch_system(
         });
 
         let mut pbr = PbrBundle::default();
+        pbr.material = chunk_mat.0.clone();
         pbr.transform.translation = Vec3 {
             x: CHUNK_SIZE_F32 * event.0.x as f32,
             y: CHUNK_SIZE_F32 * event.0.y as f32,

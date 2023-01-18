@@ -64,13 +64,13 @@ fn funny_startup_system(
     commands.spawn((
         Camera3dBundle::default(),
         FlyCam,
-        // PointLight {
-        //     color: Color::WHITE,
-        //     intensity: 1000.0,
-        //     range: 10000.0,
-        //     // radius: todo!(),
-        //     ..default()
-        // },
+        PointLight {
+            color: Color::WHITE,
+            intensity: 1000.0,
+            range: 10000.0,
+            // radius: todo!(),
+            ..default()
+        },
     ));
     for x in -8..8 {
         for y in -4..4 {
