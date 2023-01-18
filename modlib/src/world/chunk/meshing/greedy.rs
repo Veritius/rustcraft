@@ -1,4 +1,4 @@
-use bevy::{prelude::Mesh, render::mesh::Indices};
+use bevy::{prelude::{Mesh, Color}, render::mesh::Indices};
 use ndarray::{Array3, Axis};
 use crate::world::{block::{BlockId, registry::BlockRegistry, Block}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
 
@@ -24,8 +24,9 @@ pub(super) fn greedy_mesh(
     // TODO: This can be optimised by not copying data in the array passed in arguments. Possibly use subviews from ndarray?
 
     let mut positions = vec![];
-    // let mut normals = vec![];
-    // let mut uvs = vec![];
+    let mut normals = vec![];
+    let mut uvs = vec![];
+    let mut colors: Vec<[f32; 4]> = vec![];
 
     // Left and right
     for x in 1..SHAPE_SIZE_USIZE-1 {
@@ -46,7 +47,7 @@ pub(super) fn greedy_mesh(
 
         let x = x - 1;
 
-        for (_blockid, quad) in greedy_determine_quads(&left_slice) {
+        for (blockid, quad) in greedy_determine_quads(&left_slice) {
             positions.extend([
                [x as f32, quad[0] as f32, quad[1] as f32],
                [x as f32, quad[0] as f32, quad[3] as f32],
@@ -55,8 +56,22 @@ pub(super) fn greedy_mesh(
                [x as f32, quad[2] as f32, quad[3] as f32],
                [x as f32, quad[2] as f32, quad[1] as f32],
             ]);
+            normals.extend([
+                [1.0, 0.0, 0.0]; 6
+            ]);
+            uvs.extend([
+                [0.0, 0.0]; 6
+            ]);
+            match registry.get_by_id(blockid) {
+                Some(entry) => {
+                    colors.extend([entry.color().as_rgba_f32(); 6]);
+                },
+                None => {
+                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
+                },
+            }
         }
-        for (_blockid, quad) in greedy_determine_quads(&right_slice) {
+        for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
                [x as f32 + 1.0, quad[0] as f32, quad[3] as f32],
                [x as f32 + 1.0, quad[0] as f32, quad[1] as f32],
@@ -65,6 +80,20 @@ pub(super) fn greedy_mesh(
                [x as f32 + 1.0, quad[0] as f32, quad[3] as f32],
                [x as f32 + 1.0, quad[2] as f32, quad[1] as f32],
             ]);
+            normals.extend([
+                [-1.0, 0.0, 0.0]; 6
+            ]);
+            uvs.extend([
+                [0.0, 0.0]; 6
+            ]);
+            match registry.get_by_id(blockid) {
+                Some(entry) => {
+                    colors.extend([entry.color().as_rgba_f32(); 6]);
+                },
+                None => {
+                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
+                },
+            }
         }
     }
 
@@ -87,7 +116,7 @@ pub(super) fn greedy_mesh(
 
         let y = y - 1;
 
-        for (_blockid, quad) in greedy_determine_quads(&left_slice) {
+        for (blockid, quad) in greedy_determine_quads(&left_slice) {
             positions.extend([
                 [quad[0] as f32, y as f32, quad[3] as f32],
                 [quad[0] as f32, y as f32, quad[1] as f32],
@@ -96,8 +125,22 @@ pub(super) fn greedy_mesh(
                 [quad[0] as f32, y as f32, quad[3] as f32],
                 [quad[2] as f32, y as f32, quad[1] as f32],
             ]);
+            normals.extend([
+                [0.0, 1.0, 0.0]; 6
+            ]);
+            uvs.extend([
+                [0.0, 0.0]; 6
+            ]);
+            match registry.get_by_id(blockid) {
+                Some(entry) => {
+                    colors.extend([entry.color().as_rgba_f32(); 6]);
+                },
+                None => {
+                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
+                },
+            }
         }
-        for (_blockid, quad) in greedy_determine_quads(&right_slice) {
+        for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
                 [quad[0] as f32, y as f32 + 1.0, quad[1] as f32],
                 [quad[0] as f32, y as f32 + 1.0, quad[3] as f32],
@@ -106,6 +149,20 @@ pub(super) fn greedy_mesh(
                 [quad[2] as f32, y as f32 + 1.0, quad[3] as f32],
                 [quad[2] as f32, y as f32 + 1.0, quad[1] as f32],
             ]);
+            normals.extend([
+                [0.0, -1.0, 0.0]; 6
+            ]);
+            uvs.extend([
+                [0.0, 0.0]; 6
+            ]);
+            match registry.get_by_id(blockid) {
+                Some(entry) => {
+                    colors.extend([entry.color().as_rgba_f32(); 6]);
+                },
+                None => {
+                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
+                },
+            }
         }
     }
 
@@ -128,7 +185,7 @@ pub(super) fn greedy_mesh(
 
         let z = z - 1;
 
-        for (_blockid, quad) in greedy_determine_quads(&left_slice) {
+        for (blockid, quad) in greedy_determine_quads(&left_slice) {
             positions.extend([
                [quad[0] as f32, quad[1] as f32, z as f32],
                [quad[0] as f32, quad[3] as f32, z as f32],
@@ -137,8 +194,22 @@ pub(super) fn greedy_mesh(
                [quad[2] as f32, quad[3] as f32, z as f32],
                [quad[2] as f32, quad[1] as f32, z as f32],
             ]);
+            normals.extend([
+                [0.0, 0.0, 1.0]; 6
+            ]);
+            uvs.extend([
+                [0.0, 0.0]; 6
+            ]);
+            match registry.get_by_id(blockid) {
+                Some(entry) => {
+                    colors.extend([entry.color().as_rgba_f32(); 6]);
+                },
+                None => {
+                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
+                },
+            }
         }
-        for (_blockid, quad) in greedy_determine_quads(&right_slice) {
+        for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
                [quad[0] as f32, quad[3] as f32, z as f32 + 1.0],
                [quad[0] as f32, quad[1] as f32, z as f32 + 1.0],
@@ -147,10 +218,27 @@ pub(super) fn greedy_mesh(
                [quad[0] as f32, quad[3] as f32, z as f32 + 1.0],
                [quad[2] as f32, quad[1] as f32, z as f32 + 1.0],
             ]);
+            normals.extend([
+                [0.0, 0.0, -1.0]; 6
+            ]);
+            uvs.extend([
+                [0.0, 0.0]; 6
+            ]);
+            match registry.get_by_id(blockid) {
+                Some(entry) => {
+                    colors.extend([entry.color().as_rgba_f32(); 6]);
+                },
+                None => {
+                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
+                },
+            }
         }
     }
 
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
 }
 
 #[doc(hidden)]
