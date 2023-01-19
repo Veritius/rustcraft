@@ -11,8 +11,8 @@ use rustcraft_modlib::{
     BlockRegistryPlugin,
     world::{
         block::traits::AddBlock,
-        chunk::loader::LoadChunkMessage,
-        generation::WorldGenPlugin
+        generation::WorldGenPlugin,
+        chunk::events::LoadChunkMessage,
     },
     ChunkedWorldPlugin,
     debug::DebugMenuPlugin

@@ -2,6 +2,7 @@ pub mod meshing;
 pub mod bundle;
 pub mod registry;
 pub mod loader;
+pub mod events;
 
 use bevy::{prelude::{Component, SystemLabel, Entity}, utils::HashMap};
 use self::registry::ChunkCoordinate;
@@ -12,6 +13,7 @@ use super::block::{BlockId, Block};
 pub enum SystemLabels {
     ChunkMeshingDispatchSystem,
     ChunkMeshingPollingSystem,
+    ChunkChangeEventSystem,
 }
 
 // The size of each chunk in all axes, so a value of 16 would be 16x16x16.

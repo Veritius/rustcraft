@@ -6,7 +6,7 @@ use super::{
         CHUNK_SIZE,
         CHUNK_SIZE_F32,
         CHUNK_SIZE_I32,
-        loader::LoadChunkMessage,
+        events::LoadChunkMessage,
         registry::{ChunkRegistry, ChunkState},
         meshing::RemeshChunkMarker,
         Chunk,

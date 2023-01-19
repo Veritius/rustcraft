@@ -6,7 +6,7 @@ use ndarray::Array3;
 use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
 use self::greedy::greedy_mesh;
 
-use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32};
+use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};
 
 mod greedy;
 
@@ -129,6 +129,31 @@ pub fn chunk_remesh_polling_system(
         if let Some(mesh) = future::block_on(future::poll_once(&mut remesh.0)) {
             *handle = meshes.add(mesh);
             commands.entity(entity).remove::<BeingRemeshed>();
+        }
+    }
+}
+
+pub(crate) fn remesh_changed_chunks_system(
+    registry: Res<ChunkRegistry>,
+    mut events: EventReader<ChunkModifiedEvent>,
+    mut commands: Commands,
+) {
+    for event in events.iter() {
+        for offset in [
+            [1,0,0], [-1,0,0],
+            [0,1,0], [0,-1,0],
+            [0,0,1], [0,0,-1],
+        ] {
+            match registry.get((
+                event.0.x + offset[0],
+                event.0.y + offset[1],
+                event.0.z + offset[2]
+            )) {
+                super::registry::ChunkState::Present(entity) => {
+                    commands.entity(entity).insert(RemeshChunkMarker);
+                },
+                _ => {},
+            }
         }
     }
 }
