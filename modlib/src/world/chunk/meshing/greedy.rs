@@ -28,6 +28,15 @@ pub(super) fn greedy_mesh(
     let mut uvs = vec![];
     let mut colors: Vec<[f32; 4]> = vec![];
 
+    const UVS: [[f32; 2]; 6] = [
+        [0.0, 0.0],
+        [0.0, 1.0],
+        [1.0, 0.0],
+        [1.0, 0.0],
+        [0.0, 1.0],
+        [1.0, 1.0],
+    ];
+
     // Left and right
     for x in 1..SHAPE_SIZE_USIZE-1 {
         let array_subview = array.index_axis(Axis(0), x);
@@ -59,9 +68,7 @@ pub(super) fn greedy_mesh(
             normals.extend([
                 [1.0, 0.0, 0.0]; 6
             ]);
-            uvs.extend([
-                [0.0, 0.0]; 6
-            ]);
+            uvs.extend(UVS);
             match registry.get_by_id(blockid) {
                 Some(entry) => {
                     colors.extend([entry.color().as_rgba_f32(); 6]);
@@ -83,9 +90,7 @@ pub(super) fn greedy_mesh(
             normals.extend([
                 [-1.0, 0.0, 0.0]; 6
             ]);
-            uvs.extend([
-                [0.0, 0.0]; 6
-            ]);
+            uvs.extend(UVS);
             match registry.get_by_id(blockid) {
                 Some(entry) => {
                     colors.extend([entry.color().as_rgba_f32(); 6]);
@@ -128,9 +133,7 @@ pub(super) fn greedy_mesh(
             normals.extend([
                 [0.0, 1.0, 0.0]; 6
             ]);
-            uvs.extend([
-                [0.0, 0.0]; 6
-            ]);
+            uvs.extend(UVS);
             match registry.get_by_id(blockid) {
                 Some(entry) => {
                     colors.extend([entry.color().as_rgba_f32(); 6]);
@@ -152,9 +155,7 @@ pub(super) fn greedy_mesh(
             normals.extend([
                 [0.0, -1.0, 0.0]; 6
             ]);
-            uvs.extend([
-                [0.0, 0.0]; 6
-            ]);
+            uvs.extend(UVS);
             match registry.get_by_id(blockid) {
                 Some(entry) => {
                     colors.extend([entry.color().as_rgba_f32(); 6]);
@@ -197,9 +198,7 @@ pub(super) fn greedy_mesh(
             normals.extend([
                 [0.0, 0.0, 1.0]; 6
             ]);
-            uvs.extend([
-                [0.0, 0.0]; 6
-            ]);
+            uvs.extend(UVS);
             match registry.get_by_id(blockid) {
                 Some(entry) => {
                     colors.extend([entry.color().as_rgba_f32(); 6]);
@@ -221,9 +220,7 @@ pub(super) fn greedy_mesh(
             normals.extend([
                 [0.0, 0.0, -1.0]; 6
             ]);
-            uvs.extend([
-                [0.0, 0.0]; 6
-            ]);
+            uvs.extend(UVS);
             match registry.get_by_id(blockid) {
                 Some(entry) => {
                     colors.extend([entry.color().as_rgba_f32(); 6]);

@@ -61,16 +61,33 @@ fn funny_startup_system(
     mut commands: Commands,
     mut event_writer: EventWriter<LoadChunkMessage>,
 ) {
+    const HALF_SIZE: f32 = 10.0;
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            illuminance: 10000.0,
+            shadow_projection: OrthographicProjection {
+                left: -HALF_SIZE,
+                right: HALF_SIZE,
+                bottom: -HALF_SIZE,
+                top: HALF_SIZE,
+                near: -10.0 * HALF_SIZE,
+                far: 10.0 * HALF_SIZE,
+                ..default()
+            },
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform {
+            translation: Vec3::new(0.0, 128.0, 0.0),
+            rotation: Quat::from_euler(EulerRot::YXZ, 10.0, 40.0, 70.0),
+            ..default()
+        },
+        ..default()
+    });
+
     commands.spawn((
         Camera3dBundle::default(),
         FlyCam,
-        PointLight {
-            color: Color::WHITE,
-            intensity: 1000.0,
-            range: 10000.0,
-            // radius: todo!(),
-            ..default()
-        },
     ));
     for x in -8..8 {
         for y in -4..4 {

@@ -81,29 +81,32 @@ pub fn chunk_remesh_dispatch_system(
                 }
             }
 
+            // TODO: Fix random holes in geometry
+            // Adjacent chunks are disabled to prevent the holes, but this creates a lot of redundant polygons.
+
             // Left and right chunks
-            for y in 0..CHUNK_SIZE {
-                for z in 0..CHUNK_SIZE {
-                    intermediate_array[[0, y, z]] = left_chunk.get_generic_or_empty(15, y, z);
-                    intermediate_array[[17, y, z]] = right_chunk.get_generic_or_empty(0, y, z);
-                }
-            }
+            // for y in 0..CHUNK_SIZE {
+            //     for z in 0..CHUNK_SIZE {
+            //         intermediate_array[[0, y, z]] = left_chunk.get_generic_or_empty(15, y, z);
+            //         intermediate_array[[17, y, z]] = right_chunk.get_generic_or_empty(0, y, z);
+            //     }
+            // }
 
-            // Above and below chunks
-            for x in 0..CHUNK_SIZE {
-                for z in 0..CHUNK_SIZE {
-                    intermediate_array[[x, 0, z]] = up_chunk.get_generic_or_empty(x, 15, z);
-                    intermediate_array[[x, 17, z]] = down_chunk.get_generic_or_empty(x, 0, z);
-                }
-            }
+            // // Above and below chunks
+            // for x in 0..CHUNK_SIZE {
+            //     for z in 0..CHUNK_SIZE {
+            //         intermediate_array[[x, 0, z]] = up_chunk.get_generic_or_empty(x, 15, z);
+            //         intermediate_array[[x, 17, z]] = down_chunk.get_generic_or_empty(x, 0, z);
+            //     }
+            // }
 
-            // Forward and back chunks
-            for x in 0..CHUNK_SIZE {
-                for y in 0..CHUNK_SIZE {
-                    intermediate_array[[x, y, 0]] = forward_chunk.get_generic_or_empty(x, y, 15);
-                    intermediate_array[[x, y, 17]] = back_chunk.get_generic_or_empty(x, y, 0);
-                }
-            }
+            // // Forward and back chunks
+            // for x in 0..CHUNK_SIZE {
+            //     for y in 0..CHUNK_SIZE {
+            //         intermediate_array[[x, y, 0]] = forward_chunk.get_generic_or_empty(x, y, 15);
+            //         intermediate_array[[x, y, 17]] = back_chunk.get_generic_or_empty(x, y, 0);
+            //     }
+            // }
 
             // TODO: Figure out a solution that doesn't involve cloning the entire block registry
             let registry = block_registry.clone();

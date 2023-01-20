@@ -11,7 +11,7 @@ use super::{
         meshing::RemeshChunkMarker,
         Chunk,
     },
-    block::{BlockId, Block},
+    block::{BlockId, Block, registry::BlockRegistry},
 };
 
 #[derive(SystemLabel)]
@@ -24,7 +24,7 @@ pub enum SystemLabels {
 pub struct BeingGenerated(Task<Chunk>);
 
 // TODO: Make this able to be changed
-const WORLD_GEN_SEED: u32 = 53252345;
+const WORLD_GEN_SEED: u32 = 24234232;
 const PERLIN_MODIFIER: f32 = 0.026639428;
 
 pub struct WorldGenPlugin;
