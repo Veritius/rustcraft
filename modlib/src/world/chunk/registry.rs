@@ -10,6 +10,9 @@ pub struct ChunkRegistry {
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChunkState {
+    /// This variant has multiple meanings.
+    /// If it's returned from `get`, the chunk does not exist.
+    /// If it's passed in `set`, it removes the chunk from the registry.
     Absent,
     BeingGenerated,
     Present(Entity),
@@ -29,6 +32,7 @@ impl ChunkRegistry {
         }
     }
 
+    /// Removes the chunk from the registry. This does not delete the entity itself! Use WorldMapHelpers for confidence in deleting chunks.
     pub fn set(&mut self, coord: ChunkCoordinate, to: ChunkState){
         match to {
             ChunkState::Absent => {
@@ -42,20 +46,5 @@ impl ChunkRegistry {
 
     pub fn get_inner_registry(&self) -> &BTreeMap<ChunkCoordinate, ChunkState> {
         &self.registry
-    }
-}
-
-#[derive(Debug)]
-pub enum ChunkOperationError {
-    NoChunkInPosition(ChunkCoordinate),
-    ChunkAlreadyPresent(ChunkCoordinate),
-}
-
-impl std::fmt::Display for ChunkOperationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ChunkOperationError::NoChunkInPosition(coord) => { f.write_str(&format!("No chunk in position {:?}", coord)) },
-            ChunkOperationError::ChunkAlreadyPresent(coord) => { f.write_str(&format!("Chunk already present at {:?}", coord)) },
-        }
     }
 }

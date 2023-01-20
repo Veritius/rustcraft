@@ -89,9 +89,9 @@ fn funny_startup_system(
         Camera3dBundle::default(),
         FlyCam,
     ));
-    for x in -8..8 {
-        for y in -4..4 {
-            for z in -8..8 {
+    for x in -32..32 {
+        for y in -8..8 {
+            for z in -32..32 {
                 event_writer.send(LoadChunkMessage(IVec3 { x, y, z }));
             }
         }

@@ -5,6 +5,7 @@ pub mod loader;
 pub mod events;
 
 use bevy::{prelude::{Component, SystemLabel, Entity}, utils::HashMap};
+use ndarray::Array3;
 use self::registry::ChunkCoordinate;
 
 use super::block::{BlockId, Block};
@@ -31,7 +32,7 @@ pub const CHUNK_SIZE_I32: i32 = CHUNK_SIZE as i32;
 #[derive(Component)]
 pub struct Chunk {
     position: ChunkCoordinate,
-    array: [[[ChunkBlockInternal; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE],
+    array: Array3<ChunkBlockInternal>,
     entities: HashMap<u16, Entity>,
 }
 
@@ -61,20 +62,20 @@ impl Chunk {
     pub fn new(at_coordinates: ChunkCoordinate) -> Self {
         Self {
             position: at_coordinates,
-            array: [[[ChunkBlockInternal::EMPTY; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE],
+            array: Array3::from_elem([CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE], ChunkBlockInternal::EMPTY),
             entities: HashMap::new(),
         }
     }
 
     pub fn get_block(&self, x: usize, y: usize, z: usize) -> Block {
-        match self.array[x][y][z] {
+        match self.array[[x, y, z]] {
             ChunkBlockInternal::Generic(blockid) => Block::Generic(blockid),
             ChunkBlockInternal::Entity(idx) => Block::Entity(*self.entities.get(&idx).expect("Entity index should have been in the the map!")),
         }
     }
 
     pub fn get_generic_or_empty(&self, x: usize, y: usize, z: usize) -> BlockId {
-        match self.array[x][y][z] {
+        match self.array[[x, y, z]] {
             ChunkBlockInternal::Generic(blockid) => blockid,
             ChunkBlockInternal::Entity(_) => BlockId::EMPTY,
         }
@@ -83,19 +84,24 @@ impl Chunk {
     pub fn set_block(&mut self, x: usize, y: usize, z: usize, to: Block) {
         match to {
             Block::Generic(blockid) => {
-                if let ChunkBlockInternal::Entity(idx) = self.array[x][y][z] {
+                if let ChunkBlockInternal::Entity(idx) = self.array[[x, y, z]] {
                     self.entities.remove(&idx);
                 }
-                self.array[x][y][z] = ChunkBlockInternal::Generic(blockid)
+                self.array[[x, y, z]] = ChunkBlockInternal::Generic(blockid)
             },
             Block::Entity(entity) => {
                 for idx in 0..u16::MAX {
                     if self.entities.contains_key(&idx) { continue; }
                     self.entities.insert(idx, entity);
-                    self.array[x][y][z] = ChunkBlockInternal::Entity(idx);
+                    self.array[[x, y, z]] = ChunkBlockInternal::Entity(idx);
                 }
             },
         }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn get_internal_array(&self) -> &Array3<ChunkBlockInternal> {
+        &self.array
     }
 
     pub fn get_position(&self) -> ChunkCoordinate {
