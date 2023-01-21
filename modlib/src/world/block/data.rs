@@ -138,3 +138,11 @@ impl AddBlock for App {
         self
     }
 }
+
+pub(crate) fn air_block() -> BlockData {
+    let mut block = BlockData::new("engine_air", MeshingVisibility::Invisible);
+    block.insert_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME, BlockAttributeValue::StaticStr("Air"));
+    block.insert_attribute(BlockData::ATTRIBUTE_COLOR, BlockAttributeValue::Color(Color::NONE));
+
+    block
+}

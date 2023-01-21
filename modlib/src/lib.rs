@@ -26,7 +26,9 @@ pub mod debug;
 pub struct BlockRegistryPlugin;
 impl Plugin for BlockRegistryPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.insert_resource(BlockRegistry::new());
+        let mut block_registry = BlockRegistry::new();
+        block_registry.add_block_type(world::block::data::air_block());
+        app.insert_resource(block_registry);
     }
 }
 
