@@ -1,6 +1,10 @@
+use std::{ops::Range, collections::BTreeMap};
 use bevy::{prelude::*, tasks::{Task, AsyncComputeTaskPool}, render::once_cell::sync::Lazy};
 use futures_lite::future;
-use noise::{Perlin, NoiseFn, Seedable};
+use noise::{
+    Perlin,
+    NoiseFn,
+};
 use super::{
     chunk::{
         CHUNK_SIZE,
@@ -11,8 +15,13 @@ use super::{
         meshing::RemeshChunkMarker,
         Chunk,
     },
-    block::{BlockId, Block, registry::BlockRegistry},
+    block::{
+        BlockId,
+        Block,
+    },
 };
+
+pub mod biome;
 
 #[derive(SystemLabel)]
 pub enum SystemLabels {

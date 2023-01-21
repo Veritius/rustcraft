@@ -19,6 +19,7 @@ use rustcraft_modlib::{
 };
 
 pub mod blocks;
+pub mod biomes;
 
 fn main() {
     let mut app = App::new();
