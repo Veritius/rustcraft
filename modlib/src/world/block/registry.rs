@@ -1,5 +1,5 @@
-use std::{collections::BTreeMap, ops::Deref};
-use bevy::prelude::{Resource, info, Color};
+use std::{collections::BTreeMap};
+use bevy::prelude::{Resource, info};
 
 use super::{BlockId, data::BlockData};
 
@@ -11,7 +11,7 @@ pub struct BlockRegistry {
 }
 
 impl BlockRegistry {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             id_idx: 0,
             data_map: BTreeMap::new(),
@@ -30,9 +30,11 @@ impl BlockRegistry {
         let id = BlockId(self.id_idx);
         match block.get_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME) {
             Some(name) => {
-                
+                info!("Added block {} ({:?}) under id {:?}", block.string_identifier, name, id);
             },
-            None => todo!(),
+            None => {
+                info!("Added block {} under id {:?}", block.string_identifier, id);
+            },
         }
 
         self.name_map.insert(block.string_identifier.to_owned(), id);
