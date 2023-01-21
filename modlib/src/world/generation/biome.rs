@@ -54,10 +54,12 @@ pub struct BiomeData {
 impl BiomeData {
     pub const ATTRIBUTE_DISPLAY_NAME: BiomeAttribute =
         BiomeAttribute::new("biome_display_name", 0, BiomeAttributeKind::StaticStr);
-    pub const ATTRIBUTE_HEIGHT: BiomeAttribute =
-        BiomeAttribute::new("biome_height_range", 1, BiomeAttributeKind::RangeI16);
-    pub const ATTRIBUTE_TEMPERATURE: BiomeAttribute =
-        BiomeAttribute::new("biome_temperature_range", 2, BiomeAttributeKind::RangeI16);
+    pub const ATTRIBUTE_GENVAR_HEIGHT: BiomeAttribute =
+        BiomeAttribute::new("biome_genvar_height", 1, BiomeAttributeKind::RangeI32);
+    pub const ATTRIBUTE_GENVAR_TEMPERATURE: BiomeAttribute =
+        BiomeAttribute::new("biome_genvar_temperature", 2, BiomeAttributeKind::RangeI32);
+    pub const ATTRIBUTE_GENVAR_HUMIDITY: BiomeAttribute =
+        BiomeAttribute::new("biome_genvar_humidity", 3, BiomeAttributeKind::RangeU16);
 
     pub fn new() -> Self {
         Self {
@@ -83,7 +85,7 @@ impl BiomeData {
 #[derive(PartialEq, Eq, Hash)]
 pub struct BiomeAttribute {
     name: &'static str,
-    /// _Unique_ id for this attribute kind. If in doubt, make a very large or random number.
+    /// _Unique_ id for this attribute. If in doubt, make a very large or random number.
     /// Built in attributes follow a close-to-zero pattern.
     id: u32,
     kind: BiomeAttributeKind,

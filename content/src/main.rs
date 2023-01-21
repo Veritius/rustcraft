@@ -37,7 +37,12 @@ fn main() {
     app.add_block(blocks::sand());
     app.add_block(blocks::grass());
 
+    app.add_biome(biomes::ocean());
     app.add_biome(biomes::plains());
+    app.add_biome(biomes::forest());
+    app.add_biome(biomes::jungle());
+    app.add_biome(biomes::desert());
+    app.add_biome(biomes::tundra());
 
     app.add_system(wireframe_toggle_system);
 

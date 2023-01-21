@@ -50,7 +50,7 @@ impl BlockData {
 #[derive(PartialEq, Eq, Hash)]
 pub struct BlockAttribute {
     string_identifier: &'static str,
-    /// _Unique_ id for this attribute kind. If in doubt, make a very large or random number.
+    /// _Unique_ id for this attribute. If in doubt, make a very large or random number.
     /// Built in attributes follow a close-to-zero pattern.
     id: u32,
     kind: BlockAttributeKind,
