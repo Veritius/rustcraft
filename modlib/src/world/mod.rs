@@ -68,8 +68,7 @@ pub(crate) fn debug_data_system(
         all_chunks += 1;
     }
 
-    let mut block_count: u16 = 0;
-    for (_, _) in world_map.block_registry.get_inner_registry() { block_count += 1; }
+    let mut block_count: u16 = world_map.block_registry.len() as u16;
 
     let mut meshing_chunks_count: u32 = 0;
     for _ in meshing_chunks.iter() { meshing_chunks_count += 1; }

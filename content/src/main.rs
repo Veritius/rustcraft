@@ -6,12 +6,11 @@ use bevy::{
     }
 };
 use bevy_flycam::{NoCameraPlayerPlugin, FlyCam};
-use blocks::*;
 use rustcraft_modlib::{
     BlockRegistryPlugin,
     world::{
-        block::traits::AddBlock,
-        generation::WorldGenPlugin,
+        block::data::AddBlock,
+        generation::{WorldGenPlugin, biome::AddBiome},
         chunk::events::LoadChunkMessage,
     },
     ChunkedWorldPlugin,
@@ -33,10 +32,12 @@ fn main() {
     app.add_plugin(ChunkedWorldPlugin);
     app.add_plugin(WorldGenPlugin);
 
-    app.add_block::<Grass>();
-    app.add_block::<Dirt>();
-    app.add_block::<Sand>();
-    app.add_block::<Stone>();
+    app.add_block(blocks::dirt());
+    app.add_block(blocks::stone());
+    app.add_block(blocks::sand());
+    app.add_block(blocks::grass());
+
+    app.add_biome(biomes::plains());
 
     app.add_system(wireframe_toggle_system);
 

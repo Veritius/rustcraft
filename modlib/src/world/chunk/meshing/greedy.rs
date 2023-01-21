@@ -69,14 +69,6 @@ pub(super) fn greedy_mesh(
                 [1.0, 0.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            match registry.get_by_id(blockid) {
-                Some(entry) => {
-                    colors.extend([entry.color().as_rgba_f32(); 6]);
-                },
-                None => {
-                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
-                },
-            }
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -91,14 +83,6 @@ pub(super) fn greedy_mesh(
                 [-1.0, 0.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            match registry.get_by_id(blockid) {
-                Some(entry) => {
-                    colors.extend([entry.color().as_rgba_f32(); 6]);
-                },
-                None => {
-                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
-                },
-            }
         }
     }
 
@@ -134,14 +118,6 @@ pub(super) fn greedy_mesh(
                 [0.0, 1.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            match registry.get_by_id(blockid) {
-                Some(entry) => {
-                    colors.extend([entry.color().as_rgba_f32(); 6]);
-                },
-                None => {
-                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
-                },
-            }
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -156,14 +132,6 @@ pub(super) fn greedy_mesh(
                 [0.0, -1.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            match registry.get_by_id(blockid) {
-                Some(entry) => {
-                    colors.extend([entry.color().as_rgba_f32(); 6]);
-                },
-                None => {
-                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
-                },
-            }
         }
     }
 
@@ -199,14 +167,6 @@ pub(super) fn greedy_mesh(
                 [0.0, 0.0, 1.0]; 6
             ]);
             uvs.extend(UVS);
-            match registry.get_by_id(blockid) {
-                Some(entry) => {
-                    colors.extend([entry.color().as_rgba_f32(); 6]);
-                },
-                None => {
-                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
-                },
-            }
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -221,21 +181,13 @@ pub(super) fn greedy_mesh(
                 [0.0, 0.0, -1.0]; 6
             ]);
             uvs.extend(UVS);
-            match registry.get_by_id(blockid) {
-                Some(entry) => {
-                    colors.extend([entry.color().as_rgba_f32(); 6]);
-                },
-                None => {
-                    colors.extend([[1.0, 1.0, 1.0, 1.0]; 6]);
-                },
-            }
         }
     }
 
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
-    mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
+    // mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
 }
 
 #[doc(hidden)]
@@ -283,8 +235,8 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
 }
 
 fn get_visibility(block: BlockId, registry: &BlockRegistry) -> MeshingVisibility {
-    match registry.get_by_id(block) {
-        Some(entry) => entry.visibility(),
+    match registry.get_by_numerical_id(block) {
+        Some(entry) => entry.block_visibility,
         None => MeshingVisibility::Invisible,
     }
 }

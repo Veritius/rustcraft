@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, ops::Deref, task::Poll};
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::Indices}, tasks::{AsyncComputeTaskPool, Task}};
 use futures_lite::{FutureExt, future};
 use ndarray::Array3;
-use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, traits::BlockDefinition, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
+use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
 use self::greedy::greedy_mesh;
 
 use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};

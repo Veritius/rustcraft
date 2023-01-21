@@ -1,83 +1,60 @@
 use std::{collections::BTreeMap, ops::Deref};
 use bevy::prelude::{Resource, info, Color};
-use crate::world::chunk::meshing::MeshingVisibility;
 
-use super::{traits::BlockDefinition, BlockId};
+use super::{BlockId, data::BlockData};
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct BlockRegistry {
-    last_assigned_id: u16,
-    registry: BTreeMap<BlockId, Box<dyn BlockDefinition>>,
-}
-
-impl Clone for BlockRegistry {
-    fn clone(&self) -> Self {
-        let mut new_registry: BTreeMap<BlockId, Box<dyn BlockDefinition>> = BTreeMap::new();
-
-        for entry in self.registry.iter() {
-            new_registry.insert(*entry.0, dyn_clone::clone_box(&**entry.1));
-        }
-
-        Self {
-            last_assigned_id: self.last_assigned_id.clone(),
-            registry: new_registry,
-        }
-    }
+    id_idx: u16,
+    data_map: BTreeMap<BlockId, BlockData>,
+    name_map: BTreeMap<String, BlockId>,
 }
 
 impl BlockRegistry {
     pub fn new() -> Self {
-        let mut v_self = Self {
-            last_assigned_id: 0,
-            registry: BTreeMap::new(),
-        };
-        v_self.register_new::<Air>();
-        v_self
+        Self {
+            id_idx: 0,
+            data_map: BTreeMap::new(),
+            name_map: BTreeMap::new(),
+        }
     }
     
-    pub fn register_new<T: 'static + BlockDefinition>(&mut self) -> BlockId {
-        let new_def = T::new();
-
+    pub fn add_block_type(&mut self, block: BlockData) -> BlockId {
         // Check for collisions
-        for (_key, value) in self.registry.iter() {
-            if value.deref().str_id() == new_def.str_id() {
-                panic!("Block string ID collision occurred for \"{}\"", new_def.str_id());
+        for (_key, value) in self.data_map.iter() {
+            if value.string_identifier == block.string_identifier {
+                panic!("Block string ID collision occurred for \"{}\"", block.string_identifier);
             }
         }
 
-        let id = BlockId(self.last_assigned_id);
-        info!("Registered new block {} ({}) under {}", new_def.name(), new_def.str_id(), id.0);
-        self.registry.insert(id, Box::new(new_def));
-        self.last_assigned_id += 1;
+        let id = BlockId(self.id_idx);
+        match block.get_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME) {
+            Some(name) => {
+                
+            },
+            None => todo!(),
+        }
+
+        self.name_map.insert(block.string_identifier.to_owned(), id);
+        self.data_map.insert(id, block);
+        self.id_idx += 1;
         return id;
     }
 
-    pub fn get_by_id(&self, id: BlockId) -> Option<&Box<dyn BlockDefinition>> {
-        self.registry.get(&id)
+    pub fn get_by_numerical_id(&self, id: BlockId) -> Option<&BlockData> {
+        self.data_map.get(&id)
     }
 
-    pub fn get_by_type<T: BlockDefinition>(&self) -> Option<BlockId> {
-        for (key, value) in self.registry.iter() {
-            if value.deref().str_id() == T::new().str_id() {
-                return Some(*key)
-            }
+    pub fn get_by_string_id(&self, id: String) -> Option<&BlockData> {
+        match self.name_map.get(&id) {
+            Some(id) => {
+                self.data_map.get(id)
+            },
+            None => None,
         }
-        return None
     }
 
-    pub fn get_inner_registry(&self) -> &BTreeMap<BlockId, Box<dyn BlockDefinition>> {
-        &self.registry
+    pub fn len(&self) -> usize {
+        self.data_map.len()
     }
 }
-
-#[derive(Clone, Copy)]
-pub struct Air;
-impl BlockDefinition for Air {
-    fn new() -> Self where Self: Sized { Self {} }
-    fn str_id(&self) -> &'static str { "engine_empty" }
-    fn name(&self) -> &'static str { "Air" }
-    fn color(&self) -> Color { Color::NONE }
-    fn visibility(&self) -> MeshingVisibility { MeshingVisibility::Invisible }
-}
-
-pub type Empty = Air;

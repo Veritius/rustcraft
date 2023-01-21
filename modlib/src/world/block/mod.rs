@@ -1,7 +1,7 @@
 use bevy::prelude::Entity;
 
 pub mod entity;
-pub mod traits;
+pub mod data;
 pub mod registry;
 
 #[derive(Clone, Copy)]

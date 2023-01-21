@@ -45,12 +45,18 @@ pub struct BiomeData {
 }
 
 impl BiomeData {
-    const ATTRIBUTE_NAME: BiomeAttribute =
-        BiomeAttribute::new("biome_display_name", 0, BiomeAttributeKind::String);
-    const ATTRIBUTE_HEIGHT: BiomeAttribute =
+    pub const ATTRIBUTE_DISPLAY_NAME: BiomeAttribute =
+        BiomeAttribute::new("biome_display_name", 0, BiomeAttributeKind::StaticStr);
+    pub const ATTRIBUTE_HEIGHT: BiomeAttribute =
         BiomeAttribute::new("biome_height_range", 1, BiomeAttributeKind::RangeI16);
-    const ATTRIBUTE_TEMPERATURE: BiomeAttribute =
+    pub const ATTRIBUTE_TEMPERATURE: BiomeAttribute =
         BiomeAttribute::new("biome_temperature_range", 2, BiomeAttributeKind::RangeI16);
+
+    pub fn new() -> Self {
+        Self {
+            attributes: BTreeMap::new()
+        }
+    }
 
     pub fn insert_attribute(&mut self, attribute: BiomeAttribute, value: BiomeAttributeValue) {
         let value_kind = BiomeAttributeKind::from(&value);
@@ -85,6 +91,7 @@ impl BiomeAttribute {
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum BiomeAttributeKind {
     String,
+    StaticStr,
     Uint16,
     Uint32,
     Uint64,
@@ -104,6 +111,7 @@ impl From<&BiomeAttributeValue> for BiomeAttributeKind {
     fn from(value: &BiomeAttributeValue) -> Self {
         match value {
             BiomeAttributeValue::String(_) => BiomeAttributeKind::String,
+            BiomeAttributeValue::StaticStr(_) => BiomeAttributeKind::StaticStr,
             BiomeAttributeValue::Uint16(_) => BiomeAttributeKind::Uint16,
             BiomeAttributeValue::Uint32(_) => BiomeAttributeKind::Uint32,
             BiomeAttributeValue::Uint64(_) => BiomeAttributeKind::Uint64,
@@ -124,6 +132,7 @@ impl From<&BiomeAttributeValue> for BiomeAttributeKind {
 #[derive(Clone)]
 pub enum BiomeAttributeValue {
     String(String),
+    StaticStr(&'static str),
     Uint16(u16),
     Uint32(u32),
     Uint64(u64),
