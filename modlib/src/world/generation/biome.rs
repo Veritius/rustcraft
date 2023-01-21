@@ -132,7 +132,7 @@ impl From<&BiomeAttributeValue> for BiomeAttributeKind {
             BiomeAttributeValue::RangeU16(_) => BiomeAttributeKind::RangeU16,
             BiomeAttributeValue::RangeU32(_) => BiomeAttributeKind::RangeU32,
             BiomeAttributeValue::RangeI16(_) => BiomeAttributeKind::RangeI16,
-            BiomeAttributeValue::RangeI32(_) => BiomeAttributeKind::RangeU32,
+            BiomeAttributeValue::RangeI32(_) => BiomeAttributeKind::RangeI32,
             BiomeAttributeValue::RangeF32(_) => BiomeAttributeKind::RangeF32,
         }
     }
