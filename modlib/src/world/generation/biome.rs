@@ -30,7 +30,14 @@ pub struct BiomeTable {
 }
 
 impl BiomeTable {
-    fn add_biome_type(&mut self, biome: BiomeData) -> BiomeId {
+    pub(crate) fn new() -> Self {
+        Self {
+            id_index: 0,
+            map: HashMap::new(),
+        }
+    }
+
+    pub fn add_biome_type(&mut self, biome: BiomeData) -> BiomeId {
         let id = self.id_index;
         self.map.insert(id, biome);
         self.id_index += 1;

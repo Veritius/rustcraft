@@ -5,6 +5,8 @@ use noise::{
     Perlin,
     NoiseFn,
 };
+use self::biome::BiomeTable;
+
 use super::{
     chunk::{
         CHUNK_SIZE,
@@ -35,6 +37,8 @@ pub struct BeingGenerated(Task<Chunk>);
 pub struct WorldGenPlugin;
 impl Plugin for WorldGenPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(BiomeTable::new());
+
         app.add_startup_system(worldgen_setup_system);
         app.add_system(generation_dispatch_system
             .label(SystemLabels::ChunkGenerationDispatchSystem));
