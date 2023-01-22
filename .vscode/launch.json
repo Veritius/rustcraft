@@ -11,6 +11,7 @@
             "cargo": {
                 "args": [
                     "build",
+                    "--release",
                     "--bin=rustcraft",
                     "--package=rustcraft"
                 ],
@@ -29,6 +30,7 @@
             "cargo": {
                 "args": [
                     "test",
+                    "--release",
                     "--no-run",
                     "--bin=rustcraft",
                     "--package=rustcraft"
@@ -48,6 +50,7 @@
             "cargo": {
                 "args": [
                     "test",
+                    "--release",
                     "--no-run",
                     "--lib",
                     "--package=rustcraft-modlib"
