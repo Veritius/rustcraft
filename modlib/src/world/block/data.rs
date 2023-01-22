@@ -12,6 +12,7 @@ pub struct BlockData {
     /// - `rustcraft` - the name of your mod
     /// - `_` - an underscore
     /// - `dirt` - the name of your block
+    /// 
     /// Which gives `rustcraft_dirt`.
     pub string_identifier: &'static str,
     pub block_visibility: MeshingVisibility,
@@ -21,8 +22,13 @@ pub struct BlockData {
 impl BlockData {
     pub const ATTRIBUTE_DISPLAY_NAME: BlockAttribute =
         BlockAttribute::new("block_display_name", 0, BlockAttributeKind::StaticStr);
+    /// A base color for the block. Usually used either for debugging or massive world views.
     pub const ATTRIBUTE_COLOR: BlockAttribute =
-        BlockAttribute::new("block_base_color", 2, BlockAttributeKind::Color);
+        BlockAttribute::new("block_base_color", 1, BlockAttributeKind::Color);
+    /// Image ids for each side of a solid block, in this order:
+    /// Left, right, up, down, forward, back.
+    pub const ATTRIBUTE_SOLID_TEXTURE_SIDES: BlockAttribute =
+        BlockAttribute::new("block_texture_sides", 2, BlockAttributeKind::StaticStrX6);
 
     pub fn new(string_identifier: &'static str, block_visibility: MeshingVisibility) -> Self {
         Self {
@@ -80,6 +86,11 @@ pub enum BlockAttributeKind {
     RangeI16,
     RangeI32,
     RangeF32,
+    RangeF64,
+    StaticStrX6,
+    Uint32X6,
+    Sint32X6,
+    Float32X6,
 }
 
 impl From<&BlockAttributeValue> for BlockAttributeKind {
@@ -101,6 +112,11 @@ impl From<&BlockAttributeValue> for BlockAttributeKind {
             BlockAttributeValue::RangeI16(_) => BlockAttributeKind::RangeI16,
             BlockAttributeValue::RangeI32(_) => BlockAttributeKind::RangeU32,
             BlockAttributeValue::RangeF32(_) => BlockAttributeKind::RangeF32,
+            BlockAttributeValue::RangeF64(_) => BlockAttributeKind::RangeF64,
+            BlockAttributeValue::StaticStrX6(_) => BlockAttributeKind::StaticStrX6,
+            BlockAttributeValue::Uint32X6(_) => BlockAttributeKind::Uint32X6,
+            BlockAttributeValue::Sint32X6(_) => BlockAttributeKind::Sint32X6,
+            BlockAttributeValue::Float32X6(_) => BlockAttributeKind::Float32X6,
         }
     }
 }
@@ -123,6 +139,11 @@ pub enum BlockAttributeValue {
     RangeI16(Range<i16>),
     RangeI32(Range<i32>),
     RangeF32(Range<f32>),
+    RangeF64(Range<f64>),
+    StaticStrX6([&'static str; 6]),
+    Uint32X6([u32; 6]),
+    Sint32X6([i32; 6]),
+    Float32X6([f32; 6]),
 }
 
 pub trait AddBlock {

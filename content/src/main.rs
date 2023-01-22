@@ -32,10 +32,12 @@ fn main() {
     app.add_plugin(ChunkedWorldPlugin);
     app.add_plugin(WorldGenPlugin);
 
+    app.add_block(blocks::water());
     app.add_block(blocks::dirt());
     app.add_block(blocks::stone());
     app.add_block(blocks::sand());
     app.add_block(blocks::grass());
+    app.add_block(blocks::glass());
 
     app.add_biome(biomes::ocean());
     app.add_biome(biomes::plains());
