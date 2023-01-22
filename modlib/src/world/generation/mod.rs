@@ -1,11 +1,7 @@
 use std::{ops::Range, collections::BTreeMap};
 use bevy::{prelude::*, tasks::{Task, AsyncComputeTaskPool}, render::once_cell::sync::Lazy};
 use futures_lite::future;
-use noise::{
-    Perlin,
-    NoiseFn,
-};
-use self::biome::BiomeTable;
+use self::biome::table::BiomeTable;
 
 use super::{
     chunk::{
@@ -24,6 +20,9 @@ use super::{
 };
 
 pub mod biome;
+pub mod generator;
+pub mod helpers;
+pub mod noise_layers;
 
 #[derive(SystemLabel)]
 pub enum SystemLabels {
@@ -78,7 +77,7 @@ fn generation_dispatch_system(
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
                     for z in 0..CHUNK_SIZE {
-                        chunk.set_block(x, y, z, generate_per_block(chunk_position, x, y, z));
+                        // chunk.set_block(x, y, z, generate_per_block(chunk_position, x, y, z));
                     }
                 }
             }
@@ -110,42 +109,4 @@ fn generation_polling_system(
             commands.entity(entity).remove::<BeingGenerated>().insert(chunk).insert(RemeshChunkMarker);
         }
     }
-}
-
-static WGEN_SURFACE_NOISE_1: Lazy<Perlin> = Lazy::new(||{Perlin::new(52842)});
-const WGEN_SURFACE_NOISE_1_MODIFIER: f64 = 0.016639428;
-static WGEN_SURFACE_NOISE_2: Lazy<Perlin> = Lazy::new(||{Perlin::new(15834)});
-const WGEN_SURFACE_NOISE_2_MODIFIER: f64 = 0.0093313213;
-static WGEN_SURFACE_NOISE_3: Lazy<Perlin> = Lazy::new(||{Perlin::new(21722)});
-const WGEN_SURFACE_NOISE_3_MODIFIER: f64 = 0.001219412;
-
-// TODO: Make this not a monolith function and instead modular using Bevy
-fn generate_per_block(chunk_position: IVec3, x: usize, y: usize, z: usize) -> Block {
-    let block_coordinates = Vec3 {
-        x: x as f32 + (chunk_position.x * CHUNK_SIZE_I32) as f32,
-        y: y as f32 + (chunk_position.y * CHUNK_SIZE_I32) as f32,
-        z: z as f32 + (chunk_position.z * CHUNK_SIZE_I32) as f32,
-    };
-
-    // Major
-    let mut surface_level = 5.0 * WGEN_SURFACE_NOISE_1.get([
-        block_coordinates.x as f64 * WGEN_SURFACE_NOISE_1_MODIFIER,
-        block_coordinates.z as f64 * WGEN_SURFACE_NOISE_1_MODIFIER,
-    ]);
-
-    // Middle
-    surface_level += 10.0 * WGEN_SURFACE_NOISE_2.get([
-        block_coordinates.x as f64 * WGEN_SURFACE_NOISE_2_MODIFIER,
-        block_coordinates.z as f64 * WGEN_SURFACE_NOISE_2_MODIFIER,
-    ]);
-
-    // Minor
-    surface_level += 15.0 * WGEN_SURFACE_NOISE_3.get([
-        block_coordinates.x as f64 * WGEN_SURFACE_NOISE_3_MODIFIER,
-        block_coordinates.z as f64 * WGEN_SURFACE_NOISE_3_MODIFIER,
-    ]);
-    
-    let block = if surface_level >= block_coordinates.y as f64 { Block::Generic(BlockId(1)) } else { Block::EMPTY };
-
-    block
 }

@@ -31,7 +31,7 @@ impl MeshingVisibility {
             (MeshingVisibility::Opaque, MeshingVisibility::Invisible) => true,
             (MeshingVisibility::Translucent, MeshingVisibility::Opaque) => false,
             (MeshingVisibility::Translucent, MeshingVisibility::Translucent) => false,
-            (MeshingVisibility::Translucent, MeshingVisibility::Invisible) => false,
+            (MeshingVisibility::Translucent, MeshingVisibility::Invisible) => true,
         }
     }
 }

@@ -1,4 +1,4 @@
-use rustcraft_modlib::world::generation::biome::{BiomeData, BiomeAttributeValue};
+use rustcraft_modlib::world::generation::biome::table::{BiomeData, BiomeAttributeValue};
 
 pub(crate) fn ocean() -> BiomeData {
     let mut biome = BiomeData::new();

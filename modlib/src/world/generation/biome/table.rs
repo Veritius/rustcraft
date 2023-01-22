@@ -1,32 +1,12 @@
-use std::{
-    collections::BTreeMap,
-    ops::Range,
-};
-use bevy::{
-    prelude::*,
-    utils::HashMap,
-};
-
-pub trait AddBiome {
-   fn add_biome(&mut self, biome: BiomeData) -> &mut Self;
-}
-
-impl AddBiome for App {
-    fn add_biome(&mut self, biome: BiomeData) -> &mut Self {
-        self.add_startup_system(move |mut biome_table: ResMut<BiomeTable>| {
-            biome_table.add_biome_type(biome.clone());
-        });
-
-        self
-    }
-}
-
-type BiomeId = u32;
+use std::{collections::BTreeMap, ops::Range};
+use bevy::{prelude::Resource, utils::HashMap};
+use super::{BiomeId, /* considerations::BiomeWeightingConsideration */};
 
 #[derive(Resource)]
 pub struct BiomeTable {
     id_index: u32,
     map: HashMap<u32, BiomeData>,
+    // considerations: Vec<Box<dyn BiomeWeightingConsideration>>,
 }
 
 impl BiomeTable {
@@ -34,6 +14,7 @@ impl BiomeTable {
         Self {
             id_index: 0,
             map: HashMap::new(),
+            // considerations: vec![],
         }
     }
 
