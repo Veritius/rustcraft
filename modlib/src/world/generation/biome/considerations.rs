@@ -1,15 +1,19 @@
+use std::ops::Range;
 use bevy::prelude::{Vec2, IVec3};
 use crate::world::generation::noise_layers::*;
 use super::table::BiomeData;
 
-pub trait BiomeWeightingConsideration: Send + Sync {
-    fn get_weight_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> u32;
+pub trait BiomeSelectionScorer: Send + Sync {
+    fn get_weight_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64;
 }
 
-/// Considerations for height, temperature, and humidity.
-pub(crate) struct BaseWeightingConsiderations;
-impl BiomeWeightingConsideration for BaseWeightingConsiderations {
-    fn get_weight_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> u32 {
+/// Biome scoring for height, temperature, and humidity.
+/// 
+/// Currently does scores for height, temperature, and humidity.
+/// Biomes get better scores if they're closer to the middle point of their range.
+pub(crate) struct BaseSelectionScorer;
+impl BiomeSelectionScorer for BaseSelectionScorer {
+    fn get_weight_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64 {
         let coordinates_as_vec2 = Vec2 { x: coordinates.x as f32, y: coordinates.z as f32 };
         let height = add_up_2d(vec![
             (&WGEN_HEIGHT_NOISE_1, WGEN_HEIGHT_NOISE_1_MODIFIER, coordinates_as_vec2),
@@ -27,15 +31,28 @@ impl BiomeWeightingConsideration for BaseWeightingConsiderations {
             (&WGEN_HUMIDITY_NOISE_3, WGEN_HUMIDITY_NOISE_3_MODIFIER, coordinates_as_vec2),
         ]);
 
-        let mut total = 0;
+        let mut total = 0.0;
 
-        for (noise_level, attribute) in [
+        // Calculate score
+        for (level, attribute) in [
             (height, biome_data.get_attribute(BiomeData::ATTRIBUTE_GENVAR_HEIGHT)),
             (temperature, biome_data.get_attribute(BiomeData::ATTRIBUTE_GENVAR_TEMPERATURE)),
             (humidity, biome_data.get_attribute(BiomeData::ATTRIBUTE_GENVAR_HUMIDITY)),
         ] {
             if attribute.is_none() { continue; }
+            let attribute: Result<Range<f32>, ()> = attribute.unwrap().clone().try_into();
+            if attribute.is_err() { continue; }
             let attribute = attribute.unwrap();
+
+            // Find midpoint between minimum and maximum
+            let midpoint = (attribute.start + attribute.end) as f64 / 2.0;
+            
+            // Calculate point score
+            let distance = (level - midpoint).abs();
+            let value = (10.0 - distance).max(0.0);
+
+            // Apply to total
+            total += value;
         }
 
         total

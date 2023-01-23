@@ -2,13 +2,13 @@ use std::{collections::BTreeMap, ops::Range};
 use bevy::{prelude::Resource, utils::HashMap};
 use crate::attributes::{AttributeKind, AttributeValue};
 
-use super::{BiomeId, considerations::BiomeWeightingConsideration};
+use super::{BiomeId, considerations::BiomeSelectionScorer};
 
 #[derive(Resource)]
 pub struct BiomeTable {
     id_index: u32,
     map: HashMap<u32, BiomeData>,
-    considerations: Vec<Box<dyn BiomeWeightingConsideration>>,
+    considerations: Vec<Box<dyn BiomeSelectionScorer>>,
 }
 
 impl BiomeTable {
@@ -38,15 +38,12 @@ impl BiomeData {
     pub const ATTRIBUTE_DISPLAY_NAME: BiomeAttribute =
         BiomeAttribute::new("biome_display_name", 0, AttributeKind::StaticStr);
     /// The altitude range this biome should spawn in.
-    /// Biomes get a better score the closer to the midpoint of the range they are.
     pub const ATTRIBUTE_GENVAR_HEIGHT: BiomeAttribute =
         BiomeAttribute::new("biome_genvar_height", 1, AttributeKind::RangeI32);
     /// The temperature range this biome should spawn in.
-    /// Biomes get a better score the closer to the midpoint of the range they are.
     pub const ATTRIBUTE_GENVAR_TEMPERATURE: BiomeAttribute =
         BiomeAttribute::new("biome_genvar_temperature", 2, AttributeKind::RangeI32);
     /// The humidity range this biome should spawn in.
-    /// Biomes get a better score the closer to the midpoint of the range they are.
     pub const ATTRIBUTE_GENVAR_HUMIDITY: BiomeAttribute =
         BiomeAttribute::new("biome_genvar_humidity", 3, AttributeKind::RangeU16);
 
