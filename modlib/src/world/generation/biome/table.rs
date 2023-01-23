@@ -1,31 +1,51 @@
-use std::{collections::BTreeMap, ops::Range};
-use bevy::{prelude::Resource, utils::HashMap};
+use std::collections::BTreeMap;
+use bevy::{prelude::{Resource, IVec3}, utils::HashMap};
 use crate::attributes::{AttributeKind, AttributeValue};
 
 use super::{BiomeId, scorer::BiomeSelectionScorer};
 
 #[derive(Resource)]
-pub struct BiomeTable {
+pub struct BiomeRegistry {
     id_index: u32,
-    map: HashMap<u32, BiomeData>,
-    considerations: Vec<Box<dyn BiomeSelectionScorer>>,
+    biomes: HashMap<u32, BiomeData>,
+    scorers: Vec<Box<dyn BiomeSelectionScorer>>,
 }
 
-impl BiomeTable {
+impl BiomeRegistry {
     pub(crate) fn new() -> Self {
         Self {
             id_index: 0,
-            map: HashMap::new(),
-            considerations: vec![],
+            biomes: HashMap::new(),
+            scorers: vec![],
         }
     }
 
     pub fn add_biome_type(&mut self, biome: BiomeData) -> BiomeId {
         let id = self.id_index;
-        self.map.insert(id, biome);
+        self.biomes.insert(id, biome);
         self.id_index += 1;
 
         id
+    }
+
+    pub(crate) fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) {
+        self.scorers.push(Box::new(scorer))
+    }
+
+    pub fn calculate_biome_for_chunk(&self, pos: IVec3) -> BiomeId {
+        let mut biggest = (0.0, BiomeId::MAX);
+        for (id, biome) in &self.biomes {
+            let mut current = 0.0;
+            for scorer in &self.scorers {
+                current += scorer.get_weight_for_coordinates(pos, &biome);
+            }
+            if current > biggest.0 {
+                biggest.0 = current;
+                biggest.1 = *id;
+            }
+        }
+
+        biggest.1
     }
 }
 
@@ -56,8 +76,7 @@ impl BiomeData {
     pub fn insert_attribute(&mut self, attribute: BiomeAttribute, value: AttributeValue) {
         let value_kind = AttributeKind::from(&value);
         if attribute.kind != value_kind {
-            panic!("Failed to insert attribute. Invalid attribute kind for {}. Given kind is {value_kind:?} but expected {:?}",
-            attribute.name, attribute.kind);
+            panic!("Failed to insert attribute. Invalid attribute kind for {}. Given kind is {value_kind:?} but expected {:?}", attribute.name, attribute.kind);
         }
 
         self.attributes.insert(attribute.id, value);
@@ -78,6 +97,11 @@ pub struct BiomeAttribute {
 }
 
 impl BiomeAttribute {
+    /// Creates a new BiomeAttribute from the given arguments.
+    /// 
+    /// The `name` and `value` fields can be anything, but the `id` field has to be a _unique_ number.
+    /// This can be chosen by setting a very large or random number.
+    /// Do not use a close-to-zero pattern, as this will collide with the engine attribute IDs.
     pub const fn new(name: &'static str, id: u32, value: AttributeKind) -> Self {
         BiomeAttribute { name, id, kind: value }
     }

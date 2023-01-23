@@ -1,7 +1,7 @@
 use std::{ops::Range, collections::BTreeMap};
 use bevy::{prelude::*, tasks::{Task, AsyncComputeTaskPool}, render::once_cell::sync::Lazy};
 use futures_lite::future;
-use self::biome::table::BiomeTable;
+use self::{biome::{table::{BiomeRegistry, BiomeData}, scorer::{BaseSelectionScorer, BiomeSelectionScorer}}, generator::{WorldGeneratorPass, WorldGenerationConfig}};
 
 use super::{
     chunk::{
@@ -36,7 +36,9 @@ pub struct BeingGenerated(Task<Chunk>);
 pub struct WorldGenPlugin;
 impl Plugin for WorldGenPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(BiomeTable::new());
+        app.insert_resource(BiomeRegistry::new());
+
+        app.add_biome_scorer(BaseSelectionScorer);
 
         app.add_startup_system(worldgen_setup_system);
         app.add_system(generation_dispatch_system
@@ -110,3 +112,38 @@ fn generation_polling_system(
         }
     }
 }
+
+pub trait WorldGenExtensionFns {
+    fn add_biome(&mut self, biome: BiomeData) -> &mut Self;
+    fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) -> &mut Self;
+    fn add_world_generator_pass(&mut self, scorer: impl WorldGeneratorPass) -> &mut Self;
+ }
+ 
+ impl WorldGenExtensionFns for App {
+     /// Adds a new biome type
+     fn add_biome(&mut self, biome: BiomeData) -> &mut Self {
+         self.add_startup_system(move |mut biome_table: ResMut<BiomeRegistry>| {
+             biome_table.add_biome_type(biome.clone());
+         });
+ 
+         self
+     }
+ 
+     /// Adds a new `BiomeSelectionScorer` to the game
+     fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) -> &mut Self {
+         self.add_startup_system(move |mut biome_table: ResMut<BiomeRegistry>| {
+             biome_table.add_biome_scorer(dyn_clone::clone(&scorer));
+         });
+ 
+         self
+     }
+
+     /// Adds a new `WorldGeneratorPass` to the chunk generation system
+     fn add_world_generator_pass(&mut self, gen_pass: impl WorldGeneratorPass) -> &mut Self {
+        self.add_startup_system(move |mut generation_config: ResMut<WorldGenerationConfig>| {
+            generation_config.add_worldgen_pass(dyn_clone::clone(&gen_pass));
+        });
+
+        self
+     }
+ }

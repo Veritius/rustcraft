@@ -10,7 +10,7 @@ use rustcraft_modlib::{
     BlockRegistryPlugin,
     world::{
         block::data::AddBlock,
-        generation::{WorldGenPlugin, biome::AddBiome},
+        generation::{WorldGenPlugin, WorldGenExtensionFns},
         chunk::events::LoadChunkMessage,
     },
     ChunkedWorldPlugin,

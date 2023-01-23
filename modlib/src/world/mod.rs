@@ -6,6 +6,7 @@ use self::{
         registry::BlockRegistry,
         entity::BlockEntity, Block,
     },
+    generation::biome::table::BiomeRegistry,
 };
 
 pub mod block;
@@ -16,6 +17,7 @@ pub mod generation;
 pub struct WorldMapHelpers<'w, 's> {
     pub block_registry: Res<'w, BlockRegistry>,
     pub chunk_registry: Res<'w, ChunkRegistry>,
+    pub biome_registry: Res<'w, BiomeRegistry>,
     pub blocks: Query<'w, 's, (Entity, &'static BlockEntity)>,
     pub chunks: Query<'w, 's, (Entity, &'static Chunk)>,
 }
