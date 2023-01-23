@@ -37,6 +37,7 @@ pub struct WorldGenPlugin;
 impl Plugin for WorldGenPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(BiomeRegistry::new());
+        app.insert_resource(WorldGenerationConfig::new());
 
         app.add_biome_scorer(BaseSelectionScorer);
 

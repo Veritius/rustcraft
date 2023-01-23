@@ -13,6 +13,7 @@ pub trait BiomeSelectionScorer: 'static + Send + Sync + DynClone {
 /// 
 /// Currently does scores for height, temperature, and humidity.
 /// Biomes get better scores if they're closer to the middle point of their range.
+// TODO: Move this to content
 #[derive(Clone)]
 pub(crate) struct BaseSelectionScorer;
 impl BiomeSelectionScorer for BaseSelectionScorer {

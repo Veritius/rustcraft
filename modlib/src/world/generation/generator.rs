@@ -9,6 +9,13 @@ pub struct WorldGenerationConfig {
 }
 
 impl WorldGenerationConfig {
+    pub fn new() -> Self {
+        Self {
+            mode: WorldGenerationMode::NONE,
+            passes: vec![],
+        }
+    }
+
     // TODO: Make it so order can be specified (not doing stone before ore, etc)
     pub fn add_worldgen_pass(&mut self, pass: impl WorldGeneratorPass) {
         self.passes.push(Box::new(pass))
@@ -27,11 +34,11 @@ impl WorldGenerationConfig {
 
 /// A _unique_ id for a world generation mode. Has an internal opaque value.
 /// Use a random number generator to generate a unique unsigned 32-bit integer for your generation mode.
-/// Default modes use a non-zero pattern, such as `NORMAL` being 0.
+/// Default modes use a non-zero pattern, such as `NONE` being 0.
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub struct WorldGenerationMode(u32);
 impl WorldGenerationMode {
-    pub const NORMAL: Self = Self(0);
+    pub const NONE: Self = Self(0);
 
     pub fn new(unique_id: u32) -> Self {
         Self(unique_id)
