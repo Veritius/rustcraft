@@ -1,6 +1,6 @@
 use std::{ops::Range, collections::BTreeMap};
 use bevy::prelude::{App, ResMut, Color};
-use crate::world::chunk::meshing::MeshingVisibility;
+use crate::{world::chunk::meshing::MeshingVisibility, attributes::{AttributeKind, AttributeValue}};
 
 use super::registry::BlockRegistry;
 
@@ -16,19 +16,19 @@ pub struct BlockData {
     /// Which gives `rustcraft_dirt`.
     pub string_identifier: &'static str,
     pub block_visibility: MeshingVisibility,
-    attributes: BTreeMap<u32, BlockAttributeValue>,
+    attributes: BTreeMap<u32, AttributeValue>,
 }
 
 impl BlockData {
     pub const ATTRIBUTE_DISPLAY_NAME: BlockAttribute =
-        BlockAttribute::new("block_display_name", 0, BlockAttributeKind::StaticStr);
+        BlockAttribute::new("block_display_name", 0, AttributeKind::StaticStr);
     /// A base color for the block. Usually used either for debugging or massive world views.
     pub const ATTRIBUTE_COLOR: BlockAttribute =
-        BlockAttribute::new("block_base_color", 1, BlockAttributeKind::Color);
+        BlockAttribute::new("block_base_color", 1, AttributeKind::Color);
     /// Image ids for each side of a solid block, in this order:
     /// Left, right, up, down, forward, back.
     pub const ATTRIBUTE_SOLID_TEXTURE_SIDES: BlockAttribute =
-        BlockAttribute::new("block_texture_sides", 2, BlockAttributeKind::StaticStrX6);
+        BlockAttribute::new("block_texture_sides", 2, AttributeKind::StaticStrX6);
 
     pub fn new(string_identifier: &'static str, block_visibility: MeshingVisibility) -> Self {
         Self {
@@ -38,8 +38,8 @@ impl BlockData {
         }
     }
 
-    pub fn insert_attribute(&mut self, attribute: BlockAttribute, value: BlockAttributeValue) {
-        let value_kind = BlockAttributeKind::from(&value);
+    pub fn insert_attribute(&mut self, attribute: BlockAttribute, value: AttributeValue) {
+        let value_kind = AttributeKind::from(&value);
         if attribute.kind != value_kind {
             panic!("Failed to insert attribute. Invalid attribute kind for {}. Given kind is {value_kind:?} but expected {:?}",
             attribute.string_identifier, attribute.kind);
@@ -48,7 +48,7 @@ impl BlockData {
         self.attributes.insert(attribute.id, value);
     }
 
-    pub(crate) fn get_attribute(&self, attribute: BlockAttribute) -> Option<&BlockAttributeValue> {
+    pub(crate) fn get_attribute(&self, attribute: BlockAttribute) -> Option<&AttributeValue> {
         self.attributes.get(&attribute.id)
     }
 }
@@ -59,91 +59,13 @@ pub struct BlockAttribute {
     /// _Unique_ id for this attribute. If in doubt, make a very large or random number.
     /// Built in attributes follow a close-to-zero pattern.
     id: u32,
-    kind: BlockAttributeKind,
+    kind: AttributeKind,
 }
 
 impl BlockAttribute {
-    pub const fn new(name: &'static str, id: u32, value: BlockAttributeKind) -> Self {
+    pub const fn new(name: &'static str, id: u32, value: AttributeKind) -> Self {
         BlockAttribute { string_identifier: name, id, kind: value }
     }
-}
-
-#[derive(Debug, PartialEq, Eq, Hash)]
-pub enum BlockAttributeKind {
-    Color,
-    StaticStr,
-    String,
-    Uint16,
-    Uint32,
-    Uint64,
-    Sint16,
-    Sint32,
-    Sint64,
-    Float32,
-    Float64,
-    RangeU16,
-    RangeU32,
-    RangeI16,
-    RangeI32,
-    RangeF32,
-    RangeF64,
-    StaticStrX6,
-    Uint32X6,
-    Sint32X6,
-    Float32X6,
-}
-
-impl From<&BlockAttributeValue> for BlockAttributeKind {
-    fn from(value: &BlockAttributeValue) -> Self {
-        match value {
-            BlockAttributeValue::Color(_) => BlockAttributeKind::Color,
-            BlockAttributeValue::StaticStr(_) => BlockAttributeKind::StaticStr,
-            BlockAttributeValue::String(_) => BlockAttributeKind::String,
-            BlockAttributeValue::Uint16(_) => BlockAttributeKind::Uint16,
-            BlockAttributeValue::Uint32(_) => BlockAttributeKind::Uint32,
-            BlockAttributeValue::Uint64(_) => BlockAttributeKind::Uint64,
-            BlockAttributeValue::Sint16(_) => BlockAttributeKind::Sint16,
-            BlockAttributeValue::Sint32(_) => BlockAttributeKind::Sint32,
-            BlockAttributeValue::Sint64(_) => BlockAttributeKind::Sint64,
-            BlockAttributeValue::Float32(_) => BlockAttributeKind::Float32,
-            BlockAttributeValue::Float64(_) => BlockAttributeKind::Float64,
-            BlockAttributeValue::RangeU16(_) => BlockAttributeKind::RangeU16,
-            BlockAttributeValue::RangeU32(_) => BlockAttributeKind::RangeU32,
-            BlockAttributeValue::RangeI16(_) => BlockAttributeKind::RangeI16,
-            BlockAttributeValue::RangeI32(_) => BlockAttributeKind::RangeU32,
-            BlockAttributeValue::RangeF32(_) => BlockAttributeKind::RangeF32,
-            BlockAttributeValue::RangeF64(_) => BlockAttributeKind::RangeF64,
-            BlockAttributeValue::StaticStrX6(_) => BlockAttributeKind::StaticStrX6,
-            BlockAttributeValue::Uint32X6(_) => BlockAttributeKind::Uint32X6,
-            BlockAttributeValue::Sint32X6(_) => BlockAttributeKind::Sint32X6,
-            BlockAttributeValue::Float32X6(_) => BlockAttributeKind::Float32X6,
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum BlockAttributeValue {
-    Color(Color),
-    StaticStr(&'static str),
-    String(String),
-    Uint16(u16),
-    Uint32(u32),
-    Uint64(u64),
-    Sint16(i16),
-    Sint32(i32),
-    Sint64(i64),
-    Float32(f32),
-    Float64(f64),
-    RangeU16(Range<u16>),
-    RangeU32(Range<u32>),
-    RangeI16(Range<i16>),
-    RangeI32(Range<i32>),
-    RangeF32(Range<f32>),
-    RangeF64(Range<f64>),
-    StaticStrX6([&'static str; 6]),
-    Uint32X6([u32; 6]),
-    Sint32X6([i32; 6]),
-    Float32X6([f32; 6]),
 }
 
 pub trait AddBlock {
@@ -162,8 +84,8 @@ impl AddBlock for App {
 
 pub(crate) fn air_block() -> BlockData {
     let mut block = BlockData::new("engine_air", MeshingVisibility::Invisible);
-    block.insert_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME, BlockAttributeValue::StaticStr("Air"));
-    block.insert_attribute(BlockData::ATTRIBUTE_COLOR, BlockAttributeValue::Color(Color::NONE));
+    block.insert_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME, AttributeValue::StaticStr("Air"));
+    block.insert_attribute(BlockData::ATTRIBUTE_COLOR, AttributeValue::Color(Color::NONE));
 
     block
 }
