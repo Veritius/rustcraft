@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, ops::Range};
 use bevy::{prelude::Resource, utils::HashMap};
 use crate::attributes::{AttributeKind, AttributeValue};
 
-use super::{BiomeId, considerations::BiomeSelectionScorer};
+use super::{BiomeId, scorer::BiomeSelectionScorer};
 
 #[derive(Resource)]
 pub struct BiomeTable {
