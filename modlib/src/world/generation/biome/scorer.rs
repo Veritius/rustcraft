@@ -1,7 +1,7 @@
 use std::ops::Range;
 use bevy::prelude::{Vec2, IVec3};
 use dyn_clone::DynClone;
-use super::table::BiomeData;
+use super::registry::BiomeData;
 
 dyn_clone::clone_trait_object!(BiomeSelectionScorer);
 pub trait BiomeSelectionScorer: 'static + Send + Sync + DynClone {

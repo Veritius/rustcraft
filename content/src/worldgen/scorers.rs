@@ -1,6 +1,6 @@
 use std::ops::Range;
 use bevy::prelude::{Vec2, IVec3};
-use rustcraft_modlib::world::generation::biome::{scorer::BiomeSelectionScorer, table::BiomeData};
+use rustcraft_modlib::world::generation::biome::{scorer::BiomeSelectionScorer, registry::BiomeData};
 
 /// Biome scoring for height, temperature, and humidity.
 /// 

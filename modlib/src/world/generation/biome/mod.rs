@@ -1,4 +1,4 @@
 pub mod scorer;
-pub mod table;
+pub mod registry;
 
 pub type BiomeId = u32;

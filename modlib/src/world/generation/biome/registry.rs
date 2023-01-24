@@ -1,20 +1,68 @@
-use std::collections::BTreeMap;
-use bevy::{prelude::{Resource, IVec3}, utils::HashMap};
-use crate::attributes::{AttributeKind, AttributeValue};
+use std::{collections::BTreeMap, sync::Arc, ops::Deref};
+use bevy::{prelude::*, utils::HashMap};
+use crate::{attributes::{AttributeKind, AttributeValue}, world::block::registry::BlockRegistryStartupBuffer};
 
 use super::{BiomeId, scorer::BiomeSelectionScorer};
 
+/// Temporary resource that only exists at startup for systems to add new kinds of 
+#[derive(Resource)]
+pub(crate) struct BiomeRegistryStartupBuffer {
+    id_index: u32,
+    internal: BiomeRegistryInternal,
+}
+
+impl BiomeRegistryStartupBuffer {
+    pub fn new() -> Self {
+        Self {
+            id_index: 0,
+            internal: BiomeRegistryInternal::new(),
+        }
+    }
+    
+    pub fn add_biome_type(&mut self, biome: BiomeData) {
+        let id = self.id_index;
+        self.internal.biomes.insert(id, biome);
+        self.id_index += 1;
+    }
+
+    pub(crate) fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) {
+        self.internal.scorers.push(Box::new(scorer))
+    }
+}
+
+/// Stores an arc of the internal biome registry.
 #[derive(Resource)]
 pub struct BiomeRegistry {
-    id_index: u32,
+    internal: Arc<BiomeRegistryInternal>,
+}
+
+impl BiomeRegistry {
+    pub(crate) fn new(from: BiomeRegistryInternal) -> Self {
+        Self { internal: Arc::new(from) }
+    }
+
+    pub fn get_internal_registry(&self) -> Arc<BiomeRegistryInternal> {
+        self.internal.clone()
+    }
+}
+
+impl Deref for BiomeRegistry {
+    type Target = BiomeRegistryInternal;
+
+    fn deref(&self) -> &Self::Target {
+        self.internal.deref()
+    }
+}
+
+#[derive(Clone)]
+pub struct BiomeRegistryInternal {
     biomes: HashMap<u32, BiomeData>,
     scorers: Vec<Box<dyn BiomeSelectionScorer>>,
 }
 
-impl BiomeRegistry {
+impl BiomeRegistryInternal {
     pub(crate) fn new() -> Self {
         Self {
-            id_index: 0,
             biomes: HashMap::new(),
             scorers: vec![],
         }
@@ -22,18 +70,6 @@ impl BiomeRegistry {
 
     pub fn get_biome_data(&self, id: BiomeId) -> Option<&BiomeData> {
         self.biomes.get(&id)
-    }
-
-    pub fn add_biome_type(&mut self, biome: BiomeData) -> BiomeId {
-        let id = self.id_index;
-        self.biomes.insert(id, biome);
-        self.id_index += 1;
-
-        id
-    }
-
-    pub(crate) fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) {
-        self.scorers.push(Box::new(scorer))
     }
 
     pub fn calculate_biome_for_chunk(&self, pos: IVec3) -> BiomeId {
@@ -100,4 +136,12 @@ impl BiomeAttribute {
     pub const fn new(name: &'static str, id: u32, value: AttributeKind) -> Self {
         BiomeAttribute { name, id, kind: value }
     }
+}
+
+pub(crate) fn biome_buffer_transfer_system(
+    mut commands: Commands,
+    buffer: Res<BiomeRegistryStartupBuffer>,
+) {
+    commands.insert_resource(BiomeRegistry::new(buffer.internal.clone()));
+    commands.remove_resource::<BiomeRegistryStartupBuffer>();
 }

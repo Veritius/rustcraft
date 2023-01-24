@@ -6,7 +6,7 @@ use self::{
         registry::BlockRegistry,
         entity::BlockEntity, Block,
     },
-    generation::biome::table::BiomeRegistry,
+    generation::biome::registry::BiomeRegistry,
 };
 
 pub mod block;
@@ -48,36 +48,4 @@ impl WorldMapHelpers<'_, '_> {
             _ => None,
         }
     }
-}
-
-pub(crate) fn debug_data_system(
-    open: Option<Res<DebugMenuOpen>>,
-    mut events: EventWriter<AppendDebugMenuMessage>,
-    world_map: WorldMapHelpers,
-    meshing_chunks: Query<(), With<BeingRemeshed>>,
-) {
-    if open.is_none() { return; }
-
-    let mut all_chunks: u32 = 0;
-    let mut mid_generation: u32 = 0;
-    let mut present: u32 = 0;
-    for (_, value) in world_map.chunk_registry.get_inner_registry().iter() {
-        match value {
-            ChunkState::BeingGenerated => { mid_generation += 1; },
-            ChunkState::Present(_) => { present += 1; },
-            _ => panic!("Variant Absent shouldn't have been in the chunk registry"),
-        }
-        all_chunks += 1;
-    }
-
-    let mut block_count: u16 = world_map.block_registry.len() as u16;
-
-    let mut meshing_chunks_count: u32 = 0;
-    for _ in meshing_chunks.iter() { meshing_chunks_count += 1; }
-
-    let mut text = String::new();
-    text.push_str(&format!("Chunks (all/active/generating/remeshing): {}/{}/{}/{}\n", all_chunks, present, mid_generation, meshing_chunks_count));
-    text.push_str(&format!("Generic block types defined: {}\n", block_count));
-
-    events.send(AppendDebugMenuMessage::new(TextSection { value: text, style: Default::default() }));
 }

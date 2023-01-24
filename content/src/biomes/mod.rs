@@ -2,7 +2,7 @@ pub mod defs;
 
 pub mod attributes {
     use rustcraft_modlib::{
-        world::generation::biome::table::BiomeAttribute,
+        world::generation::biome::registry::BiomeAttribute,
         attributes::AttributeKind,
     };
 

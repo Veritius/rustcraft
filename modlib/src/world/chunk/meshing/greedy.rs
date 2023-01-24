@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use bevy::{prelude::{Mesh, Color}, render::mesh::Indices};
 use ndarray::{Array3, Axis};
-use crate::world::{block::{BlockId, registry::BlockRegistry, Block}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
+use crate::world::{block::{BlockId, registry::{BlockRegistry, BlockRegistryInternal}, Block}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
 
 use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 
@@ -19,7 +21,7 @@ use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 pub(super) fn greedy_mesh(
     mesh: &mut Mesh,
     array: &Array3<BlockId>,
-    registry: &BlockRegistry,
+    registry: &Arc<BlockRegistryInternal>,
 ) {
     // TODO: This can be optimised by not copying data in the array passed in arguments. Possibly use subviews from ndarray?
 
@@ -234,7 +236,7 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
     quads
 }
 
-fn get_visibility(block: BlockId, registry: &BlockRegistry) -> MeshingVisibility {
+fn get_visibility(block: BlockId, registry: &Arc<BlockRegistryInternal>) -> MeshingVisibility {
     match registry.get_by_numerical_id(block) {
         Some(entry) => entry.block_visibility,
         None => MeshingVisibility::Invisible,

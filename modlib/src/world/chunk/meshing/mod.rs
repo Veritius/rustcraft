@@ -109,7 +109,7 @@ pub fn chunk_remesh_dispatch_system(
             // }
 
             // TODO: Figure out a solution that doesn't involve cloning the entire block registry
-            let registry = block_registry.clone();
+            let registry = block_registry.get_internal_registry();
             
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {

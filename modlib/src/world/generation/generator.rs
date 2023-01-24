@@ -1,26 +1,64 @@
-use bevy::prelude::{IVec3, Resource};
+use std::sync::Arc;
+
+use bevy::prelude::*;
 use dyn_clone::DynClone;
 use crate::world::chunk::Chunk;
 
+#[derive(Clone)]
+pub struct WorldGenPasses {
+    passes: Vec<Box<dyn WorldGeneratorPass>>,
+}
+
+impl WorldGenPasses {
+    pub(crate) fn new() -> Self {
+        Self {
+            passes: vec![],
+        }
+    }
+    
+    pub(crate) fn add_worldgen_pass(&mut self, pass: impl WorldGeneratorPass) {
+        self.passes.push(Box::new(pass));
+    }
+
+    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, mode: WorldGenerationMode, chunk: &mut Chunk) {
+        for pass in &self.passes {
+            pass.chunk_pass(pos, mode, chunk);
+        }
+    }
+}
+
+#[derive(Resource)]
+pub(crate) struct WorldGenerationConfigStartupBuffer {
+    passes: WorldGenPasses
+}
+
+impl WorldGenerationConfigStartupBuffer {
+    pub(crate) fn new() -> Self {
+        Self {
+            passes: WorldGenPasses::new(),
+        }
+    }
+
+    pub fn add_worldgen_pass(&mut self, pass: impl WorldGeneratorPass) {
+        self.passes.add_worldgen_pass(pass);
+    }
+}
+
+/// World generation options
 #[derive(Resource)]
 pub struct WorldGenerationConfig {
     seed: u32,
     mode: WorldGenerationMode,
-    passes: Vec<Box<dyn WorldGeneratorPass>>,
+    passes: Arc<WorldGenPasses>,
 }
 
 impl WorldGenerationConfig {
-    pub fn new(seed: u32) -> Self {
+    pub(crate) fn new(seed: u32, vec: WorldGenPasses) -> Self {
         Self {
             seed,
             mode: WorldGenerationMode::NONE,
-            passes: vec![],
+            passes: Arc::new(vec),
         }
-    }
-
-    // TODO: Make it so order can be specified (not doing stone before ore, etc)
-    pub fn add_worldgen_pass(&mut self, pass: impl WorldGeneratorPass) {
-        self.passes.push(Box::new(pass))
     }
 
     pub fn set_worldgen_mode(&mut self, mode: WorldGenerationMode) {
@@ -28,9 +66,7 @@ impl WorldGenerationConfig {
     }
 
     pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, chunk: &mut Chunk) {
-        for pass in &self.passes {
-            pass.chunk_pass(pos, self.mode, chunk)
-        }
+        self.passes.do_passes_on_chunk(pos, self.mode, chunk);
     }
 }
 
@@ -50,4 +86,12 @@ impl WorldGenerationMode {
 dyn_clone::clone_trait_object!(WorldGeneratorPass);
 pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
     fn chunk_pass(&self, pos: IVec3, mode: WorldGenerationMode, chunk: &mut Chunk);
+}
+
+pub(crate) fn generation_config_buffer_transfer_system(
+    mut commands: Commands,
+    buffer: Res<WorldGenerationConfigStartupBuffer>,
+) {
+    commands.insert_resource(WorldGenerationConfig::new(0, buffer.passes.clone()));
+    commands.remove_resource::<WorldGenerationConfigStartupBuffer>();
 }
