@@ -14,7 +14,6 @@ pub trait StartupWriteResource<B: StartupWriteBuffer<I>, I: StartupWriteInternal
 /// This specific trait is used when the data is first being written at startup. It is later discarded.
 pub trait StartupWriteBuffer<I: StartupWriteInternal>: Resource + Clone {
     fn new() -> Self;
-    fn get_internal(&self) -> &I;
 }
 
 /// Something that needs to be written at (Bevy) startup and then never written again, but read across threads.
