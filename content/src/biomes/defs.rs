@@ -1,4 +1,4 @@
-use rustcraft_modlib::{world::generation::biome::registry::BiomeData, attributes::AttributeValue};
+use rustcraft_modlib::{world::generation::biome::registry::BiomeData, registries::attributes::AttributeValue};
 
 use super::attributes::*;
 

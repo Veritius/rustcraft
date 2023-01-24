@@ -1,5 +1,5 @@
 use bevy::prelude::Color;
-use rustcraft_modlib::{world::{block::data::BlockData, chunk::meshing::MeshingVisibility}, attributes::AttributeValue};
+use rustcraft_modlib::{world::{block::data::BlockData, chunk::meshing::MeshingVisibility}, registries::attributes::AttributeValue};
 
 pub(crate) fn water() -> BlockData {
     let mut block = BlockData::new("rustcraft_water", MeshingVisibility::Translucent);

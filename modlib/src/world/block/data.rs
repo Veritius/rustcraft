@@ -1,6 +1,6 @@
 use std::{ops::Range, collections::BTreeMap};
 use bevy::prelude::{App, ResMut, Color};
-use crate::{world::chunk::meshing::MeshingVisibility, attributes::{AttributeKind, AttributeValue}};
+use crate::{world::chunk::meshing::MeshingVisibility, registries::attributes::{AttributeKind, AttributeValue}};
 
 use super::registry::{BlockRegistry, BlockRegistryStartupBuffer};
 

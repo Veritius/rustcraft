@@ -1,5 +1,4 @@
 use std::ops::Range;
-
 use bevy::prelude::Color;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
