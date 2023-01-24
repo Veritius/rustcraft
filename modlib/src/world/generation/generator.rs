@@ -4,13 +4,15 @@ use crate::world::chunk::Chunk;
 
 #[derive(Resource)]
 pub struct WorldGenerationConfig {
+    seed: u32,
     mode: WorldGenerationMode,
     passes: Vec<Box<dyn WorldGeneratorPass>>,
 }
 
 impl WorldGenerationConfig {
-    pub fn new() -> Self {
+    pub fn new(seed: u32) -> Self {
         Self {
+            seed,
             mode: WorldGenerationMode::NONE,
             passes: vec![],
         }

@@ -20,6 +20,10 @@ impl BiomeRegistry {
         }
     }
 
+    pub fn get_biome_data(&self, id: BiomeId) -> Option<&BiomeData> {
+        self.biomes.get(&id)
+    }
+
     pub fn add_biome_type(&mut self, biome: BiomeData) -> BiomeId {
         let id = self.id_index;
         self.biomes.insert(id, biome);
@@ -37,7 +41,7 @@ impl BiomeRegistry {
         for (id, biome) in &self.biomes {
             let mut current = 0.0;
             for scorer in &self.scorers {
-                current += scorer.get_weight_for_coordinates(pos, &biome);
+                current += scorer.get_point_score_for_coordinates(pos, &biome);
             }
             if current > biggest.0 {
                 biggest.0 = current;

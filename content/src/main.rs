@@ -9,7 +9,7 @@ use bevy_flycam::{NoCameraPlayerPlugin, FlyCam};
 use rustcraft_modlib::{
     world::{
         block::{data::AddBlock, BlockRegistryPlugin},
-        generation::{WorldGenerationPlugin, WorldGenExtensionFns},
+        generation::{WorldGenPlugin, WorldGenExtensionFns},
         chunk::{events::LoadChunkMessage, ChunkedWorldPlugin},
     },
     debug::DebugMenuPlugin
@@ -29,7 +29,7 @@ fn main() {
     
     app.add_plugin(BlockRegistryPlugin);
     app.add_plugin(ChunkedWorldPlugin);
-    app.add_plugin(WorldGenerationPlugin);
+    app.add_plugin(WorldGenPlugin);
 
     app.add_block(blocks::defs::water());
     app.add_block(blocks::defs::dirt());

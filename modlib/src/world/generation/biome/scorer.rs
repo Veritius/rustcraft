@@ -5,5 +5,5 @@ use super::table::BiomeData;
 
 dyn_clone::clone_trait_object!(BiomeSelectionScorer);
 pub trait BiomeSelectionScorer: 'static + Send + Sync + DynClone {
-    fn get_weight_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64;
+    fn get_point_score_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64;
 }

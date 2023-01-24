@@ -1,4 +1,4 @@
-use std::{ops::Range, collections::BTreeMap};
+use std::{ops::{Range, Deref}, collections::BTreeMap};
 use bevy::{prelude::*, tasks::{Task, AsyncComputeTaskPool}, render::once_cell::sync::Lazy};
 use futures_lite::future;
 use self::{biome::{table::{BiomeRegistry, BiomeData}, scorer::BiomeSelectionScorer}, generator::{WorldGeneratorPass, WorldGenerationConfig}};
@@ -31,11 +31,11 @@ pub enum SystemLabels {
 #[derive(Component)]
 pub struct BeingGenerated(Task<Chunk>);
 
-pub struct WorldGenerationPlugin;
-impl Plugin for WorldGenerationPlugin {
+pub struct WorldGenPlugin;
+impl Plugin for WorldGenPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(BiomeRegistry::new());
-        app.insert_resource(WorldGenerationConfig::new());
+        app.insert_resource(WorldGenerationConfig::new(u32::MIN));
 
         app.add_startup_system(worldgen_setup_system);
         app.add_system(generation_dispatch_system
@@ -65,21 +65,16 @@ fn generation_dispatch_system(
     mut commands: Commands,
     mut gen_events: EventReader<LoadChunkMessage>,
     mut chunk_registry: ResMut<ChunkRegistry>,
+    biome_registry: Res<BiomeRegistry>,
+    world_gen_config: Res<WorldGenerationConfig>,
     chunk_mat: Res<ChunkMaterialHandle>,
 ) {
     let task_pool = AsyncComputeTaskPool::get();
     for event in gen_events.iter() {
         let chunk_position = event.0.clone();
+        let biome = biome_registry.calculate_biome_for_chunk(chunk_position);
         let task: Task<Chunk> = task_pool.spawn(async move {
             let mut chunk = Chunk::new(chunk_position.into());
-
-            for x in 0..CHUNK_SIZE {
-                for y in 0..CHUNK_SIZE {
-                    for z in 0..CHUNK_SIZE {
-                        // chunk.set_block(x, y, z, generate_per_block(chunk_position, x, y, z));
-                    }
-                }
-            }
 
             chunk
         });

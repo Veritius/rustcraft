@@ -10,7 +10,7 @@ use rustcraft_modlib::world::generation::biome::{scorer::BiomeSelectionScorer, t
 #[derive(Clone)]
 pub(crate) struct BaseSelectionScorer;
 impl BiomeSelectionScorer for BaseSelectionScorer {
-    fn get_weight_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64 {
+    fn get_point_score_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64 {
         let coordinates_as_vec2 = Vec2 { x: coordinates.x as f32, y: coordinates.z as f32 };
         /* let height = add_up_2d(vec![
             (&WGEN_HEIGHT_NOISE_1, WGEN_HEIGHT_NOISE_1_MODIFIER, coordinates_as_vec2),
