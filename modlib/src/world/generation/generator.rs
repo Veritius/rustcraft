@@ -20,9 +20,9 @@ impl WorldGenPasses {
         self.passes.push(Box::new(pass));
     }
 
-    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, mode: WorldGenerationMode, chunk: &mut Chunk) {
+    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, chunk: &mut Chunk) {
         for pass in &self.passes {
-            pass.chunk_pass(pos, mode, chunk);
+            pass.chunk_pass(pos, seed, mode, chunk);
         }
     }
 }
@@ -47,8 +47,8 @@ impl WorldGenerationConfigStartupBuffer {
 /// World generation options
 #[derive(Resource)]
 pub struct WorldGenerationConfig {
-    seed: u32,
-    mode: WorldGenerationMode,
+    pub seed: u32,
+    pub mode: WorldGenerationMode,
     passes: Arc<WorldGenPasses>,
 }
 
@@ -61,12 +61,12 @@ impl WorldGenerationConfig {
         }
     }
 
-    pub fn set_worldgen_mode(&mut self, mode: WorldGenerationMode) {
-        self.mode = mode
+    pub fn get_passes_arc(&self) -> Arc<WorldGenPasses> {
+        self.passes.clone()
     }
 
     pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, chunk: &mut Chunk) {
-        self.passes.do_passes_on_chunk(pos, self.mode, chunk);
+        self.passes.do_passes_on_chunk(pos, self.seed, self.mode, chunk);
     }
 }
 
@@ -85,7 +85,10 @@ impl WorldGenerationMode {
 
 dyn_clone::clone_trait_object!(WorldGeneratorPass);
 pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
-    fn chunk_pass(&self, pos: IVec3, mode: WorldGenerationMode, chunk: &mut Chunk);
+    /// Checks if this generator pass supports a specific generation mode.
+    fn supports_mode(&self, mode: WorldGenerationMode) -> bool;
+    /// Does a pass over a given chunk.
+    fn chunk_pass(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, chunk: &mut Chunk);
 }
 
 pub(crate) fn generation_config_buffer_transfer_system(

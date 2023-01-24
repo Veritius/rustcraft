@@ -81,9 +81,16 @@ fn generation_dispatch_system(
     let task_pool = AsyncComputeTaskPool::get();
     for event in gen_events.iter() {
         let chunk_position = event.0.clone();
-        let biome = biome_registry.calculate_biome_for_chunk(chunk_position);
+        // let biome_registry_arc = biome_registry.get_internal_registry();
+        let generation_seed = world_gen_config.seed;
+        let generation_mode = world_gen_config.mode;
+        let world_gen_config_arc = world_gen_config.get_passes_arc();
+
+        // Async task definition
         let task: Task<Chunk> = task_pool.spawn(async move {
             let mut chunk = Chunk::new(chunk_position.into());
+            // let biome = biome_registry_arc.calculate_biome_for_chunk(chunk_position);
+            world_gen_config_arc.do_passes_on_chunk(chunk_position, generation_seed, generation_mode, &mut chunk);
 
             chunk
         });
