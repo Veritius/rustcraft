@@ -7,18 +7,17 @@ use bevy::{
 };
 use bevy_flycam::{NoCameraPlayerPlugin, FlyCam};
 use rustcraft_modlib::{
-    BlockRegistryPlugin,
     world::{
-        block::data::AddBlock,
-        generation::{WorldGenPlugin, WorldGenExtensionFns},
-        chunk::events::LoadChunkMessage,
+        block::{data::AddBlock, BlockRegistryPlugin},
+        generation::{WorldGenerationPlugin, WorldGenExtensionFns},
+        chunk::{events::LoadChunkMessage, ChunkedWorldPlugin},
     },
-    ChunkedWorldPlugin,
     debug::DebugMenuPlugin
 };
 
 pub mod blocks;
 pub mod biomes;
+pub mod worldgen;
 
 fn main() {
     let mut app = App::new();
@@ -30,21 +29,21 @@ fn main() {
     
     app.add_plugin(BlockRegistryPlugin);
     app.add_plugin(ChunkedWorldPlugin);
-    app.add_plugin(WorldGenPlugin);
+    app.add_plugin(WorldGenerationPlugin);
 
-    app.add_block(blocks::water());
-    app.add_block(blocks::dirt());
-    app.add_block(blocks::stone());
-    app.add_block(blocks::sand());
-    app.add_block(blocks::grass());
-    app.add_block(blocks::glass());
+    app.add_block(blocks::defs::water());
+    app.add_block(blocks::defs::dirt());
+    app.add_block(blocks::defs::stone());
+    app.add_block(blocks::defs::sand());
+    app.add_block(blocks::defs::grass());
+    app.add_block(blocks::defs::glass());
 
-    app.add_biome(biomes::ocean());
-    app.add_biome(biomes::plains());
-    app.add_biome(biomes::forest());
-    app.add_biome(biomes::jungle());
-    app.add_biome(biomes::desert());
-    app.add_biome(biomes::tundra());
+    app.add_biome(biomes::defs::ocean());
+    app.add_biome(biomes::defs::plains());
+    app.add_biome(biomes::defs::forest());
+    app.add_biome(biomes::defs::jungle());
+    app.add_biome(biomes::defs::desert());
+    app.add_biome(biomes::defs::tundra());
 
     app.add_system(wireframe_toggle_system);
 

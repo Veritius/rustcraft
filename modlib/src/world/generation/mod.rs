@@ -1,7 +1,7 @@
 use std::{ops::Range, collections::BTreeMap};
 use bevy::{prelude::*, tasks::{Task, AsyncComputeTaskPool}, render::once_cell::sync::Lazy};
 use futures_lite::future;
-use self::{biome::{table::{BiomeRegistry, BiomeData}, scorer::{BaseSelectionScorer, BiomeSelectionScorer}}, generator::{WorldGeneratorPass, WorldGenerationConfig}};
+use self::{biome::{table::{BiomeRegistry, BiomeData}, scorer::BiomeSelectionScorer}, generator::{WorldGeneratorPass, WorldGenerationConfig}};
 
 use super::{
     chunk::{
@@ -21,8 +21,6 @@ use super::{
 
 pub mod biome;
 pub mod generator;
-pub mod helpers;
-pub mod noise_layers;
 
 #[derive(SystemLabel)]
 pub enum SystemLabels {
@@ -33,13 +31,11 @@ pub enum SystemLabels {
 #[derive(Component)]
 pub struct BeingGenerated(Task<Chunk>);
 
-pub struct WorldGenPlugin;
-impl Plugin for WorldGenPlugin {
+pub struct WorldGenerationPlugin;
+impl Plugin for WorldGenerationPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(BiomeRegistry::new());
         app.insert_resource(WorldGenerationConfig::new());
-
-        app.add_biome_scorer(BaseSelectionScorer);
 
         app.add_startup_system(worldgen_setup_system);
         app.add_system(generation_dispatch_system
