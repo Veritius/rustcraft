@@ -4,7 +4,7 @@ use rustcraft_modlib::{
         block::data::BlockData,
         chunk::meshing::MeshingVisibility,
     },
-    registries::attributes::AttributeValue,
+    attributes::AttributeValue,
 };
 
 pub mod defs;

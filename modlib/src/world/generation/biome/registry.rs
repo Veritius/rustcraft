@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, sync::Arc, ops::Deref};
 use bevy::{prelude::*, utils::HashMap};
-use crate::{registries::attributes::{AttributeKind, AttributeValue}, world::block::registry::BlockRegistryStartupBuffer};
+use crate::{attributes::{AttributeKind, AttributeValue}, world::block::registry::BlockRegistryStartupBuffer};
 
 use super::{BiomeId, scorer::BiomeSelectionScorer};
 

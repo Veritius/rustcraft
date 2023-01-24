@@ -3,4 +3,4 @@ pub use bevy;
 
 pub mod world;
 pub mod debug;
-pub mod registries;
+pub mod attributes;

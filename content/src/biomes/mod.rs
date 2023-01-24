@@ -3,7 +3,7 @@ pub mod defs;
 pub mod attributes {
     use rustcraft_modlib::{
         world::generation::biome::registry::BiomeAttribute,
-        registries::attributes::AttributeKind,
+        attributes::AttributeKind,
     };
 
     /// The altitude range this biome should spawn in.
