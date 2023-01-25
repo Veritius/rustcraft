@@ -14,7 +14,7 @@ use rustcraft_modlib::{
     },
     debug::DebugMenuPlugin, noise_rs::Perlin
 };
-use worldgen::noise::{NOISE_LAYER_HEIGHT, NOISE_LAYER_TEMPERATURE, NOISE_LAYER_HUMIDITY};
+use worldgen::{noise::{NOISE_LAYER_HEIGHT, NOISE_LAYER_TEMPERATURE, NOISE_LAYER_HUMIDITY}, scorers::BaseSelectionScorer, passes::BaseTerrainPass};
 
 pub mod blocks;
 pub mod biomes;
@@ -48,19 +48,23 @@ fn main() {
 
     app.add_noise_layer(NOISE_LAYER_HEIGHT.to_owned(), SimpleNoiseLayer2D::new(2524123412, vec![
         (5.0, Perlin::new(0), 0.029592342),
-        (10.0, Perlin::new(0), 0.008732425),
-        (15.0, Perlin::new(0), 0.003241255),
+        (7.0, Perlin::new(0), 0.008732425),
+        (10.0, Perlin::new(0), 0.003241255),
     ]));
     app.add_noise_layer(NOISE_LAYER_TEMPERATURE.to_owned(), SimpleNoiseLayer2D::new(42512352, vec![
         (5.0, Perlin::new(0), 0.029592342),
-        (10.0, Perlin::new(0), 0.008732425),
-        (15.0, Perlin::new(0), 0.003241255),
+        (7.0, Perlin::new(0), 0.008732425),
+        (10.0, Perlin::new(0), 0.003241255),
     ]));
     app.add_noise_layer(NOISE_LAYER_HUMIDITY.to_owned(), SimpleNoiseLayer2D::new(1235212379, vec![
         (5.0, Perlin::new(0), 0.029592342),
-        (10.0, Perlin::new(0), 0.008732425),
-        (15.0, Perlin::new(0), 0.003241255),
+        (7.0, Perlin::new(0), 0.008732425),
+        (10.0, Perlin::new(0), 0.003241255),
     ]));
+
+    app.add_biome_scorer(BaseSelectionScorer);
+
+    app.add_world_generator_pass(BaseTerrainPass);
 
     app.add_system(wireframe_toggle_system);
 

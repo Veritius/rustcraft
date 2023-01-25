@@ -76,8 +76,10 @@ impl WorldGenerationConfig {
 /// A _unique_ id for a world generation mode. Has an internal opaque value.
 /// Use a random number generator to generate a unique unsigned 32-bit integer for your generation mode.
 /// Default modes use a non-zero pattern, such as `NONE` being 0.
+/// 
+/// **TODO:** Replace this with an attribute registry.
 #[derive(PartialEq, Eq, Clone, Copy)]
-pub struct WorldGenerationMode(u32);
+pub struct WorldGenerationMode(pub u32);
 impl WorldGenerationMode {
     pub const NONE: Self = Self(0);
 
