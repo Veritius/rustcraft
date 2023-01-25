@@ -131,7 +131,7 @@ pub trait WorldGenExtensionFns {
     fn add_biome(&mut self, biome: BiomeData) -> &mut Self;
     fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) -> &mut Self;
     fn add_world_generator_pass(&mut self, scorer: impl WorldGeneratorPass) -> &mut Self;
-    fn add_noise_layer<T: NoiseLayer>(&mut self, key: String) -> &mut Self;
+    fn add_noise_layer(&mut self, key: String, layer: impl NoiseLayer) -> &mut Self;
 }
 
 impl WorldGenExtensionFns for App {
@@ -163,9 +163,9 @@ impl WorldGenExtensionFns for App {
     }
 
     /// Adds a new `NoiseLayer` to the chunk generation system
-    fn add_noise_layer<T: NoiseLayer>(&mut self, key: String) -> &mut Self {
+    fn add_noise_layer(&mut self, key: String, layer: impl NoiseLayer) -> &mut Self {
         self.add_startup_system(move |mut layer_table: ResMut<NoiseTable>| {
-            layer_table.add_layer::<T>(key.clone());
+            layer_table.add_layer(key.clone(), dyn_clone::clone_box(&layer));
         });
 
         self

@@ -9,12 +9,12 @@ use bevy_flycam::{NoCameraPlayerPlugin, FlyCam};
 use rustcraft_modlib::{
     world::{
         block::{data::AddBlock, BlockRegistryPlugin},
-        generation::{WorldGenPlugin, WorldGenExtensionFns},
+        generation::{WorldGenPlugin, WorldGenExtensionFns, noise::SimpleNoiseLayer2D},
         chunk::{events::LoadChunkMessage, ChunkedWorldPlugin},
     },
-    debug::DebugMenuPlugin
+    debug::DebugMenuPlugin, noise_rs::Perlin
 };
-use worldgen::noise::{NOISE_LAYER_SURFACE, SurfaceNoise};
+use worldgen::noise::{NOISE_LAYER_HEIGHT, NOISE_LAYER_TEMPERATURE, NOISE_LAYER_HUMIDITY};
 
 pub mod blocks;
 pub mod biomes;
@@ -46,7 +46,21 @@ fn main() {
     app.add_biome(biomes::defs::desert());
     app.add_biome(biomes::defs::tundra());
 
-    app.add_noise_layer::<SurfaceNoise>(NOISE_LAYER_SURFACE.to_owned());
+    app.add_noise_layer(NOISE_LAYER_HEIGHT.to_owned(), SimpleNoiseLayer2D::new(2524123412, vec![
+        (5.0, Perlin::new(0), 0.029592342),
+        (10.0, Perlin::new(0), 0.008732425),
+        (15.0, Perlin::new(0), 0.003241255),
+    ]));
+    app.add_noise_layer(NOISE_LAYER_TEMPERATURE.to_owned(), SimpleNoiseLayer2D::new(42512352, vec![
+        (5.0, Perlin::new(0), 0.029592342),
+        (10.0, Perlin::new(0), 0.008732425),
+        (15.0, Perlin::new(0), 0.003241255),
+    ]));
+    app.add_noise_layer(NOISE_LAYER_HUMIDITY.to_owned(), SimpleNoiseLayer2D::new(1235212379, vec![
+        (5.0, Perlin::new(0), 0.029592342),
+        (10.0, Perlin::new(0), 0.008732425),
+        (15.0, Perlin::new(0), 0.003241255),
+    ]));
 
     app.add_system(wireframe_toggle_system);
 
