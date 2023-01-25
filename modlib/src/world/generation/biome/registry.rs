@@ -1,6 +1,6 @@
-use std::{collections::BTreeMap, sync::Arc, ops::Deref};
+use std::{collections::BTreeMap, sync::{Arc, RwLock}, ops::Deref};
 use bevy::{prelude::*, utils::HashMap};
-use crate::{attributes::{AttributeKind, AttributeValue}, world::block::registry::BlockRegistryStartupBuffer};
+use crate::{attributes::{AttributeKind, AttributeValue}, world::{block::registry::BlockRegistryStartupBuffer, generation::noise::NoiseTableInternal}};
 
 use super::{BiomeId, scorer::BiomeSelectionScorer};
 
@@ -72,12 +72,12 @@ impl BiomeRegistryInternal {
         self.biomes.get(&id)
     }
 
-    pub fn calculate_biome_for_chunk(&self, pos: IVec3) -> BiomeId {
+    pub fn calculate_biome_for_chunk(&self, pos: IVec3, noise_table: &NoiseTableInternal) -> BiomeId {
         let mut biggest = (0.0, BiomeId::MAX);
         for (id, biome) in &self.biomes {
             let mut current = 0.0;
             for scorer in &self.scorers {
-                current += scorer.get_point_score_for_coordinates(pos, &biome);
+                current += scorer.get_point_score_for_coordinates(pos, &biome, noise_table);
             }
             if current > biggest.0 {
                 biggest.0 = current;
@@ -113,7 +113,7 @@ impl BiomeData {
         self.attributes.insert(attribute.id, value);
     }
 
-    pub(crate) fn get_attribute(&self, attribute: BiomeAttribute) -> Option<&AttributeValue> {
+    pub fn get_attribute(&self, attribute: BiomeAttribute) -> Option<&AttributeValue> {
         self.attributes.get(&attribute.id)
     }
 }

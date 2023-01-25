@@ -35,6 +35,16 @@ impl NoiseTableInternal {
     pub(crate) fn add_layer(&mut self, key: String, layer: Box<dyn NoiseLayer>) {
         self.0.insert(key, layer);
     }
+
+    // TODO: Figure out a way to get the value that doesn't involve going through the hashmap
+    pub fn get_value(&self, key: &str, pos: DVec3) -> Option<f64> {
+        match self.0.get(key) {
+            Some(value) => {
+                Some(value.get_value(pos))
+            },
+            None => todo!(),
+        }
+    }
 }
 
 pub trait NoiseLayer: 'static + Send + Sync + DynClone {

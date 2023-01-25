@@ -1,6 +1,8 @@
-use std::ops::Range;
-use bevy::prelude::{Vec2, IVec3};
-use rustcraft_modlib::world::generation::biome::{scorer::BiomeSelectionScorer, registry::BiomeData};
+use std::{ops::Range, sync::{Arc, RwLock}};
+use bevy::{prelude::{Vec2, IVec3}, math::DVec3};
+use rustcraft_modlib::world::generation::{biome::{scorer::BiomeSelectionScorer, registry::BiomeData}, noise::NoiseTableInternal};
+use super::noise::{NOISE_LAYER_HEIGHT, NOISE_LAYER_TEMPERATURE, NOISE_LAYER_HUMIDITY};
+use crate::biomes::attributes::{ATTRIBUTE_GENVAR_HEIGHT, ATTRIBUTE_GENVAR_TEMPERATURE, ATTRIBUTE_GENVAR_HUMIDITY};
 
 /// Biome scoring for height, temperature, and humidity.
 /// 
@@ -10,31 +12,19 @@ use rustcraft_modlib::world::generation::biome::{scorer::BiomeSelectionScorer, r
 #[derive(Clone)]
 pub(crate) struct BaseSelectionScorer;
 impl BiomeSelectionScorer for BaseSelectionScorer {
-    fn get_point_score_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64 {
-        let coordinates_as_vec2 = Vec2 { x: coordinates.x as f32, y: coordinates.z as f32 };
-        /* let height = add_up_2d(vec![
-            (&WGEN_HEIGHT_NOISE_1, WGEN_HEIGHT_NOISE_1_MODIFIER, coordinates_as_vec2),
-            (&WGEN_HEIGHT_NOISE_2, WGEN_HEIGHT_NOISE_2_MODIFIER, coordinates_as_vec2),
-            (&WGEN_HEIGHT_NOISE_3, WGEN_HEIGHT_NOISE_3_MODIFIER, coordinates_as_vec2),
-        ]);
-        let temperature = add_up_2d(vec![
-            (&WGEN_TEMPERATURE_NOISE_1, WGEN_TEMPERATURE_NOISE_1_MODIFIER, coordinates_as_vec2),
-            (&WGEN_TEMPERATURE_NOISE_2, WGEN_TEMPERATURE_NOISE_2_MODIFIER, coordinates_as_vec2),
-            (&WGEN_TEMPERATURE_NOISE_3, WGEN_TEMPERATURE_NOISE_3_MODIFIER, coordinates_as_vec2),
-        ]);
-        let humidity = add_up_2d(vec![
-            (&WGEN_HUMIDITY_NOISE_1, WGEN_HUMIDITY_NOISE_1_MODIFIER, coordinates_as_vec2),
-            (&WGEN_HUMIDITY_NOISE_2, WGEN_HUMIDITY_NOISE_2_MODIFIER, coordinates_as_vec2),
-            (&WGEN_HUMIDITY_NOISE_3, WGEN_HUMIDITY_NOISE_3_MODIFIER, coordinates_as_vec2),
-        ]); */
+    fn get_point_score_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData, noise_table: &NoiseTableInternal) -> f64 {
+        let d_vec = DVec3 { x: coordinates.x as f64, y: coordinates.y as f64, z: coordinates.z as f64 };
+        let height = noise_table.get_value(NOISE_LAYER_HEIGHT, d_vec).unwrap();
+        let temperature = noise_table.get_value(NOISE_LAYER_TEMPERATURE, d_vec).unwrap();
+        let humidity = noise_table.get_value(NOISE_LAYER_HUMIDITY, d_vec).unwrap();
 
         let mut total = 0.0;
 
         // Calculate score
-        /* for (level, attribute) in [
-            (height, biome_data.get_attribute(BiomeData::ATTRIBUTE_GENVAR_HEIGHT)),
-            (temperature, biome_data.get_attribute(BiomeData::ATTRIBUTE_GENVAR_TEMPERATURE)),
-            (humidity, biome_data.get_attribute(BiomeData::ATTRIBUTE_GENVAR_HUMIDITY)),
+        for (level, attribute) in [
+            (height, biome_data.get_attribute(ATTRIBUTE_GENVAR_HEIGHT)),
+            (temperature, biome_data.get_attribute(ATTRIBUTE_GENVAR_TEMPERATURE)),
+            (humidity, biome_data.get_attribute(ATTRIBUTE_GENVAR_HUMIDITY)),
         ] {
             if attribute.is_none() { continue; }
             let attribute: Result<Range<f32>, ()> = attribute.unwrap().clone().try_into();
@@ -50,7 +40,7 @@ impl BiomeSelectionScorer for BaseSelectionScorer {
 
             // Apply to total
             total += value;
-        } */
+        }
 
         total
     }
