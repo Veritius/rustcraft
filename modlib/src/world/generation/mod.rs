@@ -78,6 +78,7 @@ fn generation_dispatch_system(
     mut chunk_registry: ResMut<ChunkRegistry>,
     biome_registry: Res<BiomeRegistry>,
     world_gen_config: Res<WorldGenerationConfig>,
+    noise_table: Res<NoiseTable>,
     chunk_mat: Res<ChunkMaterialHandle>,
 ) {
     let task_pool = AsyncComputeTaskPool::get();
@@ -87,12 +88,13 @@ fn generation_dispatch_system(
         let generation_seed = world_gen_config.seed;
         let generation_mode = world_gen_config.mode;
         let world_gen_config_arc = world_gen_config.get_passes_arc();
+        let noise_table = noise_table.internal();
 
         // Async task definition
         let task: Task<Chunk> = task_pool.spawn(async move {
             let mut chunk = Chunk::new(chunk_position.into());
             // let biome = biome_registry_arc.calculate_biome_for_chunk(chunk_position);
-            world_gen_config_arc.do_passes_on_chunk(chunk_position, generation_seed, generation_mode, &mut chunk);
+            world_gen_config_arc.do_passes_on_chunk(chunk_position, generation_seed, generation_mode, noise_table, &mut chunk);
 
             chunk
         });

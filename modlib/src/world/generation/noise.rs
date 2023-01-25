@@ -17,6 +17,10 @@ impl NoiseTable {
     pub fn add_layer(&mut self, key: String, layer: Box<dyn NoiseLayer>) {
         self.0.write().unwrap().add_layer(key, layer);
     }
+
+    pub fn internal(&self) -> Arc<RwLock<NoiseTableInternal>> {
+        self.0.clone()
+    }
 }
 
 pub struct NoiseTableInternal(HashMap<String, Box<dyn NoiseLayer>>);

@@ -1,8 +1,10 @@
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use bevy::prelude::*;
 use dyn_clone::DynClone;
 use crate::world::chunk::Chunk;
+
+use super::noise::NoiseTableInternal;
 
 #[derive(Clone)]
 pub struct WorldGenPasses {
@@ -20,9 +22,10 @@ impl WorldGenPasses {
         self.passes.push(Box::new(pass));
     }
 
-    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, chunk: &mut Chunk) {
+    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, noise: Arc<RwLock<NoiseTableInternal>>, chunk: &mut Chunk) {
+        let noise = noise.read().unwrap();
         for pass in &self.passes {
-            pass.chunk_pass(pos, seed, mode, chunk);
+            pass.chunk_pass(pos, seed, mode, &noise, chunk);
         }
     }
 }
@@ -65,8 +68,8 @@ impl WorldGenerationConfig {
         self.passes.clone()
     }
 
-    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, chunk: &mut Chunk) {
-        self.passes.do_passes_on_chunk(pos, self.seed, self.mode, chunk);
+    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, noise: Arc<RwLock<NoiseTableInternal>>, chunk: &mut Chunk) {
+        self.passes.do_passes_on_chunk(pos, self.seed, self.mode, noise, chunk);
     }
 }
 
@@ -88,7 +91,7 @@ pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
     /// Checks if this generator pass supports a specific generation mode.
     fn supports_mode(&self, mode: WorldGenerationMode) -> bool;
     /// Does a pass over a given chunk.
-    fn chunk_pass(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, chunk: &mut Chunk);
+    fn chunk_pass(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, noise: &NoiseTableInternal, chunk: &mut Chunk);
 }
 
 pub(crate) fn generation_config_buffer_transfer_system(
