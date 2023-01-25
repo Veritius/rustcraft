@@ -11,6 +11,10 @@ impl Blocks {
     pub fn add_block_type(&self, block: BlockData) {
         self.0.write().unwrap().add_block_type(block);
     }
+
+    pub fn get_by_string_id(&self, id: &str) -> Option<(BlockId, BlockData)> {
+        self.0.read().unwrap().get_by_string_id(id)
+    }
 }
 
 impl Default for Blocks {
@@ -61,10 +65,10 @@ impl BlockRegistryInternal {
         self.data_map.get(&id)
     }
 
-    pub fn get_by_string_id(&self, id: String) -> Option<&BlockData> {
-        match self.name_map.get(&id) {
+    pub fn get_by_string_id(&self, id: &str) -> Option<(BlockId, BlockData)> {
+        match self.name_map.get(id) {
             Some(id) => {
-                self.data_map.get(id)
+                Some((*id, self.data_map.get(id).unwrap().clone()))
             },
             None => None,
         }

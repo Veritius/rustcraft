@@ -12,7 +12,7 @@ use rustcraft_modlib::world::{
     },
     block::{
         BlockId,
-        Block,
+        Block, registry::BLOCK_REGISTRY,
     },
 };
 use super::noise::NOISE_LAYER_HEIGHT;
@@ -32,6 +32,12 @@ impl WorldGeneratorPass for BaseTerrainPass {
 
     fn chunk_pass(&self, pos: IVec3, chunk: &mut Chunk) {
         let worldgen_data = WORLD_GENERATION.read().unwrap();
+        let blocks = BLOCK_REGISTRY.read().unwrap();
+
+        let grass = Block::Generic(blocks.get_by_string_id("rustcraft_grass").unwrap().0);
+        let dirt = Block::Generic(blocks.get_by_string_id("rustcraft_dirt").unwrap().0);
+        let stone = Block::Generic(blocks.get_by_string_id("rustcraft_stone").unwrap().0);
+
         for x in 0..CHUNK_SIZE {
         for y in 0..CHUNK_SIZE {
         for z in 0..CHUNK_SIZE {
@@ -45,13 +51,13 @@ impl WorldGeneratorPass for BaseTerrainPass {
             let height = level.round();
             let v_block_pos = dvec.z.round();
             if height == v_block_pos {
-                chunk.set_block(x, y, z, Block::Generic(BlockId(2)));
+                chunk.set_block(x, y, z, grass);
             }
             if height > v_block_pos && v_block_pos >= height - V_DIRT_DEPTH {
-                chunk.set_block(x, y, z, Block::Generic(BlockId(1)));
+                chunk.set_block(x, y, z, dirt);
             }
             if height - V_DIRT_DEPTH > v_block_pos {
-                chunk.set_block(x, y, z, Block::Generic(BlockId(3)));
+                chunk.set_block(x, y, z, stone);
             }
         }}}
     }

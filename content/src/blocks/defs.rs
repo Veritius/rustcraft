@@ -12,7 +12,7 @@ pub(crate) fn water() -> BlockData {
 pub(crate) fn dirt() -> BlockData {
     let mut block = BlockData::new("rustcraft_dirt", MeshingVisibility::Opaque);
     block.insert_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME, AttributeValue::StaticStr("Dirt"));
-    block.insert_attribute(BlockData::ATTRIBUTE_BASE_COLOR, AttributeValue::Color(Color::BEIGE));
+    block.insert_attribute(BlockData::ATTRIBUTE_BASE_COLOR, AttributeValue::Color(Color::hex("724A11").unwrap()));
     block.insert_attribute(BlockData::ATTRIBUTE_SOLID_TEXTURE_SIDES, AttributeValue::StaticStrX6(["dirt"; 6]));
 
     block
