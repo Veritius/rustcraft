@@ -3,10 +3,10 @@ use std::{collections::BTreeMap, ops::Deref, task::Poll};
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::Indices}, tasks::{AsyncComputeTaskPool, Task}};
 use futures_lite::{FutureExt, future};
 use ndarray::Array3;
-use crate::world::{block::{registry::BlockRegistry, entity::BlockEntity, BlockId, Block}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
+use crate::world::{block::{entity::BlockComponent, BlockId, Block, registry::Blocks}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
 use self::greedy::greedy_mesh;
 
-use super::{registry::ChunkRegistry, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};
+use super::{registry::Chunks, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};
 
 mod greedy;
 
@@ -51,10 +51,10 @@ pub fn chunk_remesh_dispatch_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
-    block_registry: Res<BlockRegistry>,
-    chunk_registry: Res<ChunkRegistry>,
+    block_registry: Res<Blocks>,
+    chunk_registry: Res<Chunks>,
     world_map: WorldMapHelpers,
-    blocks: Query<(Entity, &BlockEntity)>,
+    blocks: Query<(Entity, &BlockComponent)>,
     chunks: Query<(Entity, &Chunk, Option<&RemeshChunkMarker>), Without<BeingRemeshed>>,
 ) {
     let task_pool = AsyncComputeTaskPool::get();
@@ -108,14 +108,11 @@ pub fn chunk_remesh_dispatch_system(
             //     }
             // }
 
-            // TODO: Figure out a solution that doesn't involve cloning the entire block registry
-            let registry = block_registry.get_internal_registry();
-            
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
-                greedy_mesh(&mut render_mesh, &intermediate_array, &registry);
+                greedy_mesh(&mut render_mesh, &intermediate_array);
 
                 render_mesh
             })));
@@ -137,7 +134,7 @@ pub fn chunk_remesh_polling_system(
 }
 
 pub(crate) fn remesh_changed_chunks_system(
-    registry: Res<ChunkRegistry>,
+    registry: Res<Chunks>,
     mut events: EventReader<ChunkModifiedEvent>,
     mut commands: Commands,
 ) {

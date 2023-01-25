@@ -4,7 +4,7 @@ use bevy::prelude::{Resource, Entity, warn, IVec3};
 pub type ChunkCoordinate = (i32, i32, i32);
 
 #[derive(Resource)]
-pub struct ChunkRegistry {
+pub struct Chunks {
     registry: BTreeMap<ChunkCoordinate, ChunkState>,
 }
 
@@ -18,7 +18,7 @@ pub enum ChunkState {
     Present(Entity),
 }
 
-impl ChunkRegistry {
+impl Chunks {
     pub fn new() -> Self {
         Self {
             registry: BTreeMap::new(),

@@ -1,9 +1,9 @@
 use self::{
     biome::{
         scorer::BiomeSelectionScorer,
-        registry::{BiomeData, BiomeRegistry, BiomeRegistryStartupBuffer, biome_buffer_transfer_system},
+        registry::{BiomeData, BiomesInternal, Biomes},
     },
-    generator::{WorldGenerationConfig, WorldGeneratorPass, WorldGenerationConfigStartupBuffer, generation_config_buffer_transfer_system}, noise::{NoiseTable, NoiseLayer},
+    generator::{WorldGeneratorPass, WorldGeneration, WORLD_GENERATION}, noise::NoiseLayer,
 };
 use bevy::{
     prelude::*,
@@ -21,7 +21,7 @@ use super::{
     chunk::{
         events::LoadChunkMessage,
         meshing::RemeshChunkMarker,
-        registry::{ChunkRegistry, ChunkState},
+        registry::{Chunks, ChunkState},
         Chunk, CHUNK_SIZE, CHUNK_SIZE_F32, CHUNK_SIZE_I32,
     },
 };
@@ -42,17 +42,12 @@ pub struct BeingGenerated(Task<Chunk>);
 pub struct WorldGenPlugin;
 impl Plugin for WorldGenPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(BiomeRegistryStartupBuffer::new());
-        app.add_startup_system_to_stage(StartupStage::PostStartup,
-            biome_buffer_transfer_system);
-        app.insert_resource(WorldGenerationConfigStartupBuffer::new());
-        app.add_startup_system_to_stage(StartupStage::PostStartup,
-            generation_config_buffer_transfer_system);
-        app.insert_resource(NoiseTable::new());
+        app.init_resource::<Biomes>();
+        app.init_resource::<WorldGeneration>();
 
         app.add_startup_system(worldgen_setup_system);
-        app.add_system(
-            generation_dispatch_system.label(SystemLabels::ChunkGenerationDispatchSystem),
+        app.add_system(generation_dispatch_system
+            .label(SystemLabels::ChunkGenerationDispatchSystem)
         );
         app.add_system(
             generation_polling_system
@@ -75,26 +70,17 @@ fn worldgen_setup_system(mut commands: Commands, mut assets: ResMut<Assets<Stand
 fn generation_dispatch_system(
     mut commands: Commands,
     mut gen_events: EventReader<LoadChunkMessage>,
-    mut chunk_registry: ResMut<ChunkRegistry>,
-    biome_registry: Res<BiomeRegistry>,
-    world_gen_config: Res<WorldGenerationConfig>,
-    noise_table: Res<NoiseTable>,
+    mut chunk_registry: ResMut<Chunks>,
     chunk_mat: Res<ChunkMaterialHandle>,
 ) {
     let task_pool = AsyncComputeTaskPool::get();
     for event in gen_events.iter() {
         let chunk_position = event.0.clone();
-        // let biome_registry_arc = biome_registry.get_internal_registry();
-        let generation_seed = world_gen_config.seed;
-        let generation_mode = world_gen_config.mode;
-        let world_gen_config_arc = world_gen_config.get_passes_arc();
-        let noise_table = noise_table.internal();
 
         // Async task definition
         let task: Task<Chunk> = task_pool.spawn(async move {
             let mut chunk = Chunk::new(chunk_position.into());
-            // let biome = biome_registry_arc.calculate_biome_for_chunk(chunk_position);
-            world_gen_config_arc.do_passes_on_chunk(chunk_position, generation_seed, generation_mode, noise_table, &mut chunk);
+            WORLD_GENERATION.read().unwrap().do_passes_on_chunk(chunk_position, &mut chunk);
 
             chunk
         });
@@ -114,7 +100,7 @@ fn generation_dispatch_system(
 
 fn generation_polling_system(
     mut commands: Commands,
-    mut chunk_registry: ResMut<ChunkRegistry>,
+    mut chunk_registry: ResMut<Chunks>,
     mut query: Query<(Entity, &mut BeingGenerated)>,
 ) {
     for (entity, mut chunk) in query.iter_mut() {
@@ -132,15 +118,15 @@ fn generation_polling_system(
 pub trait WorldGenExtensionFns {
     fn add_biome(&mut self, biome: BiomeData) -> &mut Self;
     fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) -> &mut Self;
-    fn add_world_generator_pass(&mut self, scorer: impl WorldGeneratorPass) -> &mut Self;
+    fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) -> &mut Self;
     fn add_noise_layer(&mut self, key: String, layer: impl NoiseLayer) -> &mut Self;
 }
 
 impl WorldGenExtensionFns for App {
     /// Adds a new biome type
     fn add_biome(&mut self, biome: BiomeData) -> &mut Self {
-        self.add_startup_system(move |mut biome_table: ResMut<BiomeRegistryStartupBuffer>| {
-            biome_table.add_biome_type(biome.clone());
+        self.add_startup_system(move |biomes: Res<Biomes>| {
+            biomes.add_biome(biome.clone());
         });
 
         self
@@ -148,17 +134,17 @@ impl WorldGenExtensionFns for App {
 
     /// Adds a new `BiomeSelectionScorer` to the game
     fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) -> &mut Self {
-        self.add_startup_system(move |mut biome_table: ResMut<BiomeRegistryStartupBuffer>| {
-            biome_table.add_biome_scorer(dyn_clone::clone(&scorer));
+        self.add_startup_system(move |biomes: Res<Biomes>| {
+            biomes.add_biome_scorer(dyn_clone::clone(&scorer));
         });
 
         self
     }
 
     /// Adds a new `WorldGeneratorPass` to the chunk generation system
-    fn add_world_generator_pass(&mut self, gen_pass: impl WorldGeneratorPass) -> &mut Self {
-        self.add_startup_system(move |mut generation_config: ResMut<WorldGenerationConfigStartupBuffer>| {
-            generation_config.add_worldgen_pass(dyn_clone::clone(&gen_pass));
+    fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) -> &mut Self {
+        self.add_startup_system(move |world_generation: Res<WorldGeneration>| {
+            world_generation.add_world_generator_pass(dyn_clone::clone(&pass));
         });
 
         self
@@ -166,8 +152,8 @@ impl WorldGenExtensionFns for App {
 
     /// Adds a new `NoiseLayer` to the chunk generation system
     fn add_noise_layer(&mut self, key: String, layer: impl NoiseLayer) -> &mut Self {
-        self.add_startup_system(move |mut layer_table: ResMut<NoiseTable>| {
-            layer_table.add_layer(key.clone(), dyn_clone::clone_box(&layer));
+        self.add_startup_system(move |world_generation: Res<WorldGeneration>| {
+            world_generation.add_noise_layer(key.clone(), dyn_clone::clone(&layer));
         });
 
         self

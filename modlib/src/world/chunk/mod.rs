@@ -6,20 +6,21 @@ pub mod events;
 
 use bevy::{prelude::{Component, SystemLabel, Entity, Plugin, IntoSystemDescriptor}, utils::HashMap};
 use ndarray::Array3;
-use self::{registry::{ChunkCoordinate, ChunkRegistry}, events::*, meshing::*};
+use self::{registry::{ChunkCoordinate, Chunks}, events::*, meshing::*};
 
 use super::block::{BlockId, Block};
 
 pub struct ChunkedWorldPlugin;
 impl Plugin for ChunkedWorldPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
+        app.insert_resource(Chunks::new());
+
         app.add_event::<UnloadChunkMessage>();
         app.add_event::<LoadChunkMessage>();
         app.add_event::<ChunkModifiedEvent>();
 
         app.add_system(chunk_change_system
             .label(SystemLabels::ChunkChangeEventSystem));
-        app.insert_resource(ChunkRegistry::new());
         app.add_system(chunk_remesh_dispatch_system
             .label(SystemLabels::ChunkMeshingDispatchSystem));
         app.add_system(chunk_remesh_polling_system

@@ -3,9 +3,8 @@ use rustcraft_modlib::world::{
     generation::{
         generator::{
             WorldGeneratorPass,
-            WorldGenerationMode,
+            WorldGenerationMode, WORLD_GENERATION,
         },
-        noise::NoiseTableInternal,
     },
     chunk::{
         Chunk,
@@ -31,7 +30,8 @@ impl WorldGeneratorPass for BaseTerrainPass {
         }
     }
 
-    fn chunk_pass(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, noise: &NoiseTableInternal, chunk: &mut Chunk) {
+    fn chunk_pass(&self, pos: IVec3, chunk: &mut Chunk) {
+        let worldgen_data = WORLD_GENERATION.read().unwrap();
         for x in 0..CHUNK_SIZE {
         for y in 0..CHUNK_SIZE {
         for z in 0..CHUNK_SIZE {
@@ -41,7 +41,7 @@ impl WorldGeneratorPass for BaseTerrainPass {
                 y: ((pos.z * CHUNK_SIZE_I32) + z as i32) as f64,
             };
             
-            let level = noise.get_value(NOISE_LAYER_HEIGHT, dvec).unwrap();
+            let level = worldgen_data.get_noise_layer(NOISE_LAYER_HEIGHT).unwrap().get_value(dvec);
             let height = level.round();
             let v_block_pos = dvec.z.round();
             if height == v_block_pos {

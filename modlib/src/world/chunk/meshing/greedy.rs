@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::sync::{Arc, RwLockReadGuard};
 
 use bevy::{prelude::{Mesh, Color}, render::mesh::Indices};
 use ndarray::{Array3, Axis};
-use crate::world::{block::{BlockId, registry::{BlockRegistry, BlockRegistryInternal}, Block, data::BlockData}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
+use crate::world::{block::{BlockId, registry::{BlockRegistryInternal, BLOCK_REGISTRY}, Block, data::BlockData}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
 
 use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 
@@ -21,9 +21,10 @@ use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 pub(super) fn greedy_mesh(
     mesh: &mut Mesh,
     array: &Array3<BlockId>,
-    registry: &Arc<BlockRegistryInternal>,
 ) {
     // TODO: This can be optimised by not copying data in the array passed in arguments. Possibly use subviews from ndarray?
+
+    let registry = BLOCK_REGISTRY.read().unwrap();
 
     let mut positions = vec![];
     let mut normals = vec![];
@@ -47,10 +48,10 @@ pub(super) fn greedy_mesh(
         for y in 1..SHAPE_SIZE_USIZE-1 {
             for z in 1..SHAPE_SIZE_USIZE-1 {
                 let this_block = array_subview[[y, z]];
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x-1, y, z]], registry)) {
+                if get_visibility(this_block, &registry).is_visible_against(&get_visibility(array[[x-1, y, z]], &registry)) {
                     left_slice[y-1][z-1] = this_block;
                 }
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x+1, y, z]], registry)) {
+                if get_visibility(this_block, &registry).is_visible_against(&get_visibility(array[[x+1, y, z]], &registry)) {
                     right_slice[y-1][z-1] = this_block;
                 }
             }
@@ -71,7 +72,7 @@ pub(super) fn greedy_mesh(
                 [1.0, 0.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            color_extend(&mut colors, blockid, registry);
+            color_extend(&mut colors, blockid, &registry);
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -86,7 +87,7 @@ pub(super) fn greedy_mesh(
                 [-1.0, 0.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            color_extend(&mut colors, blockid, registry);
+            color_extend(&mut colors, blockid, &registry);
         }
     }
 
@@ -98,10 +99,10 @@ pub(super) fn greedy_mesh(
         for x in 1..SHAPE_SIZE_USIZE-1 {
             for z in 1..SHAPE_SIZE_USIZE-1 {
                 let this_block = array_subview[[x, z]];
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y-1, z]], registry)) {
+                if get_visibility(this_block, &registry).is_visible_against(&get_visibility(array[[x, y-1, z]], &registry)) {
                     left_slice[x-1][z-1] = this_block;
                 }
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y+1, z]], registry)) {
+                if get_visibility(this_block, &registry).is_visible_against(&get_visibility(array[[x, y+1, z]], &registry)) {
                     right_slice[x-1][z-1] = this_block;
                 }
             }
@@ -122,7 +123,7 @@ pub(super) fn greedy_mesh(
                 [0.0, 1.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            color_extend(&mut colors, blockid, registry);
+            color_extend(&mut colors, blockid, &registry);
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -137,7 +138,7 @@ pub(super) fn greedy_mesh(
                 [0.0, -1.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
-            color_extend(&mut colors, blockid, registry);
+            color_extend(&mut colors, blockid, &registry);
         }
     }
 
@@ -149,10 +150,10 @@ pub(super) fn greedy_mesh(
         for x in 1..SHAPE_SIZE_USIZE-1 {
             for y in 1..SHAPE_SIZE_USIZE-1 {
                 let this_block = array_subview[[x, y]];
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y, z-1]], registry)) {
+                if get_visibility(this_block, &registry).is_visible_against(&get_visibility(array[[x, y, z-1]], &registry)) {
                     left_slice[x-1][y-1] = this_block;
                 }
-                if get_visibility(this_block, registry).is_visible_against(&get_visibility(array[[x, y, z+1]], registry)) {
+                if get_visibility(this_block, &registry).is_visible_against(&get_visibility(array[[x, y, z+1]], &registry)) {
                     right_slice[x-1][y-1] = this_block;
                 }
             }
@@ -173,7 +174,7 @@ pub(super) fn greedy_mesh(
                 [0.0, 0.0, 1.0]; 6
             ]);
             uvs.extend(UVS);
-            color_extend(&mut colors, blockid, registry);
+            color_extend(&mut colors, blockid, &registry);
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -188,7 +189,7 @@ pub(super) fn greedy_mesh(
                 [0.0, 0.0, -1.0]; 6
             ]);
             uvs.extend(UVS);
-            color_extend(&mut colors, blockid, registry);
+            color_extend(&mut colors, blockid, &registry);
         }
     }
 
@@ -242,7 +243,7 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
     quads
 }
 
-fn color_extend(colors: &mut Vec<[f32; 4]>, blockid: BlockId, registry: &Arc<BlockRegistryInternal>) {
+fn color_extend(colors: &mut Vec<[f32; 4]>, blockid: BlockId, registry: &RwLockReadGuard<BlockRegistryInternal>) {
     const EMPTY_COLOR: [[f32; 4]; 6] = [[1.0, 1.0, 1.0, 1.0]; 6];
     colors.extend(match registry.get_by_numerical_id(blockid) {
         Some(blockdata) => {
@@ -258,7 +259,7 @@ fn color_extend(colors: &mut Vec<[f32; 4]>, blockid: BlockId, registry: &Arc<Blo
     });
 }
 
-fn get_visibility(block: BlockId, registry: &Arc<BlockRegistryInternal>) -> MeshingVisibility {
+fn get_visibility(block: BlockId, registry: &RwLockReadGuard<BlockRegistryInternal>) -> MeshingVisibility {
     match registry.get_by_numerical_id(block) {
         Some(entry) => entry.block_visibility,
         None => MeshingVisibility::Invisible,

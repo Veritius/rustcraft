@@ -1,75 +1,67 @@
 use std::sync::{Arc, RwLock};
-
-use bevy::prelude::*;
+use bevy::{prelude::*, render::once_cell::sync::Lazy, utils::HashMap};
 use dyn_clone::DynClone;
 use crate::world::chunk::Chunk;
+use super::noise::NoiseLayer;
 
-use super::noise::NoiseTableInternal;
+pub static WORLD_GENERATION: Lazy<Arc<RwLock<WorldGenerationInternal>>> = Lazy::new(||{Arc::new(RwLock::new(WorldGenerationInternal::new()))});
 
-#[derive(Clone)]
-pub struct WorldGenPasses {
-    passes: Vec<Box<dyn WorldGeneratorPass>>,
+#[derive(Resource)]
+pub struct WorldGeneration(Arc<RwLock<WorldGenerationInternal>>);
+
+impl WorldGeneration {
+    pub fn add_world_generator_pass(&self, pass: impl WorldGeneratorPass) {
+        self.0.write().unwrap().add_world_generator_pass(pass);
+    }
+
+    pub fn add_noise_layer(&self, name: String, layer: impl NoiseLayer) {
+        self.0.write().unwrap().add_noise_layer(name, layer);
+    }
+
+    pub fn do_passes_on_chunk(&self, pos: IVec3, chunk: &mut Chunk) {
+        self.0.read().unwrap().do_passes_on_chunk(pos, chunk);
+    }
 }
 
-impl WorldGenPasses {
-    pub(crate) fn new() -> Self {
+impl Default for WorldGeneration {
+    fn default() -> Self {
+        Self(WORLD_GENERATION.clone())
+    }
+}
+
+pub struct WorldGenerationInternal {
+    pub seed: u32,
+    pub gen_mode: WorldGenerationMode,
+    passes: Vec<Box<dyn WorldGeneratorPass>>,
+    noise_layers: HashMap<String, Box<dyn NoiseLayer>>,
+}
+
+impl WorldGenerationInternal {
+    fn new() -> Self {
         Self {
+            seed: 0,
+            gen_mode: WorldGenerationMode::NONE,
             passes: vec![],
+            noise_layers: HashMap::new(),
         }
     }
-    
-    pub(crate) fn add_worldgen_pass(&mut self, pass: impl WorldGeneratorPass) {
+
+    pub fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) {
         self.passes.push(Box::new(pass));
     }
 
-    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, noise: Arc<RwLock<NoiseTableInternal>>, chunk: &mut Chunk) {
-        let noise = noise.read().unwrap();
+    pub fn add_noise_layer(&mut self, name: String, layer: impl NoiseLayer) {
+        self.noise_layers.insert(name, Box::new(layer));
+    }
+
+    pub fn do_passes_on_chunk(&self, pos: IVec3, chunk: &mut Chunk) {
         for pass in &self.passes {
-            pass.chunk_pass(pos, seed, mode, &noise, chunk);
-        }
-    }
-}
-
-#[derive(Resource)]
-pub(crate) struct WorldGenerationConfigStartupBuffer {
-    passes: WorldGenPasses
-}
-
-impl WorldGenerationConfigStartupBuffer {
-    pub(crate) fn new() -> Self {
-        Self {
-            passes: WorldGenPasses::new(),
+            pass.chunk_pass(pos, chunk);
         }
     }
 
-    pub fn add_worldgen_pass(&mut self, pass: impl WorldGeneratorPass) {
-        self.passes.add_worldgen_pass(pass);
-    }
-}
-
-/// World generation options
-#[derive(Resource)]
-pub struct WorldGenerationConfig {
-    pub seed: u32,
-    pub mode: WorldGenerationMode,
-    passes: Arc<WorldGenPasses>,
-}
-
-impl WorldGenerationConfig {
-    pub(crate) fn new(seed: u32, vec: WorldGenPasses) -> Self {
-        Self {
-            seed,
-            mode: WorldGenerationMode::NONE,
-            passes: Arc::new(vec),
-        }
-    }
-
-    pub fn get_passes_arc(&self) -> Arc<WorldGenPasses> {
-        self.passes.clone()
-    }
-
-    pub(crate) fn do_passes_on_chunk(&self, pos: IVec3, noise: Arc<RwLock<NoiseTableInternal>>, chunk: &mut Chunk) {
-        self.passes.do_passes_on_chunk(pos, self.seed, self.mode, noise, chunk);
+    pub fn get_noise_layer(&self, name: &str) -> Option<&Box<dyn NoiseLayer>> {
+        self.noise_layers.get(name)
     }
 }
 
@@ -93,13 +85,5 @@ pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
     /// Checks if this generator pass supports a specific generation mode.
     fn supports_mode(&self, mode: WorldGenerationMode) -> bool;
     /// Does a pass over a given chunk.
-    fn chunk_pass(&self, pos: IVec3, seed: u32, mode: WorldGenerationMode, noise: &NoiseTableInternal, chunk: &mut Chunk);
-}
-
-pub(crate) fn generation_config_buffer_transfer_system(
-    mut commands: Commands,
-    buffer: Res<WorldGenerationConfigStartupBuffer>,
-) {
-    commands.insert_resource(WorldGenerationConfig::new(0, buffer.passes.clone()));
-    commands.remove_resource::<WorldGenerationConfigStartupBuffer>();
+    fn chunk_pass(&self, pos: IVec3, chunk: &mut Chunk);
 }

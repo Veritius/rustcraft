@@ -5,7 +5,7 @@ use super::BlockId;
 
 // Block entities store a
 #[derive(Component)]
-pub enum BlockEntity {
+pub enum BlockComponent {
     Custom {
         visibility: MeshingVisibility,
     },

@@ -1,12 +1,13 @@
 use bevy::{prelude::*, ecs::system::SystemParam};
 use crate::debug::{DebugMenuOpen, AppendDebugMenuMessage};
 use self::{
-    chunk::{registry::{ChunkRegistry, ChunkCoordinate, ChunkState}, Chunk, meshing::BeingRemeshed},
+    chunk::{registry::{Chunks, ChunkCoordinate, ChunkState}, Chunk, meshing::BeingRemeshed},
     block::{
-        registry::BlockRegistry,
-        entity::BlockEntity, Block,
+        entity::BlockComponent,
+        Block,
+        registry::Blocks,
     },
-    generation::biome::registry::BiomeRegistry,
+    generation::biome::registry::{BiomesInternal, Biomes},
 };
 
 pub mod block;
@@ -15,10 +16,10 @@ pub mod generation;
 
 #[derive(SystemParam)]
 pub struct WorldMapHelpers<'w, 's> {
-    pub block_registry: Res<'w, BlockRegistry>,
-    pub chunk_registry: Res<'w, ChunkRegistry>,
-    pub biome_registry: Res<'w, BiomeRegistry>,
-    pub blocks: Query<'w, 's, (Entity, &'static BlockEntity)>,
+    pub block_registry: Res<'w, Blocks>,
+    pub chunk_registry: Res<'w, Chunks>,
+    pub biome_registry: Res<'w, Biomes>,
+    pub blocks: Query<'w, 's, (Entity, &'static BlockComponent)>,
     pub chunks: Query<'w, 's, (Entity, &'static Chunk)>,
 }
 

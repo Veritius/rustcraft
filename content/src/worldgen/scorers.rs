@@ -1,6 +1,6 @@
 use std::{ops::Range, sync::{Arc, RwLock}};
 use bevy::{prelude::{Vec2, IVec3}, math::DVec3};
-use rustcraft_modlib::world::generation::{biome::{scorer::BiomeSelectionScorer, registry::BiomeData}, noise::NoiseTableInternal};
+use rustcraft_modlib::world::generation::{biome::{scorer::BiomeSelectionScorer, registry::BiomeData}, generator::WORLD_GENERATION};
 use super::noise::{NOISE_LAYER_HEIGHT, NOISE_LAYER_TEMPERATURE, NOISE_LAYER_HUMIDITY};
 use crate::biomes::attributes::{ATTRIBUTE_GENVAR_HEIGHT, ATTRIBUTE_GENVAR_TEMPERATURE, ATTRIBUTE_GENVAR_HUMIDITY};
 
@@ -12,11 +12,12 @@ use crate::biomes::attributes::{ATTRIBUTE_GENVAR_HEIGHT, ATTRIBUTE_GENVAR_TEMPER
 #[derive(Clone)]
 pub(crate) struct BaseSelectionScorer;
 impl BiomeSelectionScorer for BaseSelectionScorer {
-    fn get_point_score_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData, noise_table: &NoiseTableInternal) -> f64 {
+    fn get_point_score_for_coordinates(&self, coordinates: IVec3, biome_data: &BiomeData) -> f64 {
+        let worldgen_data = WORLD_GENERATION.read().unwrap();
         let d_vec = DVec3 { x: coordinates.x as f64, y: coordinates.y as f64, z: coordinates.z as f64 };
-        let height = noise_table.get_value(NOISE_LAYER_HEIGHT, d_vec).unwrap();
-        let temperature = noise_table.get_value(NOISE_LAYER_TEMPERATURE, d_vec).unwrap();
-        let humidity = noise_table.get_value(NOISE_LAYER_HUMIDITY, d_vec).unwrap();
+        let height = worldgen_data.get_noise_layer(NOISE_LAYER_HEIGHT).unwrap().get_value(d_vec);
+        let temperature = worldgen_data.get_noise_layer(NOISE_LAYER_TEMPERATURE).unwrap().get_value(d_vec);
+        let humidity = worldgen_data.get_noise_layer(NOISE_LAYER_HUMIDITY).unwrap().get_value(d_vec);
 
         let mut total = 0.0;
 

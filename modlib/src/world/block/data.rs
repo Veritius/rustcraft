@@ -2,7 +2,7 @@ use std::{ops::Range, collections::BTreeMap};
 use bevy::prelude::{App, ResMut, Color};
 use crate::{world::chunk::meshing::MeshingVisibility, attributes::{AttributeKind, AttributeValue}};
 
-use super::registry::{BlockRegistry, BlockRegistryStartupBuffer};
+use super::registry::Blocks;
 
 #[derive(Clone)]
 pub struct BlockData {
@@ -74,7 +74,7 @@ pub trait AddBlock {
 
 impl AddBlock for App {
     fn add_block(&mut self, block: BlockData) -> &mut Self {
-        self.add_startup_system(move |mut registry: ResMut<BlockRegistryStartupBuffer>| {
+        self.add_startup_system(move |mut registry: ResMut<Blocks>| {
             registry.add_block_type(block.clone());
         });
 

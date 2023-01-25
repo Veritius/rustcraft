@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use self::registry::{BlockRegistry, BlockRegistryStartupBuffer, block_buffer_transfer_system};
+use self::registry::Blocks;
 
 pub mod entity;
 pub mod data;
@@ -8,11 +8,9 @@ pub mod registry;
 pub struct BlockRegistryPlugin;
 impl Plugin for BlockRegistryPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        let mut block_registry = BlockRegistryStartupBuffer::new();
+        let block_registry = Blocks::default();
         block_registry.add_block_type(data::air_block());
         app.insert_resource(block_registry);
-        app.add_startup_system_to_stage(StartupStage::PostStartup,
-            block_buffer_transfer_system);
     }
 }
 
