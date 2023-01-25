@@ -14,6 +14,7 @@ use rustcraft_modlib::{
     },
     debug::DebugMenuPlugin
 };
+use worldgen::noise::{NOISE_LAYER_SURFACE, SurfaceNoise};
 
 pub mod blocks;
 pub mod biomes;
@@ -44,6 +45,8 @@ fn main() {
     app.add_biome(biomes::defs::jungle());
     app.add_biome(biomes::defs::desert());
     app.add_biome(biomes::defs::tundra());
+
+    app.add_noise_layer::<SurfaceNoise>(NOISE_LAYER_SURFACE.to_owned());
 
     app.add_system(wireframe_toggle_system);
 

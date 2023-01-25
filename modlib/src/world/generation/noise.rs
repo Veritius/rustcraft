@@ -13,8 +13,8 @@ impl NoiseTable {
         self.0.write().unwrap().set_seed(seed);
     }
 
-    pub fn add_layer(&mut self, key: String, layer: impl NoiseLayer) {
-        self.0.write().unwrap().add_layer(key, layer);
+    pub fn add_layer<T: NoiseLayer>(&mut self, key: String) {
+        self.0.write().unwrap().add_layer::<T>(key);
     }
 }
 
@@ -31,12 +31,13 @@ impl NoiseTableInternal {
         }
     }
 
-    pub(crate) fn add_layer(&mut self, key: String, layer: impl NoiseLayer) {
-        self.0.insert(key, Box::new(layer));
+    pub(crate) fn add_layer<T: NoiseLayer>(&mut self, key: String) {
+        self.0.insert(key, Box::new(T::new()));
     }
 }
 
 pub trait NoiseLayer: 'static + Send + Sync + DynClone {
+    fn new() -> Self where Self: Sized;
     fn get_value(&self, pos: DVec3) -> f64;
     fn set_seed(&mut self, seed: u32);
 }
