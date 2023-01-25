@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use bevy::{prelude::{Mesh, Color}, render::mesh::Indices};
 use ndarray::{Array3, Axis};
-use crate::world::{block::{BlockId, registry::{BlockRegistry, BlockRegistryInternal}, Block}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
+use crate::world::{block::{BlockId, registry::{BlockRegistry, BlockRegistryInternal}, Block, data::BlockData}, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8}};
 
 use super::{SHAPE_SIZE_USIZE, MeshingVisibility};
 
@@ -71,6 +71,7 @@ pub(super) fn greedy_mesh(
                 [1.0, 0.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
+            color_extend(&mut colors, blockid, registry);
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -85,6 +86,7 @@ pub(super) fn greedy_mesh(
                 [-1.0, 0.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
+            color_extend(&mut colors, blockid, registry);
         }
     }
 
@@ -120,6 +122,7 @@ pub(super) fn greedy_mesh(
                 [0.0, 1.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
+            color_extend(&mut colors, blockid, registry);
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -134,6 +137,7 @@ pub(super) fn greedy_mesh(
                 [0.0, -1.0, 0.0]; 6
             ]);
             uvs.extend(UVS);
+            color_extend(&mut colors, blockid, registry);
         }
     }
 
@@ -169,6 +173,7 @@ pub(super) fn greedy_mesh(
                 [0.0, 0.0, 1.0]; 6
             ]);
             uvs.extend(UVS);
+            color_extend(&mut colors, blockid, registry);
         }
         for (blockid, quad) in greedy_determine_quads(&right_slice) {
             positions.extend([
@@ -183,13 +188,14 @@ pub(super) fn greedy_mesh(
                 [0.0, 0.0, -1.0]; 6
             ]);
             uvs.extend(UVS);
+            color_extend(&mut colors, blockid, registry);
         }
     }
 
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
-    // mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
 }
 
 #[doc(hidden)]
@@ -234,6 +240,22 @@ fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE]) -> Vec<(B
     }
 
     quads
+}
+
+fn color_extend(colors: &mut Vec<[f32; 4]>, blockid: BlockId, registry: &Arc<BlockRegistryInternal>) {
+    const EMPTY_COLOR: [[f32; 4]; 6] = [[1.0, 1.0, 1.0, 1.0]; 6];
+    colors.extend(match registry.get_by_numerical_id(blockid) {
+        Some(blockdata) => {
+            match blockdata.get_attribute(BlockData::ATTRIBUTE_BASE_COLOR) {
+                Some(value) => {
+                    let value: Color = value.clone().try_into().unwrap();
+                    [value.as_rgba_f32(); 6]
+                },
+                None => EMPTY_COLOR,
+            }
+        },
+        None => EMPTY_COLOR,
+    });
 }
 
 fn get_visibility(block: BlockId, registry: &Arc<BlockRegistryInternal>) -> MeshingVisibility {

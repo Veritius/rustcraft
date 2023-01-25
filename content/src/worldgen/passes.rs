@@ -18,14 +18,15 @@ use rustcraft_modlib::world::{
 };
 use super::noise::NOISE_LAYER_HEIGHT;
 
-pub const WGEN_NORMAL_MODE: u32 = 2584328536;
+pub const WGEN_MODE_NORMAL: u32 = 2584328536;
+pub const V_DIRT_DEPTH: f64 = 5.0;
 
 #[derive(Clone)]
 pub struct BaseTerrainPass;
 impl WorldGeneratorPass for BaseTerrainPass {
     fn supports_mode(&self, mode: WorldGenerationMode) -> bool {
         match mode.0 {
-            WGEN_NORMAL_MODE => true,
+            WGEN_MODE_NORMAL => true,
             _ => false,
         }
     }
@@ -41,8 +42,16 @@ impl WorldGeneratorPass for BaseTerrainPass {
             };
             
             let level = noise.get_value(NOISE_LAYER_HEIGHT, dvec).unwrap();
-            if level > dvec.z {
+            let height = level.round();
+            let v_block_pos = dvec.z.round();
+            if height == v_block_pos {
+                chunk.set_block(x, y, z, Block::Generic(BlockId(2)));
+            }
+            if height > v_block_pos && v_block_pos >= height - V_DIRT_DEPTH {
                 chunk.set_block(x, y, z, Block::Generic(BlockId(1)));
+            }
+            if height - V_DIRT_DEPTH > v_block_pos {
+                chunk.set_block(x, y, z, Block::Generic(BlockId(3)));
             }
         }}}
     }

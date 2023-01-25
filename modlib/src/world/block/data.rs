@@ -23,7 +23,7 @@ impl BlockData {
     pub const ATTRIBUTE_DISPLAY_NAME: BlockAttribute =
         BlockAttribute::new("block_display_name", 0, AttributeKind::StaticStr);
     /// A base color for the block. Usually used either for debugging or massive world views.
-    pub const ATTRIBUTE_COLOR: BlockAttribute =
+    pub const ATTRIBUTE_BASE_COLOR: BlockAttribute =
         BlockAttribute::new("block_base_color", 1, AttributeKind::Color);
     /// Image ids for each side of a solid block, in this order:
     /// Left, right, up, down, forward, back.
@@ -85,7 +85,7 @@ impl AddBlock for App {
 pub(crate) fn air_block() -> BlockData {
     let mut block = BlockData::new("engine_air", MeshingVisibility::Invisible);
     block.insert_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME, AttributeValue::StaticStr("Air"));
-    block.insert_attribute(BlockData::ATTRIBUTE_COLOR, AttributeValue::Color(Color::NONE));
+    block.insert_attribute(BlockData::ATTRIBUTE_BASE_COLOR, AttributeValue::Color(Color::NONE));
 
     block
 }
