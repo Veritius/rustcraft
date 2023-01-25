@@ -3,7 +3,7 @@ use self::{
         scorer::BiomeSelectionScorer,
         registry::{BiomeData, BiomeRegistry, BiomeRegistryStartupBuffer, biome_buffer_transfer_system},
     },
-    generator::{WorldGenerationConfig, WorldGeneratorPass, WorldGenerationConfigStartupBuffer, generation_config_buffer_transfer_system},
+    generator::{WorldGenerationConfig, WorldGeneratorPass, WorldGenerationConfigStartupBuffer, generation_config_buffer_transfer_system}, noise::NoiseTable,
 };
 use bevy::{
     prelude::*,
@@ -28,6 +28,7 @@ use super::{
 
 pub mod biome;
 pub mod generator;
+pub mod noise;
 
 #[derive(SystemLabel)]
 pub enum SystemLabels {
@@ -47,6 +48,7 @@ impl Plugin for WorldGenPlugin {
         app.insert_resource(WorldGenerationConfigStartupBuffer::new());
         app.add_startup_system_to_stage(StartupStage::PostStartup,
             generation_config_buffer_transfer_system);
+        app.insert_resource(NoiseTable::new());
 
         app.add_startup_system(worldgen_setup_system);
         app.add_system(
