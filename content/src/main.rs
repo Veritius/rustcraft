@@ -9,7 +9,7 @@ use bevy_flycam::{NoCameraPlayerPlugin, FlyCam};
 use rustcraft_modlib::{
     world::{
         block::{data::AddBlock, BlockRegistryPlugin},
-        generation::{WorldGenPlugin, WorldGenExtensionFns, noise::{SimpleNoiseLayer2D, SimpleNoiseLayer3D}},
+        generation::{WorldGenPlugin, WorldGenExtensionFns, noise::SimpleNoiseLayer2D},
         chunk::{events::LoadChunkMessage, ChunkedWorldPlugin},
     },
     debug::DebugMenuPlugin, noise_rs::Perlin
@@ -47,19 +47,19 @@ fn main() {
     app.add_biome(biomes::defs::tundra());
 
     app.add_noise_layer(NOISE_LAYER_HEIGHT.to_owned(), SimpleNoiseLayer2D::new(2524123412, vec![
-        (5.0, Perlin::new(0), 0.003241255),
+        (5.0, Perlin::new(0), 0.029592342),
         (7.0, Perlin::new(0), 0.008732425),
-        (10.0, Perlin::new(0), 0.029592342),
+        (10.0, Perlin::new(0), 0.003241255),
     ]));
     app.add_noise_layer(NOISE_LAYER_TEMPERATURE.to_owned(), SimpleNoiseLayer2D::new(42512352, vec![
-        (5.0, Perlin::new(0), 0.003241255),
+        (5.0, Perlin::new(0), 0.029592342),
         (7.0, Perlin::new(0), 0.008732425),
-        (10.0, Perlin::new(0), 0.029592342),
+        (10.0, Perlin::new(0), 0.003241255),
     ]));
     app.add_noise_layer(NOISE_LAYER_HUMIDITY.to_owned(), SimpleNoiseLayer2D::new(1235212379, vec![
-        (5.0, Perlin::new(0), 0.003241255),
+        (5.0, Perlin::new(0), 0.029592342),
         (7.0, Perlin::new(0), 0.008732425),
-        (10.0, Perlin::new(0), 0.029592342),
+        (10.0, Perlin::new(0), 0.003241255),
     ]));
 
     app.add_biome_scorer(BaseSelectionScorer);
