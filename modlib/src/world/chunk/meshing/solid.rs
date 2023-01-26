@@ -18,28 +18,17 @@ use std::{
 
 use super::{MeshingPass, MeshingVisibility, SHAPE_SIZE_USIZE, MeshVertexAttributeOrderable};
 
-// pub(super) fn simple_mesh(
-//     mesh: &mut Mesh,
-//     array: &Array3<BlockId>,
-//     registry: &BlockRegistry,
-// ) {
-//     let mut positions = vec![];
-//     let mut
-// }
-
 pub struct SolidBlockMesher;
 impl MeshingPass for SolidBlockMesher {
     fn do_pass(
         &self,
-        attributes: &mut BTreeMap<MeshVertexAttributeOrderable, VertexAttributeValues>,
+        positions: &mut Vec<[f32;3]>,
+        normals: &mut Vec<[f32;3]>,
+        uvs: &mut Vec<[f32;2]>,
+        colors: &mut Vec<[f32;4]>,
         array: &Array3<BlockId>,
     ) {
         let registry = BLOCK_REGISTRY.read().unwrap();
-
-        let mut positions = vec![];
-        let mut normals = vec![];
-        let mut uvs = vec![];
-        let mut colors: Vec<[f32; 4]> = vec![];
 
         const UVS: [[f32; 2]; 6] = [
             [0.0, 0.0],
@@ -84,7 +73,7 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[1.0, 0.0, 0.0]; 6]);
                 uvs.extend(UVS);
-                color_extend(&mut colors, blockid, &registry);
+                color_extend(colors, blockid, &registry);
             }
             for (blockid, quad) in greedy_determine_quads(&right_slice) {
                 positions.extend([
@@ -97,7 +86,7 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[-1.0, 0.0, 0.0]; 6]);
                 uvs.extend(UVS);
-                color_extend(&mut colors, blockid, &registry);
+                color_extend(colors, blockid, &registry);
             }
         }
 
@@ -135,7 +124,7 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, 1.0, 0.0]; 6]);
                 uvs.extend(UVS);
-                color_extend(&mut colors, blockid, &registry);
+                color_extend(colors, blockid, &registry);
             }
             for (blockid, quad) in greedy_determine_quads(&right_slice) {
                 positions.extend([
@@ -148,7 +137,7 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, -1.0, 0.0]; 6]);
                 uvs.extend(UVS);
-                color_extend(&mut colors, blockid, &registry);
+                color_extend(colors, blockid, &registry);
             }
         }
 
@@ -186,7 +175,7 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, 0.0, 1.0]; 6]);
                 uvs.extend(UVS);
-                color_extend(&mut colors, blockid, &registry);
+                color_extend(colors, blockid, &registry);
             }
             for (blockid, quad) in greedy_determine_quads(&right_slice) {
                 positions.extend([
@@ -199,51 +188,7 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, 0.0, -1.0]; 6]);
                 uvs.extend(UVS);
-                color_extend(&mut colors, blockid, &registry);
-            }
-        }
-
-        // Positions
-        if attributes.contains_key(&Mesh::ATTRIBUTE_POSITION.into()) {
-            let m = attributes.get_mut(&Mesh::ATTRIBUTE_POSITION.into()).unwrap();
-            match m {
-                VertexAttributeValues::Float32x3(vec) => {
-                    vec.append(&mut positions);
-                },
-                _ => panic!(),
-            }
-        }
-
-        // Normals
-        if attributes.contains_key(&Mesh::ATTRIBUTE_NORMAL.into()) {
-            let m = attributes.get_mut(&Mesh::ATTRIBUTE_NORMAL.into()).unwrap();
-            match m {
-                VertexAttributeValues::Float32x3(vec) => {
-                    vec.append(&mut normals);
-                },
-                _ => panic!(),
-            }
-        }
-
-        // Uvs
-        if attributes.contains_key(&Mesh::ATTRIBUTE_UV_0.into()) {
-            let m = attributes.get_mut(&Mesh::ATTRIBUTE_UV_0.into()).unwrap();
-            match m {
-                VertexAttributeValues::Float32x2(vec) => {
-                    vec.append(&mut uvs);
-                },
-                _ => panic!(),
-            }
-        }
-
-        // Uvs
-        if attributes.contains_key(&Mesh::ATTRIBUTE_COLOR.into()) {
-            let m = attributes.get_mut(&Mesh::ATTRIBUTE_COLOR.into()).unwrap();
-            match m {
-                VertexAttributeValues::Float32x4(vec) => {
-                    vec.append(&mut colors);
-                },
-                _ => panic!(),
+                color_extend(colors, blockid, &registry);
             }
         }
     }

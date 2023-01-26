@@ -4,9 +4,9 @@ pub mod registry;
 pub mod loader;
 pub mod events;
 
-use bevy::{prelude::{Component, SystemLabel, Entity, Plugin, IntoSystemDescriptor}, utils::HashMap};
+use bevy::{prelude::{Component, SystemLabel, Entity, Plugin, IntoSystemDescriptor, App}, utils::HashMap};
 use ndarray::Array3;
-use self::{registry::{ChunkCoordinate, Chunks}, events::*, meshing::*};
+use self::{registry::{ChunkCoordinate, Chunks}, events::*, meshing::{*, solid::SolidBlockMesher}};
 
 use super::block::{BlockId, Block};
 
@@ -128,7 +128,7 @@ impl Chunk {
     pub fn get_position(&self) -> ChunkCoordinate {
         self.position
     }
-}
+}   
 
 trait GetBlockOrEmpty {
     fn get_block_or_empty(&self, x: usize, y: usize, z: usize) -> Block;

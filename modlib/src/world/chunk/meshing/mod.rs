@@ -1,37 +1,42 @@
 use std::{collections::BTreeMap, ops::Deref, task::Poll, sync::{Arc, RwLock}};
 
-use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::{Indices, MeshVertexAttribute, VertexAttributeValues}, once_cell::sync::Lazy}, tasks::{AsyncComputeTaskPool, Task}};
+use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::{Indices, MeshVertexAttribute, VertexAttributeValues, MeshVertexAttributeId}, once_cell::sync::Lazy}, tasks::{AsyncComputeTaskPool, Task}};
+use dyn_clone::DynClone;
 use futures_lite::{FutureExt, future};
 use ndarray::Array3;
 use crate::world::{block::{entity::BlockComponent, BlockId, Block, registry::Blocks}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
 use super::{registry::Chunks, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};
 
 pub mod greedy;
+pub mod solid;
 
-mod solid;
+pub static MESHING_PASSES: Lazy<Arc<RwLock<MeshingPassesInternal>>> = Lazy::new(||{Arc::new(RwLock::new(MeshingPassesInternal::new()))});
 
-static MESHING_PASSES: Lazy<Arc<RwLock<MeshingPassesInternal>>> = Lazy::new(||{Arc::new(RwLock::new(MeshingPassesInternal::new()))});
-
-pub struct MeshingPassesInternal(Vec<Box<dyn MeshingPass>>);
+pub struct MeshingPassesInternal {
+    passes: Vec<Box<dyn MeshingPass>>,
+}
 
 impl MeshingPassesInternal {
     fn new() -> Self {
-        Self(vec![])
+        Self {
+            passes: vec![]
+        }
     }
 
     pub fn add_pass(&mut self, pass: impl MeshingPass) {
-        self.0.push(Box::new(pass));
+        self.passes.push(Box::new(pass));
     }
 
-    fn do_passes(&self, attributes: &mut BTreeMap<MeshVertexAttributeOrderable, VertexAttributeValues>, data: &Array3<BlockId>) {
-        for pass in &self.0 {
-            pass.do_pass(attributes, data);
+    fn do_passes(&self, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, data: &Array3<BlockId>) {
+        for pass in &self.passes {
+            pass.do_pass(positions, normals, uvs, colors, data); 
         }
     }
 }
 
 pub trait MeshingPass: 'static + Send + Sync {
-    fn do_pass(&self, attributes: &mut BTreeMap<MeshVertexAttributeOrderable, VertexAttributeValues>, data: &Array3<BlockId>);
+    // TODO: Add support for arbitrary attributes later on
+    fn do_pass(&self, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, data: &Array3<BlockId>);
 }
 
 /// Used for generating a mesh for a chunk.
@@ -102,7 +107,7 @@ pub fn chunk_remesh_dispatch_system(
                     for z in 0..CHUNK_SIZE {
                         intermediate_array[[x+1, y+1, z+1]] = this_chunk.get_generic_or_empty(x, y, z);
                     }
-                }
+                } 
             }
 
             // TODO: Fix random holes in geometry
@@ -134,14 +139,18 @@ pub fn chunk_remesh_dispatch_system(
 
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {
-                let mut mesh_attributes: BTreeMap<MeshVertexAttributeOrderable, VertexAttributeValues> = BTreeMap::new();
+                let mut positions: Vec<[f32; 3]> = vec![];
+                let mut normals: Vec<[f32; 3]> = vec![];
+                let mut uvs: Vec<[f32; 2]> = vec![];
+                let mut colors: Vec<[f32; 4]> = vec![];
 
-                MESHING_PASSES.read().unwrap().do_passes(&mut mesh_attributes, &intermediate_array);
+                MESHING_PASSES.read().unwrap().do_passes(&mut positions, &mut normals, &mut uvs, &mut colors, &intermediate_array);
 
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
-                for (attribute, value) in mesh_attributes {
-                    render_mesh.insert_attribute(attribute.0, value);
-                }
+                render_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+                render_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+                render_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+                render_mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
 
                 render_mesh
             })));
