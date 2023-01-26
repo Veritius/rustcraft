@@ -16,7 +16,9 @@ use std::{
     sync::{Arc, RwLockReadGuard},
 };
 
-use super::{MeshingPass, MeshingVisibility, SHAPE_SIZE_USIZE, MeshVertexAttributeOrderable};
+use super::{MeshingPass, MeshingVisibility, SHAPE_SIZE_USIZE, MeshVertexAttributeOrderable, MeshingPassIdentifier};
+
+pub const SOLID_BLOCK_MESHER_PASS: MeshingPassIdentifier = MeshingPassIdentifier::new("engine_solid_block", 0);
 
 pub struct SolidBlockMesher;
 impl MeshingPass for SolidBlockMesher {

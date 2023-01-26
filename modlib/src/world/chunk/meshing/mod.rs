@@ -13,24 +13,59 @@ pub mod solid;
 pub static MESHING_PASSES: Lazy<Arc<RwLock<MeshingPassesInternal>>> = Lazy::new(||{Arc::new(RwLock::new(MeshingPassesInternal::new()))});
 
 pub struct MeshingPassesInternal {
-    passes: Vec<Box<dyn MeshingPass>>,
+    passes: BTreeMap<MeshingPassIdentifier, Box<dyn MeshingPass>>,
 }
 
 impl MeshingPassesInternal {
     fn new() -> Self {
         Self {
-            passes: vec![]
+            passes: BTreeMap::new(),
         }
     }
 
-    pub fn add_pass(&mut self, pass: impl MeshingPass) {
-        self.passes.push(Box::new(pass));
+    pub fn add_pass(&mut self, name: MeshingPassIdentifier, pass: impl MeshingPass) {
+        self.passes.insert(name, Box::new(pass));
+    }
+
+    pub fn remove_pass(&mut self, name: MeshingPassIdentifier) {
+        self.passes.remove(&name);
     }
 
     fn do_passes(&self, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, data: &Array3<BlockId>) {
-        for pass in &self.passes {
+        for pass in self.passes.values() {
             pass.do_pass(positions, normals, uvs, colors, data); 
         }
+    }
+}
+
+pub struct MeshingPassIdentifier {
+    name: &'static str,
+    id: u32,
+}
+
+impl MeshingPassIdentifier {
+    pub const fn new(name: &'static str, id: u32) -> Self {
+        Self { name, id }
+    }
+}
+
+impl PartialEq for MeshingPassIdentifier {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for MeshingPassIdentifier {}
+
+impl PartialOrd for MeshingPassIdentifier {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.id.cmp(&other.id))
+    }
+}
+
+impl Ord for MeshingPassIdentifier {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.id.cmp(&other.id)
     }
 }
 
