@@ -4,9 +4,11 @@ use bevy::prelude::Color;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum AttributeKind {
+    None,
     Color,
     String,
     StaticStr,
+    Boolean,
     Uint16,
     Uint32,
     Uint64,
@@ -28,9 +30,11 @@ pub enum AttributeKind {
 
 #[derive(Debug, Clone)]
 pub enum AttributeValue {
+    None,
     Color(Color),
     String(String),
     StaticStr(&'static str),
+    Boolean(bool),
     Uint16(u16),
     Uint32(u32),
     Uint64(u64),
@@ -53,9 +57,11 @@ pub enum AttributeValue {
 impl From<&AttributeValue> for AttributeKind {
     fn from(value: &AttributeValue) -> Self {
         match value {
+            AttributeValue::None => AttributeKind::None,
             AttributeValue::Color(_) => AttributeKind::Color,
             AttributeValue::String(_) => AttributeKind::String,
             AttributeValue::StaticStr(_) => AttributeKind::StaticStr,
+            AttributeValue::Boolean(_) => AttributeKind::Boolean,
             AttributeValue::Uint16(_) => AttributeKind::Uint16,
             AttributeValue::Uint32(_) => AttributeKind::Uint32,
             AttributeValue::Uint64(_) => AttributeKind::Uint64,

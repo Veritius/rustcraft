@@ -1,14 +1,38 @@
-use std::{collections::BTreeMap, ops::Deref, task::Poll};
+use std::{collections::BTreeMap, ops::Deref, task::Poll, sync::{Arc, RwLock}};
 
-use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::Indices}, tasks::{AsyncComputeTaskPool, Task}};
+use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::{Indices, MeshVertexAttribute, VertexAttributeValues}, once_cell::sync::Lazy}, tasks::{AsyncComputeTaskPool, Task}};
 use futures_lite::{FutureExt, future};
 use ndarray::Array3;
 use crate::world::{block::{entity::BlockComponent, BlockId, Block, registry::Blocks}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
-use self::greedy::greedy_mesh;
-
 use super::{registry::Chunks, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};
 
-mod greedy;
+pub mod greedy;
+
+mod solid;
+
+static MESHING_PASSES: Lazy<Arc<RwLock<MeshingPassesInternal>>> = Lazy::new(||{Arc::new(RwLock::new(MeshingPassesInternal::new()))});
+
+pub struct MeshingPassesInternal(Vec<Box<dyn MeshingPass>>);
+
+impl MeshingPassesInternal {
+    fn new() -> Self {
+        Self(vec![])
+    }
+
+    pub fn add_pass(&mut self, pass: impl MeshingPass) {
+        self.0.push(Box::new(pass));
+    }
+
+    fn do_passes(&self, attributes: &mut BTreeMap<MeshVertexAttributeOrderable, VertexAttributeValues>, data: &Array3<BlockId>) {
+        for pass in &self.0 {
+            pass.do_pass(attributes, data);
+        }
+    }
+}
+
+pub trait MeshingPass: 'static + Send + Sync {
+    fn do_pass(&self, attributes: &mut BTreeMap<MeshVertexAttributeOrderable, VertexAttributeValues>, data: &Array3<BlockId>);
+}
 
 /// Used for generating a mesh for a chunk.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -63,12 +87,12 @@ pub fn chunk_remesh_dispatch_system(
         if let Some(_) = chunk_remesh_marker {
             let this_chunk_position = this_chunk.get_position();
 
-            let left_chunk = world_map.get_chunk_or_none((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)); // left
-            let right_chunk = world_map.get_chunk_or_none((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)); // right
-            let up_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)); // up
-            let down_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)); // down
-            let forward_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)); // forward
-            let back_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)); // back
+            // let left_chunk = world_map.get_chunk_or_none((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)); // left
+            // let right_chunk = world_map.get_chunk_or_none((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)); // right
+            // let up_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)); // up
+            // let down_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)); // down
+            // let forward_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)); // forward
+            // let back_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)); // back
                 
             let mut intermediate_array: Array3<BlockId> = Array3::from_elem((SHAPE_SIZE_USIZE, SHAPE_SIZE_USIZE, SHAPE_SIZE_USIZE), BlockId::EMPTY);
 
@@ -110,13 +134,43 @@ pub fn chunk_remesh_dispatch_system(
 
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {
-                let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
+                let mut mesh_attributes: BTreeMap<MeshVertexAttributeOrderable, VertexAttributeValues> = BTreeMap::new();
 
-                greedy_mesh(&mut render_mesh, &intermediate_array);
+                MESHING_PASSES.read().unwrap().do_passes(&mut mesh_attributes, &intermediate_array);
+
+                let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
+                for (attribute, value) in mesh_attributes {
+                    render_mesh.insert_attribute(attribute.0, value);
+                }
 
                 render_mesh
             })));
         }
+    }
+}
+
+pub struct MeshVertexAttributeOrderable(pub MeshVertexAttribute);
+impl From<MeshVertexAttribute> for MeshVertexAttributeOrderable {
+    fn from(value: MeshVertexAttribute) -> Self {
+        Self(value)
+    }
+}
+impl PartialEq for MeshVertexAttributeOrderable {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.id == other.0.id
+    }
+}
+impl Eq for MeshVertexAttributeOrderable {
+    fn assert_receiver_is_total_eq(&self) {}
+}
+impl PartialOrd for MeshVertexAttributeOrderable {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.id.partial_cmp(&other.0.id)
+    }
+}
+impl Ord for MeshVertexAttributeOrderable {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.id.cmp(&other.0.id)
     }
 }
 
