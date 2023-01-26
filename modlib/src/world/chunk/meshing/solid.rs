@@ -64,7 +64,7 @@ impl MeshingPass for SolidBlockMesher {
 
             let x = x - 1;
 
-            for (blockid, quad) in greedy_determine_quads(&left_slice) {
+            for (blockid, quad) in greedy_determine_quads(&left_slice, &registry) {
                 positions.extend([
                     [x as f32, quad[0] as f32, quad[1] as f32],
                     [x as f32, quad[0] as f32, quad[3] as f32],
@@ -77,7 +77,7 @@ impl MeshingPass for SolidBlockMesher {
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
             }
-            for (blockid, quad) in greedy_determine_quads(&right_slice) {
+            for (blockid, quad) in greedy_determine_quads(&right_slice, &registry) {
                 positions.extend([
                     [x as f32 + 1.0, quad[0] as f32, quad[3] as f32],
                     [x as f32 + 1.0, quad[0] as f32, quad[1] as f32],
@@ -115,7 +115,7 @@ impl MeshingPass for SolidBlockMesher {
 
             let y = y - 1;
 
-            for (blockid, quad) in greedy_determine_quads(&left_slice) {
+            for (blockid, quad) in greedy_determine_quads(&left_slice, &registry) {
                 positions.extend([
                     [quad[0] as f32, y as f32, quad[3] as f32],
                     [quad[0] as f32, y as f32, quad[1] as f32],
@@ -128,7 +128,7 @@ impl MeshingPass for SolidBlockMesher {
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
             }
-            for (blockid, quad) in greedy_determine_quads(&right_slice) {
+            for (blockid, quad) in greedy_determine_quads(&right_slice, &registry) {
                 positions.extend([
                     [quad[0] as f32, y as f32 + 1.0, quad[1] as f32],
                     [quad[0] as f32, y as f32 + 1.0, quad[3] as f32],
@@ -166,7 +166,7 @@ impl MeshingPass for SolidBlockMesher {
 
             let z = z - 1;
 
-            for (blockid, quad) in greedy_determine_quads(&left_slice) {
+            for (blockid, quad) in greedy_determine_quads(&left_slice, &registry) {
                 positions.extend([
                     [quad[0] as f32, quad[1] as f32, z as f32],
                     [quad[0] as f32, quad[3] as f32, z as f32],
@@ -179,7 +179,7 @@ impl MeshingPass for SolidBlockMesher {
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
             }
-            for (blockid, quad) in greedy_determine_quads(&right_slice) {
+            for (blockid, quad) in greedy_determine_quads(&right_slice, &registry) {
                 positions.extend([
                     [quad[0] as f32, quad[3] as f32, z as f32 + 1.0],
                     [quad[0] as f32, quad[1] as f32, z as f32 + 1.0],

@@ -21,14 +21,17 @@ pub struct BlockData {
 
 impl BlockData {
     pub const ATTRIBUTE_DISPLAY_NAME: BlockAttribute =
-        BlockAttribute::new("block_display_name", 0, AttributeKind::StaticStr);
+        BlockAttribute::new("engine_display_name", 0, AttributeKind::StaticStr);
     /// A base color for the block. Usually used either for debugging or massive world views.
     pub const ATTRIBUTE_BASE_COLOR: BlockAttribute =
-        BlockAttribute::new("block_base_color", 1, AttributeKind::Color);
+        BlockAttribute::new("engine_base_color", 1, AttributeKind::Color);
+    /// Marker for the `SolidBlockMesher` to know to draw this block;
+    pub const ATTRIBUTE_GENERATE_SOLID_BLOCK: BlockAttribute =
+        BlockAttribute::new("engine_use_solid_mesher", 2, AttributeKind::None);
     /// Image ids for each side of a solid block, in this order:
     /// Left, right, up, down, forward, back.
     pub const ATTRIBUTE_SOLID_TEXTURE_SIDES: BlockAttribute =
-        BlockAttribute::new("block_texture_sides", 2, AttributeKind::StaticStrX6);
+        BlockAttribute::new("engine_texture_sides", 3, AttributeKind::StaticStrX6);
 
     pub fn new(string_identifier: &'static str, block_visibility: MeshingVisibility) -> Self {
         Self {
