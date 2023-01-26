@@ -20,7 +20,7 @@ use super::{MeshingPass, MeshingVisibility, SHAPE_SIZE_USIZE, MeshVertexAttribut
 
 pub const SOLID_BLOCK_MESHER_PASS: MeshingPassIdentifier = MeshingPassIdentifier::new("engine_solid_block", 0);
 
-pub struct SolidBlockMesher;
+pub(crate) struct SolidBlockMesher;
 impl MeshingPass for SolidBlockMesher {
     fn do_pass(
         &self,

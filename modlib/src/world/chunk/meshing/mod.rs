@@ -9,6 +9,7 @@ use super::{registry::Chunks, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent}
 
 pub mod greedy;
 pub mod solid;
+pub mod liquid;
 
 pub static MESHING_PASSES: Lazy<Arc<RwLock<MeshingPassesInternal>>> = Lazy::new(||{Arc::new(RwLock::new(MeshingPassesInternal::new()))});
 

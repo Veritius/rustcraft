@@ -10,7 +10,7 @@ use rustcraft_modlib::{
     world::{
         block::{data::AddBlock, BlockRegistryPlugin},
         generation::{WorldGenPlugin, WorldGenExtensionFns, noise::SimpleNoiseLayer2D},
-        chunk::{events::LoadChunkMessage, ChunkedWorldPlugin, meshing::{MESHING_PASSES, solid::{SolidBlockMesher, SOLID_BLOCK_MESHER_PASS}}},
+        chunk::{events::LoadChunkMessage, ChunkedWorldPlugin, meshing::{MESHING_PASSES}},
     },
     debug::DebugMenuPlugin, noise_rs::Perlin
 };
@@ -65,8 +65,6 @@ fn main() {
     app.add_biome_scorer(BaseSelectionScorer);
 
     app.add_world_generator_pass(BaseTerrainPass);
-    
-    MESHING_PASSES.write().unwrap().add_pass(SOLID_BLOCK_MESHER_PASS, SolidBlockMesher);
 
     app.add_system(wireframe_toggle_system);
 
