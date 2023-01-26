@@ -25,6 +25,7 @@ impl MeshingPassesInternal {
     }
 
     pub fn add_pass(&mut self, name: MeshingPassIdentifier, pass: impl MeshingPass) {
+        info!("Added meshing pass {}", name.name);
         self.passes.insert(name, Box::new(pass));
     }
 
@@ -34,7 +35,7 @@ impl MeshingPassesInternal {
 
     fn do_passes(&self, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, data: &Array3<BlockId>) {
         for pass in self.passes.values() {
-            pass.do_pass(positions, normals, uvs, colors, data); 
+            pass.do_pass(positions, normals, uvs, colors, data);
         }
     }
 }

@@ -6,7 +6,7 @@ pub mod events;
 
 use bevy::{prelude::{Component, SystemLabel, Entity, Plugin, IntoSystemDescriptor, App}, utils::HashMap};
 use ndarray::Array3;
-use self::{registry::{ChunkCoordinate, Chunks}, events::*, meshing::{*, solid::{SolidBlockMesher, SOLID_BLOCK_MESHER_PASS}}};
+use self::{registry::{ChunkCoordinate, Chunks}, events::*, meshing::{*, solid::{SolidBlockMesher, SOLID_BLOCK_MESHER_PASS}, liquid::{LIQUID_MESHER_PASS, LiquidMesher}}};
 
 use super::block::{BlockId, Block};
 
@@ -15,7 +15,9 @@ impl Plugin for ChunkedWorldPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.insert_resource(Chunks::new());
 
-        MESHING_PASSES.write().unwrap().add_pass(SOLID_BLOCK_MESHER_PASS, SolidBlockMesher);
+        let mut meshing_passes = MESHING_PASSES.write().unwrap();
+        meshing_passes.add_pass(SOLID_BLOCK_MESHER_PASS, SolidBlockMesher);
+        meshing_passes.add_pass(LIQUID_MESHER_PASS, LiquidMesher);
 
         app.add_event::<UnloadChunkMessage>();
         app.add_event::<LoadChunkMessage>();

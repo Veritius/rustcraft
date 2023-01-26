@@ -18,7 +18,7 @@ use std::{
 
 use super::{MeshingPass, MeshingVisibility, SHAPE_SIZE_USIZE, MeshVertexAttributeOrderable, MeshingPassIdentifier};
 
-pub const SOLID_BLOCK_MESHER_PASS: MeshingPassIdentifier = MeshingPassIdentifier::new("engine_solid_block", 0);
+pub const SOLID_BLOCK_MESHER_PASS: MeshingPassIdentifier = MeshingPassIdentifier::new("engine_solid", 0);
 
 pub(crate) struct SolidBlockMesher;
 impl MeshingPass for SolidBlockMesher {
@@ -196,10 +196,10 @@ impl MeshingPass for SolidBlockMesher {
     }
 }
 
-fn color_extend(
+pub(crate) fn color_extend(
     colors: &mut Vec<[f32; 4]>,
     blockid: BlockId,
-    registry: &RwLockReadGuard<BlockRegistryInternal>,
+    registry: &BlockRegistryInternal,
 ) {
     const EMPTY_COLOR: [[f32; 4]; 6] = [[1.0, 1.0, 1.0, 1.0]; 6];
     colors.extend(match registry.get_by_numerical_id(blockid) {
@@ -214,9 +214,9 @@ fn color_extend(
     });
 }
 
-fn get_visibility(
+pub(crate) fn get_visibility(
     block: BlockId,
-    registry: &RwLockReadGuard<BlockRegistryInternal>,
+    registry: &BlockRegistryInternal,
 ) -> MeshingVisibility {
     match registry.get_by_numerical_id(block) {
         Some(entry) => entry.block_visibility,
