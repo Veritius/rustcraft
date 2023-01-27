@@ -1,6 +1,6 @@
 //! Registry attributes used by various parts of the engine.
 
-use std::ops::Range;
+use std::{ops::Range, any::Any, sync::Arc};
 use bevy::prelude::Color;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -27,9 +27,10 @@ pub enum AttributeKind {
     Uint32X6,
     Sint32X6,
     Float32X6,
+    ArcedAny,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum AttributeValue {
     None,
     Color(Color),
@@ -53,6 +54,37 @@ pub enum AttributeValue {
     Uint32X6([u32; 6]),
     Sint32X6([i32; 6]),
     Float32X6([f32; 6]),
+    ArcedAny(Arc<dyn Send + Sync>),
+}
+
+impl std::fmt::Debug for AttributeValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "None"),
+            Self::Color(arg0) => f.debug_tuple("Color").field(arg0).finish(),
+            Self::String(arg0) => f.debug_tuple("String").field(arg0).finish(),
+            Self::StaticStr(arg0) => f.debug_tuple("StaticStr").field(arg0).finish(),
+            Self::Boolean(arg0) => f.debug_tuple("Boolean").field(arg0).finish(),
+            Self::Uint16(arg0) => f.debug_tuple("Uint16").field(arg0).finish(),
+            Self::Uint32(arg0) => f.debug_tuple("Uint32").field(arg0).finish(),
+            Self::Uint64(arg0) => f.debug_tuple("Uint64").field(arg0).finish(),
+            Self::Sint16(arg0) => f.debug_tuple("Sint16").field(arg0).finish(),
+            Self::Sint32(arg0) => f.debug_tuple("Sint32").field(arg0).finish(),
+            Self::Sint64(arg0) => f.debug_tuple("Sint64").field(arg0).finish(),
+            Self::Float32(arg0) => f.debug_tuple("Float32").field(arg0).finish(),
+            Self::Float64(arg0) => f.debug_tuple("Float64").field(arg0).finish(),
+            Self::RangeU16(arg0) => f.debug_tuple("RangeU16").field(arg0).finish(),
+            Self::RangeU32(arg0) => f.debug_tuple("RangeU32").field(arg0).finish(),
+            Self::RangeI16(arg0) => f.debug_tuple("RangeI16").field(arg0).finish(),
+            Self::RangeI32(arg0) => f.debug_tuple("RangeI32").field(arg0).finish(),
+            Self::RangeF32(arg0) => f.debug_tuple("RangeF32").field(arg0).finish(),
+            Self::StaticStrX6(arg0) => f.debug_tuple("StaticStrX6").field(arg0).finish(),
+            Self::Uint32X6(arg0) => f.debug_tuple("Uint32X6").field(arg0).finish(),
+            Self::Sint32X6(arg0) => f.debug_tuple("Sint32X6").field(arg0).finish(),
+            Self::Float32X6(arg0) => f.debug_tuple("Float32X6").field(arg0).finish(),
+            Self::ArcedAny(_) => write!(f, "ArcedAny"),
+        }
+    }
 }
 
 impl From<&AttributeValue> for AttributeKind {
@@ -80,6 +112,7 @@ impl From<&AttributeValue> for AttributeKind {
             AttributeValue::Uint32X6(_) => AttributeKind::Uint32X6,
             AttributeValue::Sint32X6(_) => AttributeKind::Sint32X6,
             AttributeValue::Float32X6(_) => AttributeKind::Float32X6,
+            AttributeValue::ArcedAny(_) => AttributeKind::ArcedAny,
         }
     }
 }
