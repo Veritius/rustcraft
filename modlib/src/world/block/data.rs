@@ -4,6 +4,7 @@ use crate::{world::chunk::meshing::MeshingVisibility, attributes::{AttributeKind
 
 use super::registry::Blocks;
 
+/// Storage for BlockAttributes.
 #[derive(Clone)]
 pub struct BlockData {
     /// Unique, human-readable string identifier for this block, like `engine_air`. 

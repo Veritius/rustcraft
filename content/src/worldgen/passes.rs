@@ -3,7 +3,7 @@ use rustcraft_modlib::world::{
     generation::{
         generator::{
             WorldGeneratorPass,
-            WorldGenerationMode, WORLD_GENERATION,
+            WorldGenerationMode, WORLD_GENERATION, WorldGenerationInternal,
         },
     },
     chunk::{
@@ -12,7 +12,7 @@ use rustcraft_modlib::world::{
     },
     block::{
         BlockId,
-        Block, registry::BLOCK_REGISTRY,
+        Block, registry::{BLOCK_REGISTRY, BlockRegistryInternal},
     },
 };
 use super::noise::NOISE_LAYER_HEIGHT;
@@ -24,6 +24,8 @@ pub const V_WATER_DEPTH: f64 = -6.0;
 #[derive(Clone)]
 pub struct BaseTerrainPass;
 impl WorldGeneratorPass for BaseTerrainPass {
+    fn ordering_value(&self) -> f64 { 1.0 }
+
     fn supports_mode(&self, mode: WorldGenerationMode) -> bool {
         match mode.0 {
             WGEN_MODE_NORMAL => true,
@@ -31,10 +33,7 @@ impl WorldGeneratorPass for BaseTerrainPass {
         }
     }
 
-    fn chunk_pass(&self, pos: IVec3, chunk: &mut Chunk) {
-        let worldgen_data = WORLD_GENERATION.read().unwrap();
-        let blocks = BLOCK_REGISTRY.read().unwrap();
-
+    fn chunk_pass(&self, pos: IVec3, blocks: &BlockRegistryInternal, worldgen_data: &WorldGenerationInternal, chunk: &mut Chunk) {
         let water = Block::Generic(blocks.get_by_string_id("rustcraft_water").unwrap().0);
         let grass = Block::Generic(blocks.get_by_string_id("rustcraft_grass").unwrap().0);
         let dirt = Block::Generic(blocks.get_by_string_id("rustcraft_dirt").unwrap().0);

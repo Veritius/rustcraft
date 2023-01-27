@@ -1,3 +1,5 @@
+//! Registry attributes used by various parts of the engine.
+
 use std::ops::Range;
 use bevy::prelude::Color;
 

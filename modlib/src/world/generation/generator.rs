@@ -1,7 +1,7 @@
-use std::sync::{Arc, RwLock};
+use std::{sync::{Arc, RwLock}, collections::BTreeSet, cmp::Ordering};
 use bevy::{prelude::*, render::once_cell::sync::Lazy, utils::HashMap};
 use dyn_clone::DynClone;
-use crate::world::chunk::Chunk;
+use crate::world::{chunk::Chunk, block::registry::{BlockRegistryInternal, BLOCK_REGISTRY}};
 use super::noise::NoiseLayer;
 
 pub static WORLD_GENERATION: Lazy<Arc<RwLock<WorldGenerationInternal>>> = Lazy::new(||{Arc::new(RwLock::new(WorldGenerationInternal::new()))});
@@ -32,7 +32,7 @@ impl Default for WorldGeneration {
 pub struct WorldGenerationInternal {
     pub seed: u32,
     pub gen_mode: WorldGenerationMode,
-    passes: Vec<Box<dyn WorldGeneratorPass>>,
+    passes: BTreeSet<WorldGenPassWrapper>,
     noise_layers: HashMap<String, Box<dyn NoiseLayer>>,
 }
 
@@ -41,13 +41,13 @@ impl WorldGenerationInternal {
         Self {
             seed: 0,
             gen_mode: WorldGenerationMode::NONE,
-            passes: vec![],
+            passes: BTreeSet::new(),
             noise_layers: HashMap::new(),
         }
     }
 
     pub fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) {
-        self.passes.push(Box::new(pass));
+        self.passes.insert(WorldGenPassWrapper(Box::new(pass)));
     }
 
     pub fn add_noise_layer(&mut self, name: String, layer: impl NoiseLayer) {
@@ -55,8 +55,9 @@ impl WorldGenerationInternal {
     }
 
     pub fn do_passes_on_chunk(&self, pos: IVec3, chunk: &mut Chunk) {
+        let blocks = BLOCK_REGISTRY.read().unwrap();
         for pass in &self.passes {
-            pass.chunk_pass(pos, chunk);
+            pass.0.chunk_pass(pos, &blocks, &self, chunk);
         }
     }
 
@@ -80,10 +81,43 @@ impl WorldGenerationMode {
     }
 }
 
-dyn_clone::clone_trait_object!(WorldGeneratorPass);
+/// World generator passes are used to procedurally generate the world.
 pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
+    /// Used for ordering chunk passes.
+    fn ordering_value(&self) -> f64;
     /// Checks if this generator pass supports a specific generation mode.
     fn supports_mode(&self, mode: WorldGenerationMode) -> bool;
     /// Does a pass over a given chunk.
-    fn chunk_pass(&self, pos: IVec3, chunk: &mut Chunk);
+    fn chunk_pass(&self, pos: IVec3, blocks: &BlockRegistryInternal, gen: &WorldGenerationInternal, chunk: &mut Chunk);
+}
+dyn_clone::clone_trait_object!(WorldGeneratorPass);
+
+struct WorldGenPassWrapper(Box<dyn WorldGeneratorPass>);
+
+impl PartialEq for WorldGenPassWrapper {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.ordering_value() == other.0.ordering_value()
+    }
+}
+
+impl Eq for WorldGenPassWrapper {
+
+}
+
+impl PartialOrd for WorldGenPassWrapper {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.0.ordering_value().partial_cmp(&other.0.ordering_value())
+    }
+}
+
+// Total ordering for f64s. What could go wrong?
+impl Ord for WorldGenPassWrapper {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let this = self.0.ordering_value();
+        let other = self.0.ordering_value();
+        if this < other { return Ordering::Less }
+        if this == other { return Ordering::Equal }
+        if this > other { return Ordering::Greater }
+        panic!("Invalid comparison while ordering world generation passes. Possible NaN passed? Self: {}, Other: {}", this, other);
+    }
 }

@@ -1,3 +1,5 @@
+//! World map systems and traits.
+
 use bevy::{prelude::*, ecs::system::SystemParam};
 use crate::debug::{DebugMenuOpen, AppendDebugMenuMessage};
 use self::{
@@ -14,6 +16,7 @@ pub mod block;
 pub mod chunk;
 pub mod generation;
 
+/// Helpful tools and shortcuts for manipulating the world.
 #[derive(SystemParam)]
 pub struct WorldMapHelpers<'w, 's> {
     pub block_registry: Res<'w, Blocks>,
@@ -38,7 +41,7 @@ impl WorldMapHelpers<'_, '_> {
         Some(chunk.get_block(block_offset.x as usize, block_offset.y as usize, block_offset.z as usize).clone())
     }
 
-    pub fn get_chunk_or_none(&self, coord: ChunkCoordinate) -> Option<&Chunk> {
+    pub fn get_chunk(&self, coord: ChunkCoordinate) -> Option<&Chunk> {
         match self.chunk_registry.get(coord) {
             ChunkState::Present(entity) => {
                 match self.chunks.get(entity) {
