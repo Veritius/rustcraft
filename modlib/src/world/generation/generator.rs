@@ -47,7 +47,7 @@ impl WorldGenerationInternal {
     }
 
     pub fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) {
-        info!("Added new world generator pass {} at order {}", pass.name(), pass.ordering_value());
+        info!("Added world generator pass {} at order {}", pass.name(), pass.ordering_value());
         self.passes.insert(WorldGenPassWrapper(Box::new(pass)));
     }
 
