@@ -47,6 +47,7 @@ impl WorldGenerationInternal {
     }
 
     pub fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) {
+        info!("Added new world generator pass {} at order {}", pass.name(), pass.ordering_value());
         self.passes.insert(WorldGenPassWrapper(Box::new(pass)));
     }
 
@@ -85,6 +86,8 @@ impl WorldGenerationMode {
 pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
     /// Used for ordering chunk passes.
     fn ordering_value(&self) -> f64;
+    /// Developer-friendly display name for this object. Used for debugging.
+    fn name(&self) -> &'static str;
     /// Checks if this generator pass supports a specific generation mode.
     fn supports_mode(&self, mode: WorldGenerationMode) -> bool;
     /// Does a pass over a given chunk.
@@ -100,9 +103,7 @@ impl PartialEq for WorldGenPassWrapper {
     }
 }
 
-impl Eq for WorldGenPassWrapper {
-
-}
+impl Eq for WorldGenPassWrapper {}
 
 impl PartialOrd for WorldGenPassWrapper {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

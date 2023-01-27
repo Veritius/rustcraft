@@ -26,6 +26,8 @@ pub struct BaseTerrainPass;
 impl WorldGeneratorPass for BaseTerrainPass {
     fn ordering_value(&self) -> f64 { 1.0 }
 
+    fn name(&self) -> &'static str { "rustcraft_terrain_base" }
+
     fn supports_mode(&self, mode: WorldGenerationMode) -> bool {
         match mode.0 {
             WGEN_MODE_NORMAL => true,
