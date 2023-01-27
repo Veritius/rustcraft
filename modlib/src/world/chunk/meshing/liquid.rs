@@ -15,7 +15,6 @@ impl MeshingPass for LiquidMesher {
         colors: &mut Vec<[f32;4]>,
         data: &Array3<BlockId>
     ) {
-        todo!();
         let registry = BLOCK_REGISTRY.read().unwrap();
 
         fn selector(block: &BlockId, registry: &BlockRegistryInternal) -> bool {
@@ -23,16 +22,18 @@ impl MeshingPass for LiquidMesher {
         }
         
         for y in 1..CHUNK_SIZE+1 {
+            let array_subview = data.index_axis(Axis(1), y);
             let mut layer = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-            for x in 1..CHUNK_SIZE {
-                for z in 1..CHUNK_SIZE {
-                    let this = data[[x, y, z]];
-                    if registry.get_by_numerical_id(this).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_LIQUID_MESHER).is_none() || this != data[[x, y+1, z]] { continue; }
-                    layer[x-1][y-1] = this;
+            for x in 1..CHUNK_SIZE+1 {
+                for z in 1..CHUNK_SIZE+1 {
+                    let this_block = array_subview[[x, z]];
+                    if selector(&this_block, &registry) && this_block != data[[x, y+1, z]] {
+                        layer[x-1][z-1] = this_block;
+                    }
                 }
             }
 
-            let y = y as f32 + 0.85;
+            let y = y as f32 - 0.15;
 
             const UVS: [[f32; 2]; 6] = [
                 [0.0, 0.0],
