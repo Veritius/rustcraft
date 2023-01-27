@@ -1,5 +1,5 @@
 use ndarray::{Array3, Axis};
-use crate::world::{block::{BlockId, registry::BLOCK_REGISTRY, data::BlockData}, chunk::{CHUNK_SIZE, meshing::solid::color_extend}};
+use crate::world::{block::{BlockId, registry::{BLOCK_REGISTRY, BlockRegistryInternal}, data::BlockData}, chunk::{CHUNK_SIZE, meshing::solid::color_extend}};
 use super::{MeshingPass, greedy::greedy_determine_quads, MeshingPassIdentifier};
 
 pub const LIQUID_MESHER_PASS: MeshingPassIdentifier = MeshingPassIdentifier::new("engine_liquid", 1);
@@ -15,14 +15,19 @@ impl MeshingPass for LiquidMesher {
         colors: &mut Vec<[f32;4]>,
         data: &Array3<BlockId>
     ) {
+        todo!();
         let registry = BLOCK_REGISTRY.read().unwrap();
+
+        fn selector(block: &BlockId, registry: &BlockRegistryInternal) -> bool {
+            registry.get_by_numerical_id(*block).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_LIQUID_MESHER).is_some()
+        }
         
         for y in 1..CHUNK_SIZE+1 {
             let mut layer = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
             for x in 1..CHUNK_SIZE {
                 for z in 1..CHUNK_SIZE {
                     let this = data[[x, y, z]];
-                    if registry.get_by_numerical_id(this).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_LIQUID_MESHER).is_none()|| this != data[[x, y+1, z]] { continue; }
+                    if registry.get_by_numerical_id(this).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_LIQUID_MESHER).is_none() || this != data[[x, y+1, z]] { continue; }
                     layer[x-1][y-1] = this;
                 }
             }
@@ -38,7 +43,7 @@ impl MeshingPass for LiquidMesher {
                 [1.0, 1.0],
             ];
 
-            for (block, quad) in greedy_determine_quads(&layer, &registry) {
+            for (block, quad) in greedy_determine_quads(&layer, &registry, selector) {
                 positions.extend([
                     [quad[0] as f32, y, quad[1] as f32],
                     [quad[0] as f32, y, quad[3] as f32],

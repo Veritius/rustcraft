@@ -4,7 +4,7 @@ use crate::world::{chunk::CHUNK_SIZE, block::{BlockId, registry::BlockRegistryIn
 /// - https://0fps.net/2012/06/30/meshing-in-a-minecraft-game/
 /// - https://devforum.roblox.com/t/consume-everything-how-greedy-meshing-works/452717
 #[doc(hidden)]
-pub fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE], registry: &BlockRegistryInternal) -> Vec<(BlockId, [u8; 4])> {
+pub fn greedy_determine_quads<F: Fn(&BlockId, &BlockRegistryInternal) -> bool>(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE], registry: &BlockRegistryInternal, selector: F) -> Vec<(BlockId, [u8; 4])> {
     let mut quads = vec![];
     let mut occupied = [[false; CHUNK_SIZE]; CHUNK_SIZE];
 
@@ -22,7 +22,7 @@ pub fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE], regis
             // Check rows
             let mut offset_x = 0;
             for check_x in block_x..CHUNK_SIZE {
-                if slice[check_x][block_y] != current_block || registry.get_by_numerical_id(slice[check_x][block_y]).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_SOLID_MESHER).is_none() {
+                if slice[check_x][block_y] != current_block || !selector(&current_block, registry) {
                     break;
                 }
                 offset_x += 1;
@@ -32,7 +32,7 @@ pub fn greedy_determine_quads(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE], regis
             let mut offset_y = 0;
             'column_checker: for check_y in block_y..CHUNK_SIZE {
                 for b in block_x..block_x + offset_x {
-                    if occupied[b][check_y] || slice[b][check_y] != current_block || registry.get_by_numerical_id(slice[b][check_y]).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_SOLID_MESHER).is_none() {
+                    if occupied[b][check_y] || slice[b][check_y] != current_block || !selector(&current_block, registry) {
                         break 'column_checker;
                     }
                 }
