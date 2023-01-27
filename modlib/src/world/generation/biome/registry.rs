@@ -10,7 +10,10 @@ pub struct Biomes(pub Arc<RwLock<BiomesInternal>>);
 
 impl Biomes {
     pub fn add_biome(&self, name: BiomeId, biome: BiomeData) {
-        println!("Added ");
+        match biome.get_attribute(BiomeData::ATTRIBUTE_DISPLAY_NAME) {
+            Some(display_name) => info!("Added biome {} ({:?})", name, display_name),
+            None => info!("Added biome {}", name),
+        }
         self.0.write().unwrap().add_biome(name, biome);
     }
 
