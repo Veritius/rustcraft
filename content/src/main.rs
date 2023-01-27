@@ -39,12 +39,12 @@ fn main() {
     app.add_block(blocks::defs::grass());
     app.add_block(blocks::defs::glass());
 
-    app.add_biome(biomes::defs::ocean());
-    app.add_biome(biomes::defs::plains());
-    app.add_biome(biomes::defs::forest());
-    app.add_biome(biomes::defs::jungle());
-    app.add_biome(biomes::defs::desert());
-    app.add_biome(biomes::defs::tundra());
+    app.add_biome("rustcraft_ocean", biomes::defs::ocean());
+    app.add_biome("rustcraft_plains", biomes::defs::plains());
+    app.add_biome("rustcraft_forest", biomes::defs::forest());
+    app.add_biome("rustcraft_jungle", biomes::defs::jungle());
+    app.add_biome("rustcraft_desert", biomes::defs::desert());
+    app.add_biome("rustcraft_tundra", biomes::defs::tundra());
 
     app.add_noise_layer(NOISE_LAYER_HEIGHT.to_owned(), SimpleNoiseLayer2D::new(2524123412, vec![
         (5.0, Perlin::new(0), 0.029592342),

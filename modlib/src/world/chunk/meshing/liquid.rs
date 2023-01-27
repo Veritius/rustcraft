@@ -15,21 +15,19 @@ impl MeshingPass for LiquidMesher {
         colors: &mut Vec<[f32;4]>,
         data: &Array3<BlockId>
     ) {
-        todo!("");
         let registry = BLOCK_REGISTRY.read().unwrap();
         
         for y in 1..CHUNK_SIZE+1 {
             let mut layer = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-            for x in 1..CHUNK_SIZE+1 {
-            for z in 1..CHUNK_SIZE+1 {
-                let above = data[[x, y+1, z]];
-                let this = data[[x, y, z]];
-                if registry.get_by_numerical_id(this).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_LIQUID_MESHER).is_some() && above != this {
-                    layer[x-1][z-1] = this;
+            for x in 1..CHUNK_SIZE {
+                for z in 1..CHUNK_SIZE {
+                    let this = data[[x, y, z]];
+                    if registry.get_by_numerical_id(this).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_LIQUID_MESHER).is_none()|| this != data[[x, y+1, z]] { continue; }
+                    layer[x-1][y-1] = this;
                 }
-            }}
+            }
 
-            let y = y as f32 + 3.0; //- 0.85;
+            let y = y as f32 + 0.85;
 
             const UVS: [[f32; 2]; 6] = [
                 [0.0, 0.0],
@@ -42,17 +40,17 @@ impl MeshingPass for LiquidMesher {
 
             for (block, quad) in greedy_determine_quads(&layer, &registry) {
                 positions.extend([
-                    [quad[0] as f32, y, quad[3] as f32],
                     [quad[0] as f32, y, quad[1] as f32],
-                    [quad[2] as f32, y, quad[1] as f32],
-                    [quad[2] as f32, y, quad[3] as f32],
                     [quad[0] as f32, y, quad[3] as f32],
+                    [quad[2] as f32, y, quad[1] as f32],
+                    [quad[0] as f32, y, quad[3] as f32],
+                    [quad[2] as f32, y, quad[3] as f32],
                     [quad[2] as f32, y, quad[1] as f32],
                 ]);
-                normals.extend([[0.0, 1.0, 0.0]; 6]);
+                normals.extend([[0.0, -1.0, 0.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, block, &registry);
             }
         }
     }
-}
+} 

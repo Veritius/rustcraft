@@ -1,5 +1,7 @@
 use std::{collections::BTreeMap, sync::{Arc, RwLock}};
 use bevy::{prelude::*, render::once_cell::sync::Lazy};
+use crate::{attributes::AttributeValue, world::chunk::meshing::MeshingVisibility};
+
 use super::{BlockId, data::BlockData};
 
 pub static BLOCK_REGISTRY: Lazy<Arc<RwLock<BlockRegistryInternal>>> = Lazy::new(||{Arc::new(RwLock::new(BlockRegistryInternal::new()))});
@@ -31,11 +33,19 @@ pub struct BlockRegistryInternal {
 
 impl BlockRegistryInternal {
     pub(crate) fn new() -> Self {
-        Self {
+        let mut new = Self {
             last_idx: 0,
             data_map: BTreeMap::new(),
             name_map: BTreeMap::new(),
-        }
+        };
+
+        // Add empty block.
+        let mut empty = BlockData::new("engine_air", MeshingVisibility::Invisible);
+        empty.insert_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME, AttributeValue::StaticStr("Air"));
+        empty.insert_attribute(BlockData::ATTRIBUTE_BASE_COLOR, AttributeValue::Color(Color::NONE));
+        new.add_block_type(empty);
+
+        new
     }
 
     pub fn add_block_type(&mut self, block: BlockData) {

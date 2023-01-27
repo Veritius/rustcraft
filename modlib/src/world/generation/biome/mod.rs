@@ -1,4 +1,4 @@
 pub mod scorer;
 pub mod registry;
 
-pub type BiomeId = u32;
+pub type BiomeId = &'static str;

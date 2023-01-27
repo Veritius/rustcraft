@@ -15,8 +15,7 @@ use std::{
     collections::BTreeMap,
     sync::{Arc, RwLockReadGuard},
 };
-
-use super::{MeshingPass, MeshingVisibility, SHAPE_SIZE_USIZE, MeshVertexAttributeOrderable, MeshingPassIdentifier};
+use super::{MeshingPass, MeshingVisibility, SHAPE_SIZE_USIZE, MeshingPassIdentifier};
 
 pub const SOLID_BLOCK_MESHER_PASS: MeshingPassIdentifier = MeshingPassIdentifier::new("engine_solid", 0);
 

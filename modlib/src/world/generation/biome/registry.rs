@@ -9,8 +9,9 @@ pub static BIOME_REGISTRY: Lazy<Arc<RwLock<BiomesInternal>>> = Lazy::new(||{Arc:
 pub struct Biomes(pub Arc<RwLock<BiomesInternal>>);
 
 impl Biomes {
-    pub fn add_biome(&self, biome: BiomeData) {
-        self.0.write().unwrap().add_biome(biome);
+    pub fn add_biome(&self, name: BiomeId, biome: BiomeData) {
+        println!("Added ");
+        self.0.write().unwrap().add_biome(name, biome);
     }
 
     pub fn add_biome_scorer(&self, scorer: impl BiomeSelectionScorer) {
@@ -18,7 +19,7 @@ impl Biomes {
     }
 
     fn get_biome_data(&self, id: BiomeId) -> Option<BiomeData> {
-        self.0.read().unwrap().get_biome_data(id)
+        self.0.read().unwrap().get_biome_data(id).cloned()
     }
 }
 
@@ -30,39 +31,42 @@ impl Default for Biomes {
 
 #[derive(Clone)]
 pub struct BiomesInternal {
-    last_idx: u32,
-    biomes: HashMap<u32, BiomeData>,
+    biomes: HashMap<BiomeId, BiomeData>,
     scorers: Vec<Box<dyn BiomeSelectionScorer>>,
 }
 
 impl BiomesInternal {
     pub(crate) fn new() -> Self {
         Self {
-            last_idx: 0,
             biomes: HashMap::new(),
             scorers: vec![],
         }
     }
 
-    pub fn add_biome(&mut self, biome: BiomeData) {
-        let id = self.last_idx;
-        self.biomes.insert(id, biome);
-        self.last_idx += 1;
+    pub fn add_biome(&mut self, name: BiomeId, biome: BiomeData) {
+        self.biomes.insert(name, biome);
     }
 
     pub fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) {
         self.scorers.push(Box::new(scorer));
     }
 
-    pub fn get_biome_data(&self, id: BiomeId) -> Option<BiomeData> {
-        match self.biomes.get(&id) {
-            Some(value) => Some(value.clone()),
+    pub fn get_biome_data(&self, id: &str) -> Option<&BiomeData> {
+        match self.biomes.get(id) {
+            Some(value) => Some(value),
+            None => None,
+        }
+    }
+
+    pub fn get_biome_data_mut(&mut self, id: &str) -> Option<&mut BiomeData> {
+        match self.biomes.get_mut(id) {
+            Some(value) => Some(value),
             None => None,
         }
     }
 
     pub fn calculate_biome_for_chunk(&self, pos: IVec3) -> BiomeId {
-        let mut biggest = (0.0, BiomeId::MAX);
+        let mut biggest = (0.0, "none");
         for (id, biome) in &self.biomes {
             let mut current = 0.0;
             for scorer in &self.scorers {
@@ -70,7 +74,7 @@ impl BiomesInternal {
             }
             if current > biggest.0 {
                 biggest.0 = current;
-                biggest.1 = *id;
+                biggest.1 = id;
             }
         }
 

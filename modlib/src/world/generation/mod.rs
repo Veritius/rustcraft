@@ -1,7 +1,7 @@
 use self::{
     biome::{
         scorer::BiomeSelectionScorer,
-        registry::{BiomeData, BiomesInternal, Biomes},
+        registry::{BiomeData, BiomesInternal, Biomes}, BiomeId,
     },
     generator::{WorldGeneratorPass, WorldGeneration, WORLD_GENERATION}, noise::NoiseLayer,
 };
@@ -116,23 +116,29 @@ fn generation_polling_system(
 }
 
 pub trait WorldGenExtensionFns {
-    fn add_biome(&mut self, biome: BiomeData) -> &mut Self;
+    fn add_biome(&mut self, name: BiomeId, biome: BiomeData) -> &mut Self;
     fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) -> &mut Self;
     fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) -> &mut Self;
     fn add_noise_layer(&mut self, key: String, layer: impl NoiseLayer) -> &mut Self;
 }
 
 impl WorldGenExtensionFns for App {
-    /// Adds a new biome type
-    fn add_biome(&mut self, biome: BiomeData) -> &mut Self {
+    /// Adds a new biome type. Shorthand for
+    /// ```rs
+    /// BIOME_REGISTRY.write().unwrap().add_biome()
+    /// ```
+    fn add_biome(&mut self, name: BiomeId, biome: BiomeData) -> &mut Self {
         self.add_startup_system(move |biomes: Res<Biomes>| {
-            biomes.add_biome(biome.clone());
+            biomes.add_biome(name, biome.clone());
         });
 
         self
     }
 
-    /// Adds a new `BiomeSelectionScorer` to the game
+    /// Adds a new `BiomeSelectionScorer` for biome selection. Shorthand for
+    /// ```rs
+    /// BIOME_REGISTRY.write().unwrap().add_biome_scorer()
+    /// ```
     fn add_biome_scorer(&mut self, scorer: impl BiomeSelectionScorer) -> &mut Self {
         self.add_startup_system(move |biomes: Res<Biomes>| {
             biomes.add_biome_scorer(dyn_clone::clone(&scorer));
@@ -141,7 +147,10 @@ impl WorldGenExtensionFns for App {
         self
     }
 
-    /// Adds a new `WorldGeneratorPass` to the chunk generation system
+    /// Adds a new `WorldGeneratorPass` for chunk generation. Shorthand for
+    /// ```rs
+    /// WORLD_GENERATION.write().unwrap().add_world_generator_pass()
+    /// ```
     fn add_world_generator_pass(&mut self, pass: impl WorldGeneratorPass) -> &mut Self {
         self.add_startup_system(move |world_generation: Res<WorldGeneration>| {
             world_generation.add_world_generator_pass(dyn_clone::clone(&pass));
@@ -150,7 +159,9 @@ impl WorldGenExtensionFns for App {
         self
     }
 
-    /// Adds a new `NoiseLayer` to the chunk generation system
+    /// Adds a new `NoiseLayer` to the chunk generation system. Shorthand for
+    /// ```rs
+    /// WORLD_GENERATION.write().unwrap().add_noise_layer()
     fn add_noise_layer(&mut self, key: String, layer: impl NoiseLayer) -> &mut Self {
         self.add_startup_system(move |world_generation: Res<WorldGeneration>| {
             world_generation.add_noise_layer(key.clone(), dyn_clone::clone(&layer));

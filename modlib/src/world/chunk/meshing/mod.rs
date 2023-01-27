@@ -195,31 +195,6 @@ pub fn chunk_remesh_dispatch_system(
     }
 }
 
-pub struct MeshVertexAttributeOrderable(pub MeshVertexAttribute);
-impl From<MeshVertexAttribute> for MeshVertexAttributeOrderable {
-    fn from(value: MeshVertexAttribute) -> Self {
-        Self(value)
-    }
-}
-impl PartialEq for MeshVertexAttributeOrderable {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.id == other.0.id
-    }
-}
-impl Eq for MeshVertexAttributeOrderable {
-    fn assert_receiver_is_total_eq(&self) {}
-}
-impl PartialOrd for MeshVertexAttributeOrderable {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.0.id.partial_cmp(&other.0.id)
-    }
-}
-impl Ord for MeshVertexAttributeOrderable {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.0.id.cmp(&other.0.id)
-    }
-}
-
 pub fn chunk_remesh_polling_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

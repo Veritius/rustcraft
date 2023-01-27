@@ -1,4 +1,4 @@
-use std::{ops::Range, collections::BTreeMap};
+use std::{ops::Range, collections::BTreeMap, hash::Hash};
 use bevy::prelude::{App, ResMut, Color};
 use crate::{world::chunk::meshing::MeshingVisibility, attributes::{AttributeKind, AttributeValue}};
 
@@ -44,6 +44,15 @@ impl BlockData {
         }
     }
 
+    pub fn new_with_attributes(string_identifier: &'static str, block_visibility: MeshingVisibility, attributes: Vec<(BlockAttribute, AttributeValue)>) -> Self {
+        let mut block = Self::new(string_identifier, block_visibility);
+        for (attribute, value) in attributes {
+            block.insert_attribute(attribute, value);
+        }
+
+        block
+    }
+
     pub fn insert_attribute(&mut self, attribute: BlockAttribute, value: AttributeValue) {
         let value_kind = AttributeKind::from(&value);
         if attribute.kind != value_kind {
@@ -54,18 +63,26 @@ impl BlockData {
         self.attributes.insert(attribute.id, value);
     }
 
+    #[must_use]
     pub(crate) fn get_attribute(&self, attribute: BlockAttribute) -> Option<&AttributeValue> {
         self.attributes.get(&attribute.id)
     }
 }
 
-#[derive(PartialEq, Eq, Hash)]
+// TODO: Hash only the `id` field.
+#[derive(Hash)]
 pub struct BlockAttribute {
     string_identifier: &'static str,
     /// _Unique_ id for this attribute. If in doubt, make a very large or random number.
     /// Built in attributes follow a close-to-zero pattern.
     id: u32,
     kind: AttributeKind,
+}
+
+impl PartialEq for BlockAttribute {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
 }
 
 impl BlockAttribute {
@@ -79,6 +96,11 @@ pub trait AddBlock {
 }
 
 impl AddBlock for App {
+    /// Adds a new block type. Shorthand for
+    /// 
+    /// ```rs
+    /// BLOCK_REGISTRY.write().unwrap().add_block_type()
+    /// ```
     fn add_block(&mut self, block: BlockData) -> &mut Self {
         self.add_startup_system(move |mut registry: ResMut<Blocks>| {
             registry.add_block_type(block.clone());
@@ -86,12 +108,4 @@ impl AddBlock for App {
 
         self
     }
-}
-
-pub(crate) fn air_block() -> BlockData {
-    let mut block = BlockData::new("engine_air", MeshingVisibility::Invisible);
-    block.insert_attribute(BlockData::ATTRIBUTE_DISPLAY_NAME, AttributeValue::StaticStr("Air"));
-    block.insert_attribute(BlockData::ATTRIBUTE_BASE_COLOR, AttributeValue::Color(Color::NONE));
-
-    block
 }
