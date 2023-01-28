@@ -96,7 +96,7 @@ impl Chunk {
     pub fn get_block(&self, x: usize, y: usize, z: usize) -> Block {
         match self.array[[x, y, z]] {
             ChunkBlockInternal::Generic(blockid) => Block::Generic(blockid),
-            ChunkBlockInternal::Entity(idx) => Block::Entity(*self.entities.get(&idx).expect("Entity index should have been in the the map!")),
+            ChunkBlockInternal::Entity(entityid) => Block::Entity(self.get_entity_from_ent_idx(&entityid)),
         }
     }
 
@@ -105,12 +105,16 @@ impl Chunk {
         match self.array[[x, y, z]] {
             ChunkBlockInternal::Generic(blockid) => blockid,
             ChunkBlockInternal::Entity(entityid) => {
-                match blocks.get(*self.entities.get(&entityid).expect("Entity index should have been in the the map!")) {
+                match blocks.get(self.get_entity_from_ent_idx(&entityid)) {
                     Ok(query) => query.1.0,
                     Err(_) => BlockId::EMPTY,
                 }
             },
         }
+    }
+
+    pub(crate) fn get_entity_from_ent_idx(&self, id: &u16) -> Entity {
+        *self.entities.get(&id).expect("Entity index should have been in the the map!")
     }
 
     pub fn set_block(&mut self, x: usize, y: usize, z: usize, to: Block) {

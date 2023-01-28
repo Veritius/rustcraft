@@ -1,11 +1,11 @@
 use std::{collections::BTreeMap, ops::Deref, task::Poll, sync::{Arc, RwLock}};
-
 use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::{Indices, MeshVertexAttribute, VertexAttributeValues, MeshVertexAttributeId}, once_cell::sync::Lazy}, tasks::{AsyncComputeTaskPool, Task}};
 use dyn_clone::DynClone;
 use futures_lite::{FutureExt, future};
 use ndarray::Array3;
 use crate::world::{block::{entity::BlockComponent, BlockId, Block, registry::Blocks}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
 use super::{registry::Chunks, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};
+use ndarray::Axis;
 
 pub mod greedy;
 pub mod solid;
@@ -134,12 +134,12 @@ pub fn chunk_remesh_dispatch_system(
         if let Some(_) = chunk_remesh_marker {
             let this_chunk_position = this_chunk.get_position();
 
-            // let left_chunk = world_map.get_chunk_or_none((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)); // left
-            // let right_chunk = world_map.get_chunk_or_none((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)); // right
-            // let up_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)); // up
-            // let down_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)); // down
-            // let forward_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)); // forward
-            // let back_chunk = world_map.get_chunk_or_none((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)); // back
+            let left_chunk = world_map.get_chunk((this_chunk_position.0 - 1, this_chunk_position.1, this_chunk_position.2)); // left
+            let right_chunk = world_map.get_chunk((this_chunk_position.0 + 1, this_chunk_position.1, this_chunk_position.2)); // right
+            let up_chunk = world_map.get_chunk((this_chunk_position.0, this_chunk_position.1 + 1, this_chunk_position.2)); // up
+            let down_chunk = world_map.get_chunk((this_chunk_position.0, this_chunk_position.1 - 1, this_chunk_position.2)); // down
+            let forward_chunk = world_map.get_chunk((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 + 1)); // forward
+            let back_chunk = world_map.get_chunk((this_chunk_position.0, this_chunk_position.1, this_chunk_position.2 - 1)); // back
                 
             let mut intermediate_array: Array3<BlockId> = Array3::from_elem((SHAPE_SIZE_USIZE, SHAPE_SIZE_USIZE, SHAPE_SIZE_USIZE), BlockId::EMPTY);
 
@@ -152,32 +152,65 @@ pub fn chunk_remesh_dispatch_system(
                 } 
             }
 
-            // TODO: Fix random holes in geometry
-            // Adjacent chunks are disabled to prevent the holes, but this creates a lot of redundant polygons.
+            // Left chunk
+            if left_chunk.is_some() {
+                let left_chunk = left_chunk.unwrap();
+                for y in 0..CHUNK_SIZE {
+                    for z in 0..CHUNK_SIZE {
+                        intermediate_array[[0, y+1, z+1]] = left_chunk.get_blockid_or_empty(&blocks, 15, y, z);
+                    }
+                }
+            }
 
-            // Left and right chunks
-            // for y in 0..CHUNK_SIZE {
-            //     for z in 0..CHUNK_SIZE {
-            //         intermediate_array[[0, y, z]] = left_chunk.get_generic_or_empty(15, y, z);
-            //         intermediate_array[[17, y, z]] = right_chunk.get_generic_or_empty(0, y, z);
-            //     }
-            // }
+            // Right chunk
+            if right_chunk.is_some() {
+                let right_chunk = right_chunk.unwrap();
+                for y in 0..CHUNK_SIZE {
+                    for z in 0..CHUNK_SIZE {
+                        intermediate_array[[17, y+1, z+1]] = right_chunk.get_blockid_or_empty(&blocks, 0, y, z);
+                    }
+                }
+            }
 
-            // // Above and below chunks
-            // for x in 0..CHUNK_SIZE {
-            //     for z in 0..CHUNK_SIZE {
-            //         intermediate_array[[x, 0, z]] = up_chunk.get_generic_or_empty(x, 15, z);
-            //         intermediate_array[[x, 17, z]] = down_chunk.get_generic_or_empty(x, 0, z);
-            //     }
-            // }
+            // Top chunk
+            if up_chunk.is_some() {
+                let up_chunk = up_chunk.unwrap();
+                for x in 0..CHUNK_SIZE {
+                    for z in 0..CHUNK_SIZE {
+                        intermediate_array[[x+1, 17, z+1]] = up_chunk.get_blockid_or_empty(&blocks, x, 0, z);
+                    }
+                }
+            }
 
-            // // Forward and back chunks
-            // for x in 0..CHUNK_SIZE {
-            //     for y in 0..CHUNK_SIZE {
-            //         intermediate_array[[x, y, 0]] = forward_chunk.get_generic_or_empty(x, y, 15);
-            //         intermediate_array[[x, y, 17]] = back_chunk.get_generic_or_empty(x, y, 0);
-            //     }
-            // }
+            // Bottom chunk
+            if down_chunk.is_some() {
+                let down_chunk = down_chunk.unwrap();
+                for x in 0..CHUNK_SIZE {
+                    for z in 0..CHUNK_SIZE {
+                        intermediate_array[[x+1, 0, z+1]] = down_chunk.get_blockid_or_empty(&blocks, x, 15, z);
+                    }
+                }
+            }
+
+            // Forward chunk
+            if forward_chunk.is_some() {
+                let forward_chunk = forward_chunk.unwrap();
+                for x in 0..CHUNK_SIZE {
+                    for y in 0..CHUNK_SIZE {
+                        intermediate_array[[x+1, y+1, 17]] = forward_chunk.get_blockid_or_empty(&blocks, x, y, 0);
+                    }
+                }
+            }
+
+            // Back chunk
+            if back_chunk.is_some() {
+                let back_chunk = back_chunk.unwrap();
+                for x in 0..CHUNK_SIZE {
+                    for y in 0..CHUNK_SIZE {
+                        intermediate_array[[x+1, y+1, 0]] = back_chunk.get_blockid_or_empty(&blocks, x, y, 15);
+                    }
+                }
+            }
 
             // Spawn task
             commands.entity(chunk_entityid).remove::<RemeshChunkMarker>().insert(BeingRemeshed(task_pool.spawn(async move {
