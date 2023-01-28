@@ -142,7 +142,7 @@ pub fn chunk_remesh_dispatch_system(
             for x in 0..CHUNK_SIZE {
                 for y in 0..CHUNK_SIZE {
                     for z in 0..CHUNK_SIZE {
-                        intermediate_array[[x+1, y+1, z+1]] = this_chunk.get_generic_or_empty(x, y, z);
+                        intermediate_array[[x+1, y+1, z+1]] = this_chunk.get_blockid_or_empty(&blocks, x, y, z);
                     }
                 } 
             }

@@ -4,11 +4,11 @@ pub mod registry;
 pub mod loader;
 pub mod events;
 
-use bevy::{prelude::{Component, SystemLabel, Entity, Plugin, IntoSystemDescriptor, App}, utils::HashMap};
+use bevy::{prelude::{Component, SystemLabel, Entity, Plugin, IntoSystemDescriptor, App, Query}, utils::HashMap};
 use ndarray::Array3;
 use self::{registry::{ChunkCoordinate, Chunks}, events::*, meshing::{*, solid::{SolidBlockMesher, SOLID_BLOCK_MESHER_PASS}, liquid::{LIQUID_MESHER_PASS, LiquidMesher}}};
 
-use super::block::{BlockId, Block};
+use super::block::{BlockId, Block, entity::BlockComponent};
 
 pub struct ChunkedWorldPlugin;
 impl Plugin for ChunkedWorldPlugin {
@@ -92,6 +92,7 @@ impl Chunk {
         }
     }
 
+    /// Gets a `BlockId` or `Entity` from the chunk.
     pub fn get_block(&self, x: usize, y: usize, z: usize) -> Block {
         match self.array[[x, y, z]] {
             ChunkBlockInternal::Generic(blockid) => Block::Generic(blockid),
@@ -99,10 +100,16 @@ impl Chunk {
         }
     }
 
-    pub fn get_generic_or_empty(&self, x: usize, y: usize, z: usize) -> BlockId {
+    /// Returns the relevant `BlockId` if possible, or `BlockId::EMPTY` if it can't be found.
+    pub fn get_blockid_or_empty(&self, blocks: &Query<(Entity, &BlockComponent)>, x: usize, y: usize, z: usize) -> BlockId {
         match self.array[[x, y, z]] {
             ChunkBlockInternal::Generic(blockid) => blockid,
-            ChunkBlockInternal::Entity(_) => BlockId::EMPTY,
+            ChunkBlockInternal::Entity(entityid) => {
+                match blocks.get(*self.entities.get(&entityid).expect("Entity index should have been in the the map!")) {
+                    Ok(query) => query.1.0,
+                    Err(_) => BlockId::EMPTY,
+                }
+            },
         }
     }
 

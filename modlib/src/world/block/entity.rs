@@ -3,11 +3,6 @@ use crate::world::chunk::meshing::MeshingVisibility;
 
 use super::BlockId;
 
-// Block entities store a
+/// Allows blocks to be stored in a chunk. Stores a `BlockId` for rapid block-to-block comparisons and asynchronous access.
 #[derive(Component)]
-pub enum BlockComponent {
-    Custom {
-        visibility: MeshingVisibility,
-    },
-    Generic(BlockId),
-}
+pub struct BlockComponent(pub BlockId);

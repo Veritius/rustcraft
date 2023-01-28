@@ -36,6 +36,7 @@ impl WorldGeneratorPass for BaseTerrainPass {
     }
 
     fn chunk_pass(&self, pos: IVec3, blocks: &BlockRegistryInternal, worldgen_data: &WorldGenerationInternal, chunk: &mut Chunk) {
+        // Block types
         let water = Block::Generic(blocks.get_by_string_id("rustcraft_water").unwrap().0);
         let grass = Block::Generic(blocks.get_by_string_id("rustcraft_grass").unwrap().0);
         let dirt = Block::Generic(blocks.get_by_string_id("rustcraft_dirt").unwrap().0);
