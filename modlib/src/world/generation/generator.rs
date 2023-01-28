@@ -82,7 +82,10 @@ impl WorldGenerationMode {
     }
 }
 
-/// World generator passes are used to procedurally generate the world.
+/// World generator passes are used to procedurally generate the world. Passes are not aware of eachother.
+/// 
+/// Passes must be ordered correctly or issues may occur. The `f64` returned by `ordering_value` is used for ordering, based on the `Ord` implementation of [WorldGenPassWrapper].
+/// Ordering will panic if the returned float is a NaN or other value that cannot be either greater, equal, or smaller than another.
 pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
     /// Used for ordering chunk passes.
     fn ordering_value(&self) -> f64;
@@ -95,6 +98,7 @@ pub trait WorldGeneratorPass: 'static + Send + Sync + DynClone {
 }
 dyn_clone::clone_trait_object!(WorldGeneratorPass);
 
+/// `Ord`-implementing wrapper for `WorldGeneratorPass` objects.
 struct WorldGenPassWrapper(Box<dyn WorldGeneratorPass>);
 
 impl PartialEq for WorldGenPassWrapper {

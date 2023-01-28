@@ -71,8 +71,13 @@ impl Ord for MeshingPassIdentifier {
     }
 }
 
+/// A single 'pass' of the meshing system. Passes allow new cases for blocks to be specified, allowing the generation of new geometry.
+/// Passes are not ordered and will be executed in the order they were inserted, which can be unpredictable.
 pub trait MeshingPass: 'static + Send + Sync {
-    // TODO: Add support for arbitrary attributes later on
+    // TODO: Add support for arbitrary attributes
+    /// Does a pass over the chunk.
+    /// 
+    /// **Warning for implementors:** All vectors must be the same length!
     fn do_pass(&self, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, data: &Array3<BlockId>);
 }
 

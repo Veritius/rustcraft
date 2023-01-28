@@ -1,10 +1,18 @@
-use crate::world::{chunk::CHUNK_SIZE, block::{BlockId, registry::BlockRegistryInternal, data::BlockData}};
+use crate::world::{chunk::CHUNK_SIZE, block::{BlockId, registry::BlockRegistryInternal}};
 
-/// Greedy meshing algorithm based on the following resources:
-/// - https://0fps.net/2012/06/30/meshing-in-a-minecraft-game/
+/// Somewhat flexible greedy meshing algorithm. Operates over a 2D slice of `BlockId` objects to generate a set of quads.
+/// Each quad is a single `BlockId` type. The algorithm will not create a quad that would contain multiple BlockIds. Quads will always be rectangular and will never create quads that overlap.
+/// 
+/// Takes the following arguments:
+/// - A 2D 'slice' of the chunk (not in the Rust sense) that will be looped over.
+/// - A reference to a BlockRegistryInternal to use for comparisons.
+/// - A `Fn(&BlockId, &BlockRegistryInternal) -> bool` (called the Selector) object to check if a block should be meshed.
+/// 
+/// Implementation of the greedy meshing algorithm based on the following resources.
+/// - https://0fps.net/2012/06/30/meshing-in-a-minecraft-game/s
 /// - https://devforum.roblox.com/t/consume-everything-how-greedy-meshing-works/452717
 #[doc(hidden)]
-pub fn greedy_determine_quads<F: Fn(&BlockId, &BlockRegistryInternal) -> bool>(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE], registry: &BlockRegistryInternal, selector: F) -> Vec<(BlockId, [u8; 4])> {
+pub fn greedy_determine_quads<Selector: Fn(&BlockId, &BlockRegistryInternal) -> bool>(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE], registry: &BlockRegistryInternal, selector: Selector) -> Vec<(BlockId, [u8; 4])> {
     let mut quads = vec![];
     let mut occupied = [[false; CHUNK_SIZE]; CHUNK_SIZE];
 
