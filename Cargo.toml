@@ -1,6 +1,7 @@
 [workspace]
 resolver="2"
 members=[
-    "content",
-	"modlib",
+	"engine",
+    "modlib",
+    "game",
 ]

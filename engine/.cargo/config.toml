@@ -1,0 +1,3 @@
+# Engine will always be a dynamic link, but the modlib data will be part of the mod binary.
+[build]
+rustflags = ["-C", "prefer-dynamic", "-C", "rpath"]

@@ -1,0 +1,10 @@
+[package]
+name = "rustcraft_game"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+rustcraft_modlib = { path="../modlib" }
+dlopen = "0.1.8"
+dlopen_derive = "0.1.4"
+glob = "0.3.1"

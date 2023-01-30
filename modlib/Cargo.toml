@@ -1,12 +1,8 @@
 [package]
-name = "rustcraft-modlib"
-version = "0.1.0"
+name = "rustcraft_modlib"
+version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.9.1"
-rand = "0.8.5"
-noise = "0.8.2"
-futures-lite = "1.4.0"
-ndarray = "0.15.6"
-dyn-clone = "1.0.10"
+rustcraft_engine = { path="../engine" }
+semver = "1.0.16"

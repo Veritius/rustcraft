@@ -1,0 +1,15 @@
+[package]
+name = "rustcraft_engine"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["dylib", "rlib"]
+
+[dependencies]
+bevy = "0.9.1"
+rand = "0.8.5"
+noise = "0.8.2"
+futures-lite = "1.4.0"
+ndarray = "0.15.6"
+dyn-clone = "1.0.10"
