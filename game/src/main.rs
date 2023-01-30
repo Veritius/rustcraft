@@ -15,7 +15,6 @@ struct ModWrapper {
 }
 
 fn main() {
-    // Stores all packages
     let mut packages = vec![];
 
     #[cfg(target_os="windows")]
@@ -24,9 +23,18 @@ fn main() {
     let extension = "so";
     #[cfg(target_os="macos")]
     let extension = "dylib";
+
     for package in glob::glob(&format!("mods/*.{extension}")).unwrap() {
         let package = package.unwrap();
         let package_wrapper: Container<ModWrapper> = unsafe { Container::load(package).unwrap() };
+        let metadata = package_wrapper.metadata();
         packages.push(package_wrapper);
     }
+
+    let mut app = App::new();
+    for package in packages {
+        package.entry_point(&mut app);
+    }
+
+    app.run();
 }

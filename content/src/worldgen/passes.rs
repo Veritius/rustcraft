@@ -1,9 +1,10 @@
-use bevy::{prelude::IVec3, math::DVec3};
-use rustcraft_modlib::world::{
+use rustcraft_modlib::engine::bevy::{prelude::IVec3, math::DVec3};
+use rustcraft_modlib::engine::world::{
     generation::{
         generator::{
             WorldGeneratorPass,
-            WorldGenerationMode, WORLD_GENERATION, WorldGenerationInternal,
+            WorldGenerationMode,
+            WorldGenerationInternal,
         },
     },
     chunk::{
@@ -11,8 +12,8 @@ use rustcraft_modlib::world::{
         CHUNK_SIZE, CHUNK_SIZE_I32,
     },
     block::{
-        BlockId,
-        Block, registry::{BLOCK_REGISTRY, BlockRegistryInternal},
+        Block,
+        registry::BlockRegistryInternal,
     },
 };
 use super::noise::NOISE_LAYER_HEIGHT;

@@ -4,4 +4,5 @@ members=[
 	"engine",
     "modlib",
     "game",
+    "content",
 ]

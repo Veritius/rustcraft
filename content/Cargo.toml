@@ -3,8 +3,8 @@ name = "rustcraft_simpleworld"
 version = "0.0.0"
 edition = "2021"
 
+[lib]
+crate-type = ["dylib", "rlib"]
+
 [dependencies]
-bevy = "0.9.1"
 rustcraft_modlib = { path = "../modlib" }
-bevy_flycam = "0.9"
-rand = "0.8.5"

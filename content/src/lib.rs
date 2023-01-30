@@ -1,32 +1,32 @@
-use bevy::{
-    prelude::*,
-    DefaultPlugins,
-    pbr::wireframe::{
-        WireframePlugin, WireframeConfig
-    }
-};
-use bevy_flycam::{NoCameraPlayerPlugin, FlyCam};
-use rustcraft_modlib::{
-    world::{
-        block::{data::AddBlock, BlockRegistryPlugin},
-        generation::{WorldGenPlugin, WorldGenExtensionFns, noise::SimpleNoiseLayer2D},
-        chunk::{events::LoadChunkMessage, ChunkedWorldPlugin, meshing::{MESHING_PASSES}},
-    },
-    debug::DebugMenuPlugin, noise_rs::Perlin
-};
+pub use rustcraft_modlib::engine::bevy;
+use bevy::prelude::*;
+use rustcraft_modlib::{ModPackageData, semver::Version, engine::{debug::DebugMenuPlugin, bevy::pbr::wireframe::{WireframePlugin, WireframeConfig}, world::{block::{BlockRegistryPlugin, data::AddBlock}, chunk::{ChunkedWorldPlugin, events::LoadChunkMessage}, generation::{WorldGenPlugin, noise::SimpleNoiseLayer2D, WorldGenExtensionFns}}, noise_rs::Perlin}};
+
 use worldgen::{noise::{NOISE_LAYER_HEIGHT, NOISE_LAYER_TEMPERATURE, NOISE_LAYER_HUMIDITY}, scorers::BaseSelectionScorer, passes::BaseTerrainPass};
 
 pub mod blocks;
 pub mod biomes;
 pub mod worldgen;
 
-fn main() {
-    let mut app = App::new();
+#[no_mangle]
+pub fn metadata() -> ModPackageData {
+    ModPackageData {
+        unique_id: "veritius:simpleworld",
+        name: "SimpleWorld",
+        description: "Simple world generation.",
+        authors: vec!["Veritius"],
+        version: Version::new(0, 0, 0),
+        engine_version: Version::new(0, 0, 0),
+        incompatibilities: vec![],
+        requirements: vec![],
+    }
+}
 
+#[no_mangle]
+pub fn entry_point(app: &mut App) {
     app.add_plugins(DefaultPlugins);
     app.add_plugin(DebugMenuPlugin);
     app.add_plugin(WireframePlugin);
-    app.add_plugin(NoCameraPlayerPlugin);
     
     app.add_plugin(BlockRegistryPlugin);
     app.add_plugin(ChunkedWorldPlugin);
@@ -69,8 +69,6 @@ fn main() {
     app.add_system(wireframe_toggle_system);
 
     app.add_startup_system(funny_startup_system);
-
-    app.run();
 }
 
 fn wireframe_toggle_system(
@@ -116,7 +114,6 @@ fn funny_startup_system(
 
     commands.spawn((
         Camera3dBundle::default(),
-        FlyCam,
     ));
     for x in -16..16 {
         for y in -4..4 {

@@ -1,6 +1,6 @@
-use std::{ops::Range, sync::{Arc, RwLock}};
-use bevy::{prelude::{Vec2, IVec3}, math::DVec3};
-use rustcraft_modlib::world::generation::{biome::{scorer::BiomeSelectionScorer, registry::BiomeData}, generator::WORLD_GENERATION};
+use std::ops::Range;
+use rustcraft_modlib::engine::bevy::{prelude::IVec3, math::DVec3};
+use rustcraft_modlib::engine::world::generation::{biome::{scorer::BiomeSelectionScorer, registry::BiomeData}, generator::WORLD_GENERATION};
 use super::noise::{NOISE_LAYER_HEIGHT, NOISE_LAYER_TEMPERATURE, NOISE_LAYER_HUMIDITY};
 use crate::biomes::attributes::{ATTRIBUTE_GENVAR_HEIGHT, ATTRIBUTE_GENVAR_TEMPERATURE, ATTRIBUTE_GENVAR_HUMIDITY};
 
