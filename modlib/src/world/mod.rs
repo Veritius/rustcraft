@@ -15,6 +15,7 @@ use self::{
 pub mod block;
 pub mod chunk;
 pub mod generation;
+pub mod render;
 
 /// Helpful tools and shortcuts for manipulating the world.
 #[derive(SystemParam)]

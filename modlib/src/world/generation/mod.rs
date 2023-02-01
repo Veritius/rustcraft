@@ -23,7 +23,7 @@ use super::{
         meshing::RemeshChunkMarker,
         registry::{Chunks, ChunkState},
         Chunk, CHUNK_SIZE, CHUNK_SIZE_F32, CHUNK_SIZE_I32,
-    },
+    }, render::shader::EfficientChunkMaterial,
 };
 
 pub mod biome;
@@ -45,6 +45,8 @@ impl Plugin for WorldGenPlugin {
         app.init_resource::<Biomes>();
         app.init_resource::<WorldGeneration>();
 
+        app.add_asset::<EfficientChunkMaterial>();
+
         app.add_startup_system(worldgen_setup_system);
         app.add_system(generation_dispatch_system
             .label(SystemLabels::ChunkGenerationDispatchSystem)
@@ -58,13 +60,13 @@ impl Plugin for WorldGenPlugin {
 }
 
 #[derive(Resource)]
-struct ChunkMaterialHandle(Handle<StandardMaterial>);
+struct ChunkMaterialHandle(Handle<EfficientChunkMaterial>);
 
-fn worldgen_setup_system(mut commands: Commands, mut assets: ResMut<Assets<StandardMaterial>>) {
-    commands.insert_resource(ChunkMaterialHandle(assets.add(StandardMaterial {
-        base_color: Color::WHITE,
-        ..default()
-    })));
+fn worldgen_setup_system(
+    mut commands: Commands,
+    mut assets: ResMut<Assets<EfficientChunkMaterial>>
+) {
+    commands.insert_resource(ChunkMaterialHandle(assets.add(EfficientChunkMaterial {})));
 }
 
 fn generation_dispatch_system(
@@ -85,7 +87,7 @@ fn generation_dispatch_system(
             chunk
         });
 
-        let mut pbr = PbrBundle::default();
+        let mut pbr = MaterialMeshBundle::default();
         pbr.material = chunk_mat.0.clone();
         pbr.transform.translation = Vec3 {
             x: CHUNK_SIZE_F32 * event.0.x as f32,
