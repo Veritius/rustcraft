@@ -3,7 +3,7 @@ use bevy::{prelude::*, render::{render_resource::PrimitiveTopology, mesh::{Indic
 use dyn_clone::DynClone;
 use futures_lite::{FutureExt, future};
 use ndarray::Array3;
-use crate::world::{block::{entity::BlockComponent, BlockId, Block, registry::Blocks}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}};
+use crate::world::{block::{entity::BlockComponent, BlockId, Block, registry::Blocks}, WorldMapHelpers, chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, GetBlockOrEmpty, CHUNK_SIZE_U16, CHUNK_SIZE_U32}, render::shader::ATTRIBUTE_TEXTURE_REPEAT_COUNT};
 use super::{registry::Chunks, Chunk, CHUNK_SIZE_I32, events::ChunkModifiedEvent};
 use ndarray::Axis;
 
@@ -227,6 +227,7 @@ pub fn chunk_remesh_dispatch_system(
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
+                render_mesh.insert_attribute(ATTRIBUTE_TEXTURE_REPEAT_COUNT, repeat);
 
                 render_mesh
             })));

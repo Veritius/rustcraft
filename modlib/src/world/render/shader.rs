@@ -8,6 +8,10 @@ pub const ATTRIBUTE_TEXTURE_REPEAT_COUNT: MeshVertexAttribute =
 pub struct EfficientChunkMaterial {}
 
 impl Material for EfficientChunkMaterial {
+    fn vertex_shader() -> ShaderRef {
+        "shaders/blocks.wgsl".into()
+    }
+
     fn fragment_shader() -> ShaderRef {
         "shaders/blocks.wgsl".into()
     }
@@ -18,8 +22,10 @@ impl Material for EfficientChunkMaterial {
         layout: &MeshVertexBufferLayout,
         _key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
-        let vtx_layout = layout.get_layout(&[ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(0)])?;
-        descriptor.vertex.buffers = vec![vtx_layout];
+        let vertex_layout = layout.get_layout(&[
+            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(0)
+        ])?;
+        descriptor.vertex.buffers = vec![vertex_layout];
         Ok(())
     }
 }

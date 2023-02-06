@@ -80,6 +80,7 @@ impl MeshingPass for SolidBlockMesher {
                 normals.extend([[1.0, 0.0, 0.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
+                repeat_extend(repeat, quad);
             }
             for (blockid, quad) in greedy_determine_quads(&right_slice, &registry, selector) {
                 positions.extend([
@@ -93,6 +94,7 @@ impl MeshingPass for SolidBlockMesher {
                 normals.extend([[-1.0, 0.0, 0.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
+                repeat_extend(repeat, quad);
             }
         }
 
@@ -131,6 +133,7 @@ impl MeshingPass for SolidBlockMesher {
                 normals.extend([[0.0, 1.0, 0.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
+                repeat_extend(repeat, quad);
             }
             for (blockid, quad) in greedy_determine_quads(&right_slice, &registry, selector) {
                 positions.extend([
@@ -144,6 +147,7 @@ impl MeshingPass for SolidBlockMesher {
                 normals.extend([[0.0, -1.0, 0.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
+                repeat_extend(repeat, quad);
             }
         }
 
@@ -182,6 +186,7 @@ impl MeshingPass for SolidBlockMesher {
                 normals.extend([[0.0, 0.0, 1.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
+                repeat_extend(repeat, quad);
             }
             for (blockid, quad) in greedy_determine_quads(&right_slice, &registry, selector) {
                 positions.extend([
@@ -195,6 +200,7 @@ impl MeshingPass for SolidBlockMesher {
                 normals.extend([[0.0, 0.0, -1.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, blockid, &registry);
+                repeat_extend(repeat, quad);
             }
         }
     }
@@ -216,6 +222,13 @@ pub(crate) fn color_extend(
         },
         None => EMPTY_COLOR,
     });
+}
+
+pub(crate) fn repeat_extend(
+    repeat: &mut Vec<[u32; 2]>,
+    quad: [u8; 4],
+) {
+    repeat.extend([[((quad[0]-quad[2])+1) as u32, ((quad[1]-quad[3])+1) as u32]; 6]);
 }
 
 pub(crate) fn get_visibility(
