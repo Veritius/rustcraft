@@ -9,11 +9,12 @@ pub struct LiquidMesher;
 impl MeshingPass for LiquidMesher {
     fn do_pass(
         &self,
+        array: &Array3<BlockId>,
         positions: &mut Vec<[f32;3]>,
         normals: &mut Vec<[f32;3]>,
         uvs: &mut Vec<[f32;2]>,
         colors: &mut Vec<[f32;4]>,
-        data: &Array3<BlockId>
+        repeat: &mut Vec<[u32;2]>,
     ) {
         let registry = BLOCK_REGISTRY.read().unwrap();
 
@@ -22,12 +23,12 @@ impl MeshingPass for LiquidMesher {
         }
         
         for y in 1..CHUNK_SIZE+1 {
-            let array_subview = data.index_axis(Axis(1), y);
+            let array_subview = array.index_axis(Axis(1), y);
             let mut layer = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
             for x in 1..CHUNK_SIZE+1 {
                 for z in 1..CHUNK_SIZE+1 {
                     let this_block = array_subview[[x, z]];
-                    if selector(&this_block, &registry) && this_block != data[[x, y+1, z]] {
+                    if selector(&this_block, &registry) && this_block != array[[x, y+1, z]] {
                         layer[x-1][z-1] = this_block;
                     }
                 }

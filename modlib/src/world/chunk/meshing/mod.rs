@@ -33,9 +33,9 @@ impl MeshingPassesInternal {
         self.passes.remove(&name);
     }
 
-    fn do_passes(&self, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, data: &Array3<BlockId>) {
+    fn do_passes(&self,  data: &Array3<BlockId>, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, repeat: &mut Vec<[u32; 2]>) {
         for pass in self.passes.values() {
-            pass.do_pass(positions, normals, uvs, colors, data);
+            pass.do_pass(data, positions, normals, uvs, colors, repeat);
         }
     }
 }
@@ -78,7 +78,7 @@ pub trait MeshingPass: 'static + Send + Sync {
     /// Does a pass over the chunk.
     /// 
     /// **Warning for implementors:** All vectors must be the same length!
-    fn do_pass(&self, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, data: &Array3<BlockId>);
+    fn do_pass(&self, data: &Array3<BlockId>, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, repeat: &mut Vec<[u32; 2]>);
 }
 
 /// Used for generating a mesh for a chunk.
@@ -218,8 +218,9 @@ pub fn chunk_remesh_dispatch_system(
                 let mut normals: Vec<[f32; 3]> = vec![];
                 let mut uvs: Vec<[f32; 2]> = vec![];
                 let mut colors: Vec<[f32; 4]> = vec![];
+                let mut repeat: Vec<[u32; 2]> = vec![];
 
-                MESHING_PASSES.read().unwrap().do_passes(&mut positions, &mut normals, &mut uvs, &mut colors, &intermediate_array);
+                MESHING_PASSES.read().unwrap().do_passes(&intermediate_array, &mut positions, &mut normals, &mut uvs, &mut colors, &mut repeat);
 
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);

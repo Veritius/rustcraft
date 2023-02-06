@@ -23,11 +23,12 @@ pub(crate) struct SolidBlockMesher;
 impl MeshingPass for SolidBlockMesher {
     fn do_pass(
         &self,
+        array: &Array3<BlockId>,
         positions: &mut Vec<[f32;3]>,
         normals: &mut Vec<[f32;3]>,
         uvs: &mut Vec<[f32;2]>,
         colors: &mut Vec<[f32;4]>,
-        array: &Array3<BlockId>,
+        repeat: &mut Vec<[u32;2]>,
     ) {
         let registry = BLOCK_REGISTRY.read().unwrap();
 

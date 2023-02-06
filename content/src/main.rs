@@ -10,7 +10,7 @@ use rustcraft_modlib::{
     world::{
         block::{data::AddBlock, BlockRegistryPlugin},
         generation::{WorldGenPlugin, WorldGenExtensionFns, noise::SimpleNoiseLayer2D},
-        chunk::{events::LoadChunkMessage, ChunkedWorldPlugin, meshing::{MESHING_PASSES}},
+        chunk::{events::LoadChunkMessage, ChunkedWorldPlugin, meshing::{MESHING_PASSES}}, render::BlockShadersPlugin,
     },
     debug::DebugMenuPlugin, noise_rs::Perlin
 };
@@ -31,6 +31,7 @@ fn main() {
     app.add_plugin(BlockRegistryPlugin);
     app.add_plugin(ChunkedWorldPlugin);
     app.add_plugin(WorldGenPlugin);
+    app.add_plugin(BlockShadersPlugin);
 
     app.add_block(blocks::defs::water());
     app.add_block(blocks::defs::dirt());
