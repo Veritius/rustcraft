@@ -7,7 +7,7 @@ use self::{
 };
 use bevy::{
     prelude::*,
-    render::once_cell::sync::Lazy,
+    render::{once_cell::sync::Lazy, primitives::Aabb},
     tasks::{AsyncComputeTaskPool, Task},
 };
 use futures_lite::future;
@@ -95,7 +95,7 @@ fn generation_dispatch_system(
             z: CHUNK_SIZE_F32 * event.0.z as f32,
         };
 
-        commands.spawn((pbr, BeingGenerated(task)));
+        commands.spawn((pbr, BeingGenerated(task), Aabb::from_min_max(Vec3::ZERO, Vec3::splat(CHUNK_SIZE as f32))));
         chunk_registry.set(event.0.into(), ChunkState::BeingGenerated);
     }
 }
