@@ -1,4 +1,4 @@
-use bevy::{render::{render_resource::{AsBindGroup, ShaderRef, RenderPipelineDescriptor, SpecializedMeshPipelineError, VertexFormat}, mesh::{MeshVertexBufferLayout, MeshVertexAttribute}}, reflect::TypeUuid, prelude::{Material, UVec2}, pbr::{MaterialPipeline, MaterialPipelineKey}};
+use bevy::{render::{render_resource::{AsBindGroup, ShaderRef, RenderPipelineDescriptor, SpecializedMeshPipelineError, VertexFormat}, mesh::{MeshVertexBufferLayout, MeshVertexAttribute}}, reflect::TypeUuid, prelude::{Material, UVec2, Mesh}, pbr::{MaterialPipeline, MaterialPipelineKey}};
 
 pub const ATTRIBUTE_TEXTURE_REPEAT_COUNT: MeshVertexAttribute =
     MeshVertexAttribute::new("Vertex_Repeat_Count", 5149634363, VertexFormat::Uint32x2);
@@ -23,7 +23,8 @@ impl Material for EfficientChunkMaterial {
         _key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
         let vertex_layout = layout.get_layout(&[
-            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(0)
+            Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
+            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(1),
         ])?;
         descriptor.vertex.buffers = vec![vertex_layout];
         Ok(())
