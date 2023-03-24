@@ -1,19 +1,35 @@
-use bevy::{render::{render_resource::{AsBindGroup, ShaderRef, RenderPipelineDescriptor, SpecializedMeshPipelineError, VertexFormat}, mesh::{MeshVertexBufferLayout, MeshVertexAttribute}}, reflect::TypeUuid, prelude::{Material, UVec2, Mesh}, pbr::{MaterialPipeline, MaterialPipelineKey}};
+use bevy::{
+    render::{
+        render_resource::{
+            AsBindGroup, ShaderRef, RenderPipelineDescriptor, SpecializedMeshPipelineError, VertexFormat
+        },
+        mesh::{
+            MeshVertexBufferLayout, MeshVertexAttribute
+        }
+    },
+    reflect::TypeUuid,
+    prelude::{
+        Material, Mesh, Handle, Image
+    },
+    pbr::{
+        MaterialPipeline, MaterialPipelineKey
+    }
+};
 
 pub const ATTRIBUTE_TEXTURE_REPEAT_COUNT: MeshVertexAttribute =
     MeshVertexAttribute::new("Vertex_Repeat_Count", 5149634363, VertexFormat::Uint32x2);
 
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
 #[uuid = "3c8448b9-7748-473b-b374-441848c5a2f8"]
-pub struct EfficientChunkMaterial {}
+pub struct RepeatingTextureMaterial {
+    #[texture(0)]
+    #[sampler(1)]
+    pub atlas: Handle<Image>,
+}
 
-impl Material for EfficientChunkMaterial {
-    fn vertex_shader() -> ShaderRef {
-        "shaders/blocks.wgsl".into()
-    }
-
+impl Material for RepeatingTextureMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/blocks.wgsl".into()
+        "shaders/repeat.wgsl".into()
     }
 
     fn specialize(

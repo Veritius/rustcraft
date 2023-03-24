@@ -23,7 +23,7 @@ use super::{
         meshing::RemeshChunkMarker,
         registry::{Chunks, ChunkState},
         Chunk, CHUNK_SIZE, CHUNK_SIZE_F32, CHUNK_SIZE_I32,
-    }, render::shader::EfficientChunkMaterial,
+    }, render::shader::RepeatingTextureMaterial,
 };
 
 pub mod biome;
@@ -45,7 +45,7 @@ impl Plugin for WorldGenPlugin {
         app.init_resource::<Biomes>();
         app.init_resource::<WorldGeneration>();
 
-        app.add_asset::<EfficientChunkMaterial>();
+        app.add_asset::<RepeatingTextureMaterial>();
 
         app.add_startup_system(worldgen_setup_system);
         app.add_system(generation_dispatch_system
@@ -60,13 +60,14 @@ impl Plugin for WorldGenPlugin {
 }
 
 #[derive(Resource)]
-struct ChunkMaterialHandle(Handle<EfficientChunkMaterial>);
+struct ChunkMaterialHandle(Handle<RepeatingTextureMaterial>);
 
 fn worldgen_setup_system(
     mut commands: Commands,
-    mut assets: ResMut<Assets<EfficientChunkMaterial>>
+    mut assets: ResMut<Assets<RepeatingTextureMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
-    commands.insert_resource(ChunkMaterialHandle(assets.add(EfficientChunkMaterial {})));
+    commands.insert_resource(ChunkMaterialHandle(assets.add(RepeatingTextureMaterial { atlas: asset_server.get_handle("textures/debug.png") })));
 }
 
 fn generation_dispatch_system(
