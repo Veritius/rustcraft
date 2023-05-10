@@ -119,7 +119,7 @@ impl PartialOrd for WorldGenPassWrapper {
 impl Ord for WorldGenPassWrapper {
     fn cmp(&self, other: &Self) -> Ordering {
         let this = self.0.ordering_value();
-        let other = self.0.ordering_value();
+        let other = other.ordering_value();
         if this < other { return Ordering::Less }
         if this == other { return Ordering::Equal }
         if this > other { return Ordering::Greater }
