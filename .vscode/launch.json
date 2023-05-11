@@ -21,6 +21,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1"
+            },
             "cwd": "${workspaceFolder}"
         },
         {
@@ -41,6 +44,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1"
+            },
             "cwd": "${workspaceFolder}"
         },
         {
@@ -61,6 +67,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1"
+            },
             "cwd": "${workspaceFolder}"
         }
     ]
