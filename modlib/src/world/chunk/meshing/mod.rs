@@ -222,12 +222,16 @@ pub fn chunk_remesh_dispatch_system(
 
                 MESHING_PASSES.read().unwrap().do_passes(&intermediate_array, &mut positions, &mut normals, &mut uvs, &mut colors, &mut repeat);
 
+                // Converts all the repeat values to floats for the shader
+                let mut repeat_postproc: Vec<[f32; 2]> = vec![];
+                repeat_postproc.extend(repeat.iter().map(|&x| [x[0] as f32, x[1] as f32]));
+
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
                 render_mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
-                render_mesh.insert_attribute(ATTRIBUTE_TEXTURE_REPEAT_COUNT, repeat);
+                render_mesh.insert_attribute(ATTRIBUTE_TEXTURE_REPEAT_COUNT, repeat_postproc);
 
                 render_mesh
             })));

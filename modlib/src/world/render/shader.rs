@@ -17,7 +17,7 @@ use bevy::{
 };
 
 pub const ATTRIBUTE_TEXTURE_REPEAT_COUNT: MeshVertexAttribute =
-    MeshVertexAttribute::new("Vertex_Repeat_Count", 5149634363, VertexFormat::Uint32x2);
+    MeshVertexAttribute::new("Vertex_Repeat_Count", 5149634363, VertexFormat::Float32x2);
 
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
 #[uuid = "3c8448b9-7748-473b-b374-441848c5a2f8"]
