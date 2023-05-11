@@ -23,7 +23,7 @@ use super::{
         meshing::RemeshChunkMarker,
         registry::{Chunks, ChunkState},
         Chunk, CHUNK_SIZE, CHUNK_SIZE_F32, CHUNK_SIZE_I32,
-    }, render::shader::RepeatingTextureMaterial,
+    }, render::shader::{RepeatingTextureMaterial, ATTRIBUTE_TEXTURE_REPEAT_COUNT},
 };
 
 pub mod biome;
@@ -88,7 +88,9 @@ fn meshtest(
 
     *loc = true;
 
-    let mesh = meshes.add(Mesh::from(shape::Cube { size: 1.0 }));
+    let mut mesh = Mesh::from(shape::Cube { size: 1.0 });
+    mesh.insert_attribute(ATTRIBUTE_TEXTURE_REPEAT_COUNT, vec![[2.0f32, 2.0]; 24]);
+    let mesh = meshes.add(mesh);
 
     commands.spawn((
         mesh.clone(),

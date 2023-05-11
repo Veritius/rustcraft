@@ -28,6 +28,10 @@ pub struct RepeatingTextureMaterial {
 }
 
 impl Material for RepeatingTextureMaterial {
+    fn vertex_shader() -> ShaderRef {
+        "shaders/repeat.wgsl".into()
+    }
+
     fn fragment_shader() -> ShaderRef {
         "shaders/repeat.wgsl".into()
     }
@@ -39,11 +43,8 @@ impl Material for RepeatingTextureMaterial {
         _key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
         let vertex_layout = layout.get_layout(&[
-            Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
-            Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
-            Mesh::ATTRIBUTE_UV_0.at_shader_location(2),
-            Mesh::ATTRIBUTE_COLOR.at_shader_location(3),
-            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(4),
+            Mesh::ATTRIBUTE_UV_0.at_shader_location(0),
+            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(1),
         ])?;
         descriptor.vertex.buffers = vec![vertex_layout];
         Ok(())
