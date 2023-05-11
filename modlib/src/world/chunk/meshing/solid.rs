@@ -36,15 +36,6 @@ impl MeshingPass for SolidBlockMesher {
             registry.get_by_numerical_id(*block).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_SOLID_MESHER).is_some()
         }
 
-        const UVS: [[f32; 2]; 6] = [
-            [0.0, 0.0],
-            [0.0, 1.0],
-            [1.0, 0.0],
-            [1.0, 0.0],
-            [0.0, 1.0],
-            [1.0, 1.0],
-        ];
-
         // Left and right
         for x in 1..SHAPE_SIZE_USIZE - 1 {
             let array_subview = array.index_axis(Axis(0), x);
@@ -78,7 +69,14 @@ impl MeshingPass for SolidBlockMesher {
                     [x as f32, quad[2] as f32, quad[1] as f32],
                 ]);
                 normals.extend([[1.0, 0.0, 0.0]; 6]);
-                uvs.extend(UVS);
+                uvs.extend([
+                    [0.0, 0.0], // top left
+                    [0.0, 1.0], // bottom left
+                    [1.0, 0.0], // top right
+                    [0.0, 1.0], // bottom left
+                    [1.0, 1.0], // bottom right
+                    [1.0, 0.0], // top right
+                ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }
@@ -92,7 +90,14 @@ impl MeshingPass for SolidBlockMesher {
                     [x as f32 + 1.0, quad[2] as f32, quad[1] as f32],
                 ]);
                 normals.extend([[-1.0, 0.0, 0.0]; 6]);
-                uvs.extend(UVS);
+                uvs.extend([
+                    [0.0, 0.0], // top left
+                    [0.0, 1.0], // bottom left
+                    [1.0, 0.0], // top right
+                    [0.0, 1.0], // bottom left
+                    [1.0, 1.0], // bottom right
+                    [1.0, 0.0], // top right
+                ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }
@@ -131,7 +136,14 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, y as f32, quad[1] as f32],
                 ]);
                 normals.extend([[0.0, 1.0, 0.0]; 6]);
-                uvs.extend(UVS);
+                uvs.extend([
+                    [0.0, 0.0], // top left
+                    [0.0, 1.0], // bottom left
+                    [1.0, 0.0], // top right
+                    [0.0, 1.0], // bottom left
+                    [1.0, 1.0], // bottom right
+                    [1.0, 0.0], // top right
+                ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }
@@ -145,7 +157,14 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, y as f32 + 1.0, quad[1] as f32],
                 ]);
                 normals.extend([[0.0, -1.0, 0.0]; 6]);
-                uvs.extend(UVS);
+                uvs.extend([
+                    [0.0, 0.0], // top left
+                    [0.0, 1.0], // bottom left
+                    [1.0, 0.0], // top right
+                    [0.0, 1.0], // bottom left
+                    [1.0, 1.0], // bottom right
+                    [1.0, 0.0], // top right
+                ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }
@@ -184,7 +203,14 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, quad[1] as f32, z as f32],
                 ]);
                 normals.extend([[0.0, 0.0, 1.0]; 6]);
-                uvs.extend(UVS);
+                uvs.extend([
+                    [0.0, 0.0], // top left
+                    [0.0, 1.0], // bottom left
+                    [1.0, 0.0], // top right
+                    [0.0, 1.0], // bottom left
+                    [1.0, 1.0], // bottom right
+                    [1.0, 0.0], // top right
+                ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }
@@ -198,7 +224,14 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, quad[1] as f32, z as f32 + 1.0],
                 ]);
                 normals.extend([[0.0, 0.0, -1.0]; 6]);
-                uvs.extend(UVS);
+                uvs.extend([
+                    [0.0, 0.0], // top left
+                    [0.0, 1.0], // bottom left
+                    [1.0, 0.0], // top right
+                    [0.0, 1.0], // bottom left
+                    [1.0, 1.0], // bottom right
+                    [1.0, 0.0], // top right
+                ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }

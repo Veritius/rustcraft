@@ -37,12 +37,12 @@ impl MeshingPass for LiquidMesher {
             let y = y as f32 - 0.15;
 
             const UVS: [[f32; 2]; 6] = [
-                [0.0, 0.0],
-                [0.0, 1.0],
-                [1.0, 0.0],
-                [1.0, 0.0],
-                [0.0, 1.0],
-                [1.0, 1.0],
+                [0.0, 0.0], // top left
+                [0.0, 1.0], // bottom left
+                [1.0, 0.0], // top right
+                [0.0, 1.0], // bottom left
+                [1.0, 1.0], // bottom right
+                [1.0, 0.0], // top right
             ];
 
             for (block, quad) in greedy_determine_quads(&layer, &registry, selector) {
