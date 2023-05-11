@@ -56,6 +56,8 @@ impl Plugin for WorldGenPlugin {
                 .label(SystemLabels::ChunkGenerationPollingSystem)
                 .after(SystemLabels::ChunkGenerationDispatchSystem),
         );
+
+        app.add_system(meshtest);
     }
 }
 
@@ -67,7 +69,55 @@ fn worldgen_setup_system(
     mut assets: ResMut<Assets<RepeatingTextureMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    commands.insert_resource(ChunkMaterialHandle(assets.add(RepeatingTextureMaterial { atlas: asset_server.get_handle("textures/debug.png") })));
+    commands.insert_resource(ChunkMaterialHandle(assets.add(RepeatingTextureMaterial { atlas: asset_server.load("textures/debug.png") })));
+}
+
+fn meshtest(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
+    mat: Res<ChunkMaterialHandle>,
+    mut loc: Local<bool>,
+    time: Res<Time>,
+) {
+    // only activate after 5 seconds because reasons
+    if time.elapsed_seconds() < 5.0 || *loc == true {
+        return;
+    }
+
+    *loc = true;
+
+    let mesh = meshes.add(Mesh::from(shape::Cube { size: 1.0 }));
+
+    commands.spawn((
+        mesh.clone(),
+        mat.0.clone(),
+        VisibilityBundle::default(),
+        TransformBundle::from_transform(Transform::from_translation(Vec3::new(-5.0, 15.0, 0.0))),
+    ));
+
+    commands.spawn((
+        mesh.clone(),
+        mat.0.clone(),
+        materials.add(StandardMaterial { ..default() }),
+        VisibilityBundle::default(),
+        TransformBundle::from_transform(Transform::from_translation(Vec3::new(0.0, 15.0, 5.0))),
+    ));
+
+    commands.spawn(PbrBundle {
+        mesh: mesh.clone(),
+        material: materials.add(StandardMaterial { base_color_texture: Some(asset_server.load("textures/debug.png")), ..default() }),
+        transform: Transform::from_translation(Vec3::new(5.0, 15.0, 0.0)),
+        ..default()
+    });
+
+    commands.spawn(PbrBundle {
+        mesh: mesh.clone(),
+        material: materials.add(Color::GREEN.into()),
+        transform: Transform::from_translation(Vec3::new(0.0, 15.0, 0.0)),
+        ..default()
+    });
 }
 
 fn generation_dispatch_system(

@@ -3,16 +3,23 @@ use rustcraft_modlib::world::{
     generation::{
         generator::{
             WorldGeneratorPass,
-            WorldGenerationMode, WORLD_GENERATION, WorldGenerationInternal,
+            WorldGenerationMode,
+            WORLD_GENERATION,
+            WorldGenerationInternal,
         },
     },
     chunk::{
         Chunk,
-        CHUNK_SIZE, CHUNK_SIZE_I32,
+        CHUNK_SIZE,
+        CHUNK_SIZE_I32,
     },
     block::{
         BlockId,
-        Block, registry::{BLOCK_REGISTRY, BlockRegistryInternal},
+        Block,
+        registry::{
+            BLOCK_REGISTRY,
+            BlockRegistryInternal
+        },
     },
 };
 use super::noise::NOISE_LAYER_HEIGHT;

@@ -9,7 +9,7 @@ use bevy::{
     },
     reflect::TypeUuid,
     prelude::{
-        Material, Mesh, Handle, Image
+        Material, Mesh, Handle, Image, Color
     },
     pbr::{
         MaterialPipeline, MaterialPipelineKey
@@ -38,11 +38,11 @@ impl Material for RepeatingTextureMaterial {
         layout: &MeshVertexBufferLayout,
         _key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
-        let vertex_layout = layout.get_layout(&[
-            Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
-            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(1),
-        ])?;
-        descriptor.vertex.buffers = vec![vertex_layout];
+        // let vertex_layout = layout.get_layout(&[
+        //     Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
+        //     ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(1),
+        // ])?;
+        // descriptor.vertex.buffers = vec![vertex_layout];
         Ok(())
     }
 }
