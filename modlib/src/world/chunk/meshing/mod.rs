@@ -33,7 +33,15 @@ impl MeshingPassesInternal {
         self.passes.remove(&name);
     }
 
-    fn do_passes(&self,  data: &Array3<BlockId>, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, repeat: &mut Vec<[u32; 2]>) {
+    fn do_passes(
+        &self,
+        data: &Array3<BlockId>,
+        positions: &mut Vec<[f32;3]>,
+        normals: &mut Vec<[f32;3]>,
+        uvs: &mut Vec<[f32;2]>,
+        colors: &mut Vec<[f32;4]>,
+        repeat: &mut Vec<[u32; 2]>
+    ) {
         for pass in self.passes.values() {
             pass.do_pass(data, positions, normals, uvs, colors, repeat);
         }
@@ -78,7 +86,15 @@ pub trait MeshingPass: 'static + Send + Sync {
     /// Does a pass over the chunk.
     /// 
     /// **Warning for implementors:** All vectors must be the same length!
-    fn do_pass(&self, data: &Array3<BlockId>, positions: &mut Vec<[f32;3]>, normals: &mut Vec<[f32;3]>, uvs: &mut Vec<[f32;2]>, colors: &mut Vec<[f32;4]>, repeat: &mut Vec<[u32; 2]>);
+    fn do_pass(
+        &self,
+        data: &Array3<BlockId>,
+        positions: &mut Vec<[f32;3]>,
+        normals: &mut Vec<[f32;3]>,
+        uvs: &mut Vec<[f32;2]>,
+        colors: &mut Vec<[f32;4]>,
+        repeat: &mut Vec<[u32; 2]>
+    );
 }
 
 /// Used for generating a mesh for a chunk.
