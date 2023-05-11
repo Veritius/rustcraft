@@ -36,6 +36,22 @@ impl MeshingPass for SolidBlockMesher {
             registry.get_by_numerical_id(*block).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_SOLID_MESHER).is_some()
         }
 
+        /*
+        (0,0) --- (1,0)
+         |           |
+         |           |
+         |           |
+         |           |
+        (0,1) --- (1,1)
+
+        A ---------- B
+        |            |
+        |            |
+        |            |
+        |            |
+        C ---------- D
+        */
+
         // Left and right
         for x in 1..SHAPE_SIZE_USIZE - 1 {
             let array_subview = array.index_axis(Axis(0), x);
@@ -70,12 +86,12 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[1.0, 0.0, 0.0]; 6]);
                 uvs.extend([
-                    [0.0, 0.0], // top left
-                    [0.0, 1.0], // bottom left
-                    [1.0, 0.0], // top right
-                    [0.0, 1.0], // bottom left
-                    [1.0, 1.0], // bottom right
-                    [1.0, 0.0], // top right
+                    [0.0, 1.0],
+                    [1.0, 1.0],
+                    [0.0, 0.0],
+                    [1.0, 1.0],
+                    [1.0, 0.0],
+                    [0.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
@@ -91,12 +107,12 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[-1.0, 0.0, 0.0]; 6]);
                 uvs.extend([
-                    [0.0, 0.0], // top left
-                    [0.0, 1.0], // bottom left
-                    [1.0, 0.0], // top right
-                    [0.0, 1.0], // bottom left
-                    [1.0, 1.0], // bottom right
-                    [1.0, 0.0], // top right
+                    [0.0, 1.0],
+                    [1.0, 1.0],
+                    [1.0, 0.0],
+                    [0.0, 0.0],
+                    [0.0, 1.0],
+                    [1.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
@@ -106,27 +122,27 @@ impl MeshingPass for SolidBlockMesher {
         // Up and down
         for y in 1..SHAPE_SIZE_USIZE - 1 {
             let array_subview = array.index_axis(Axis(1), y);
-            let mut left_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-            let mut right_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+            let mut bottom_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+            let mut top_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
             for x in 1..SHAPE_SIZE_USIZE - 1 {
                 for z in 1..SHAPE_SIZE_USIZE - 1 {
                     let this_block = array_subview[[x, z]];
                     if get_visibility(this_block, &registry)
                         .is_visible_against(&get_visibility(array[[x, y - 1, z]], &registry))
                     {
-                        left_slice[x - 1][z - 1] = this_block;
+                        bottom_slice[x - 1][z - 1] = this_block;
                     }
                     if get_visibility(this_block, &registry)
                         .is_visible_against(&get_visibility(array[[x, y + 1, z]], &registry))
                     {
-                        right_slice[x - 1][z - 1] = this_block;
+                        top_slice[x - 1][z - 1] = this_block;
                     }
                 }
             }
 
             let y = y - 1;
 
-            for (blockid, quad) in greedy_determine_quads(&left_slice, &registry, selector) {
+            for (blockid, quad) in greedy_determine_quads(&bottom_slice, &registry, selector) {
                 positions.extend([
                     [quad[0] as f32, y as f32, quad[3] as f32],
                     [quad[0] as f32, y as f32, quad[1] as f32],
@@ -137,17 +153,17 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, 1.0, 0.0]; 6]);
                 uvs.extend([
-                    [0.0, 0.0], // top left
-                    [0.0, 1.0], // bottom left
-                    [1.0, 0.0], // top right
-                    [0.0, 1.0], // bottom left
-                    [1.0, 1.0], // bottom right
-                    [1.0, 0.0], // top right
+                    [0.0, 1.0],
+                    [1.0, 1.0],
+                    [1.0, 0.0],
+                    [0.0, 0.0],
+                    [0.0, 1.0],
+                    [1.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }
-            for (blockid, quad) in greedy_determine_quads(&right_slice, &registry, selector) {
+            for (blockid, quad) in greedy_determine_quads(&top_slice, &registry, selector) {
                 positions.extend([
                     [quad[0] as f32, y as f32 + 1.0, quad[1] as f32],
                     [quad[0] as f32, y as f32 + 1.0, quad[3] as f32],
@@ -158,12 +174,12 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, -1.0, 0.0]; 6]);
                 uvs.extend([
-                    [0.0, 0.0], // top left
-                    [0.0, 1.0], // bottom left
-                    [1.0, 0.0], // top right
-                    [0.0, 1.0], // bottom left
-                    [1.0, 1.0], // bottom right
-                    [1.0, 0.0], // top right
+                    [0.0, 0.0],
+                    [0.0, 1.0],
+                    [1.0, 0.0],
+                    [0.0, 1.0],
+                    [1.0, 1.0],
+                    [1.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
@@ -173,27 +189,27 @@ impl MeshingPass for SolidBlockMesher {
         // Forward and backward
         for z in 1..SHAPE_SIZE_USIZE - 1 {
             let array_subview = array.index_axis(Axis(2), z);
-            let mut left_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
-            let mut right_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+            let mut forward_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
+            let mut backward_slice = [[BlockId::EMPTY; CHUNK_SIZE]; CHUNK_SIZE];
             for x in 1..SHAPE_SIZE_USIZE - 1 {
                 for y in 1..SHAPE_SIZE_USIZE - 1 {
                     let this_block = array_subview[[x, y]];
                     if get_visibility(this_block, &registry)
                         .is_visible_against(&get_visibility(array[[x, y, z - 1]], &registry))
                     {
-                        left_slice[x - 1][y - 1] = this_block;
+                        forward_slice[x - 1][y - 1] = this_block;
                     }
                     if get_visibility(this_block, &registry)
                         .is_visible_against(&get_visibility(array[[x, y, z + 1]], &registry))
                     {
-                        right_slice[x - 1][y - 1] = this_block;
+                        backward_slice[x - 1][y - 1] = this_block;
                     }
                 }
             }
 
             let z = z - 1;
 
-            for (blockid, quad) in greedy_determine_quads(&left_slice, &registry, selector) {
+            for (blockid, quad) in greedy_determine_quads(&forward_slice, &registry, selector) {
                 positions.extend([
                     [quad[0] as f32, quad[1] as f32, z as f32],
                     [quad[0] as f32, quad[3] as f32, z as f32],
@@ -204,17 +220,17 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, 0.0, 1.0]; 6]);
                 uvs.extend([
-                    [0.0, 0.0], // top left
-                    [0.0, 1.0], // bottom left
-                    [1.0, 0.0], // top right
-                    [0.0, 1.0], // bottom left
-                    [1.0, 1.0], // bottom right
-                    [1.0, 0.0], // top right
+                    [1.0, 1.0],
+                    [1.0, 0.0],
+                    [0.0, 1.0],
+                    [1.0, 0.0],
+                    [0.0, 0.0],
+                    [0.0, 1.0],
                 ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
             }
-            for (blockid, quad) in greedy_determine_quads(&right_slice, &registry, selector) {
+            for (blockid, quad) in greedy_determine_quads(&backward_slice, &registry, selector) {
                 positions.extend([
                     [quad[0] as f32, quad[3] as f32, z as f32 + 1.0],
                     [quad[0] as f32, quad[1] as f32, z as f32 + 1.0],
@@ -225,12 +241,12 @@ impl MeshingPass for SolidBlockMesher {
                 ]);
                 normals.extend([[0.0, 0.0, -1.0]; 6]);
                 uvs.extend([
-                    [0.0, 0.0], // top left
-                    [0.0, 1.0], // bottom left
-                    [1.0, 0.0], // top right
-                    [0.0, 1.0], // bottom left
-                    [1.0, 1.0], // bottom right
-                    [1.0, 0.0], // top right
+                    [0.0, 0.0],
+                    [0.0, 1.0],
+                    [1.0, 1.0],
+                    [1.0, 0.0],
+                    [0.0, 0.0],
+                    [1.0, 1.0],
                 ]);
                 color_extend(colors, blockid, &registry);
                 repeat_extend(repeat, quad);
