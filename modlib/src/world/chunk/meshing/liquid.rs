@@ -1,5 +1,5 @@
 use ndarray::{Array3, Axis};
-use crate::world::{block::{BlockId, registry::{BLOCK_REGISTRY, BlockRegistryInternal}, data::BlockData}, chunk::{CHUNK_SIZE, meshing::solid::{color_extend, repeat_extend}}};
+use crate::world::{block::{BlockId, registry::{BLOCK_REGISTRY, BlockRegistryInternal}, data::BlockData}, chunk::{CHUNK_SIZE, meshing::solid::color_extend}};
 use super::{MeshingPass, greedy::greedy_determine_quads, MeshingPassIdentifier};
 
 pub const LIQUID_MESHER_PASS: MeshingPassIdentifier = MeshingPassIdentifier::new("engine_liquid", 1);
@@ -57,7 +57,10 @@ impl MeshingPass for LiquidMesher {
                 normals.extend([[0.0, -1.0, 0.0]; 6]);
                 uvs.extend(UVS);
                 color_extend(colors, block, &registry);
-                repeat_extend(repeat, quad);
+                repeat.extend([[
+                    ((quad[2]-quad[0])) as u32,
+                    ((quad[3]-quad[1])) as u32,
+                    ]; 6]);
             }
         }
     }

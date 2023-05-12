@@ -239,7 +239,7 @@ pub fn chunk_remesh_dispatch_system(
                 MESHING_PASSES.read().unwrap().do_passes(&intermediate_array, &mut positions, &mut normals, &mut uvs, &mut colors, &mut repeat);
 
                 // Converts all the repeat values to floats for the shader
-                let mut repeat_postproc: Vec<[f32; 2]> = vec![];
+                let mut repeat_postproc: Vec<[f32; 2]> = Vec::with_capacity(repeat.len());
                 repeat_postproc.extend(repeat.iter().map(|&x| [x[0] as f32, x[1] as f32]));
 
                 let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);

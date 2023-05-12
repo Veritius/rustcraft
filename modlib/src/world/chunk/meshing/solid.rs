@@ -94,7 +94,10 @@ impl MeshingPass for SolidBlockMesher {
                     [0.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
-                repeat_extend(repeat, quad);
+                repeat.extend([[
+                    ((quad[3]-quad[1])) as u32,
+                    ((quad[2]-quad[0])) as u32,
+                    ]; 6]);
             }
             for (blockid, quad) in greedy_determine_quads(&right_slice, &registry, selector) {
                 positions.extend([
@@ -115,7 +118,10 @@ impl MeshingPass for SolidBlockMesher {
                     [1.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
-                repeat_extend(repeat, quad);
+                repeat.extend([[
+                    ((quad[3]-quad[1])) as u32,
+                    ((quad[2]-quad[0])) as u32,
+                    ]; 6]);
             }
         }
 
@@ -161,7 +167,10 @@ impl MeshingPass for SolidBlockMesher {
                     [1.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
-                repeat_extend(repeat, quad);
+                repeat.extend([[
+                    ((quad[2]-quad[0])) as u32,
+                    ((quad[3]-quad[1])) as u32,
+                    ]; 6]);
             }
             for (blockid, quad) in greedy_determine_quads(&top_slice, &registry, selector) {
                 positions.extend([
@@ -182,7 +191,10 @@ impl MeshingPass for SolidBlockMesher {
                     [1.0, 0.0],
                 ]);
                 color_extend(colors, blockid, &registry);
-                repeat_extend(repeat, quad);
+                repeat.extend([[
+                    ((quad[2]-quad[0])) as u32,
+                    ((quad[3]-quad[1])) as u32,
+                    ]; 6]);
             }
         }
 
@@ -228,7 +240,10 @@ impl MeshingPass for SolidBlockMesher {
                     [0.0, 1.0],
                 ]);
                 color_extend(colors, blockid, &registry);
-                repeat_extend(repeat, quad);
+                repeat.extend([[
+                    ((quad[2]-quad[0])) as u32,
+                    ((quad[3]-quad[1])) as u32,
+                    ]; 6]);
             }
             for (blockid, quad) in greedy_determine_quads(&backward_slice, &registry, selector) {
                 positions.extend([
@@ -249,7 +264,10 @@ impl MeshingPass for SolidBlockMesher {
                     [1.0, 1.0],
                 ]);
                 color_extend(colors, blockid, &registry);
-                repeat_extend(repeat, quad);
+                repeat.extend([[
+                    ((quad[2]-quad[0])) as u32,
+                    ((quad[3]-quad[1])) as u32,
+                    ]; 6]);
             }
         }
     }
@@ -271,13 +289,6 @@ pub(crate) fn color_extend(
         },
         None => EMPTY_COLOR,
     });
-}
-
-pub(crate) fn repeat_extend(
-    repeat: &mut Vec<[u32; 2]>,
-    quad: [u8; 4],
-) {
-    repeat.extend([[((quad[0]-quad[2])+1) as u32, ((quad[1]-quad[3])+1) as u32]; 6]);
 }
 
 pub(crate) fn get_visibility(
