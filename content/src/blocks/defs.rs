@@ -41,7 +41,7 @@ pub(crate) fn grass() -> BlockData {
         (BlockData::ATTRIBUTE_DISPLAY_NAME, AttributeValue::StaticStr("Grass")),
         (BlockData::ATTRIBUTE_BASE_COLOR, AttributeValue::Color(Color::GREEN)),
         (BlockData::ATTRIBUTE_USE_SOLID_MESHER, AttributeValue::None),
-        (BlockData::ATTRIBUTE_SOLID_TEXTURE_SIDES, AttributeValue::StaticStrX6(["grass_side", "grass_side", "grass_top", "dirt", "grass_side", "grass_side"])),
+        (BlockData::ATTRIBUTE_SOLID_TEXTURE_SIDES, AttributeValue::StaticStrX6(["dirt", "dirt", "grass", "dirt", "dirt", "dirt"])),
     ])
 }
 
