@@ -43,8 +43,9 @@ impl Material for RepeatingTextureMaterial {
         _key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
         let vertex_layout = layout.get_layout(&[
-            Mesh::ATTRIBUTE_UV_0.at_shader_location(0),
-            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(1),
+            Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
+            Mesh::ATTRIBUTE_UV_0.at_shader_location(1),
+            ATTRIBUTE_TEXTURE_REPEAT_COUNT.at_shader_location(2),
         ])?;
         descriptor.vertex.buffers = vec![vertex_layout];
         Ok(())
