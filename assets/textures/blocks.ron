@@ -1,18 +1,18 @@
-[
+([
     (
         name: "dirt",
-        pos: [0,0],
+        pos: (0,0),
     ),
     (
         name: "grass",
-        pos: [1,0],
+        pos: (1,0),
     ),
     (
         name: "sand",
-        pos: [2,0],
+        pos: (2,0),
     ),
     (
         name: "stone",
-        pos: [3,0],
+        pos: (3,0),
     )
-]
+])

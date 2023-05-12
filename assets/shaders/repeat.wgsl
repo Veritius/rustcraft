@@ -1,3 +1,6 @@
+#import bevy_pbr::mesh_view_bindings
+#import bevy_pbr::mesh_bindings
+
 @group(1) @binding(0)
 var base_color_texture: texture_2d<f32>;
 @group(1) @binding(1)
