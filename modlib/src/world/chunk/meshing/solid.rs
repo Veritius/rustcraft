@@ -7,7 +7,7 @@ use crate::{world::{
     chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, meshing::greedy::greedy_determine_quads}, render::blockatlas::{BLOCK_ATLAS_TEXTURE, BlockAtlas},
 }, attributes::AttributeValue};
 use bevy::{
-    prelude::{Color, Mesh},
+    prelude::{Color, Mesh, Rect},
     render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues},
 };
 use ndarray::{Array3, Axis};
@@ -325,7 +325,7 @@ fn material_extend(
         .get_by_numerical_id(blockid)
         .expect("Block should have been valid!")
         .get_attribute(BlockData::ATTRIBUTE_SOLID_TEXTURE_SIDES)
-        .unwrap();
+        .expect("Block should have had the texture sides attribute");
 
     let tex_id = match mats {
         AttributeValue::StaticStrX6(faces) => {
@@ -342,14 +342,24 @@ fn material_extend(
     };
 
     let tex_uvs = textures.map.get(tex_id).unwrap();
+    
+    fn w(
+        tex_uvs: &Rect,
+        a: f32, b: f32,
+    ) -> [f32; 2] {
+        [
+            tex_uvs.min.x + (a * tex_uvs.width()),
+            tex_uvs.min.y + (b * tex_uvs.height()),
+        ]
+    }
 
     [
-        [uvs[0][0], uvs[0][1]],
-        [uvs[1][0], uvs[1][1]],
-        [uvs[2][0], uvs[2][1]],
-        [uvs[3][0], uvs[3][1]],
-        [uvs[4][0], uvs[4][1]],
-        [uvs[5][0], uvs[5][1]],
+        w(tex_uvs, uvs[0][0], uvs[0][1]),
+        w(tex_uvs, uvs[1][0], uvs[1][1]),
+        w(tex_uvs, uvs[2][0], uvs[2][1]),
+        w(tex_uvs, uvs[3][0], uvs[3][1]),
+        w(tex_uvs, uvs[4][0], uvs[4][1]),
+        w(tex_uvs, uvs[5][0], uvs[5][1]),
     ]
 }
 

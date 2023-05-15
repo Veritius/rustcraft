@@ -26,6 +26,9 @@ pub fn greedy_determine_quads<Selector: Fn(&BlockId, &BlockRegistryInternal) -> 
 
             // Remember our current block type
             let current_block = slice[block_x][block_y];
+            if !selector(&current_block, &registry) {
+                continue;
+            }
 
             // Check rows
             let mut offset_x = 0;

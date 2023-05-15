@@ -49,7 +49,7 @@ pub(crate) fn glass() -> BlockData {
     BlockData::new_with_attributes("rustcraft_glass", MeshingVisibility::Translucent, vec![
         (BlockData::ATTRIBUTE_DISPLAY_NAME, AttributeValue::StaticStr("Grass")),
         (BlockData::ATTRIBUTE_BASE_COLOR, AttributeValue::Color(Color::ANTIQUE_WHITE)),
-        (BlockData::ATTRIBUTE_SOLID_TEXTURE_SIDES, AttributeValue::StaticStrX6(["glass"; 6])),
         (BlockData::ATTRIBUTE_USE_SOLID_MESHER, AttributeValue::None),
+        (BlockData::ATTRIBUTE_SOLID_TEXTURE_SIDES, AttributeValue::StaticStrX6(["glass"; 6])),
     ])
 }
