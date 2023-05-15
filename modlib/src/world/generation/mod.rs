@@ -69,7 +69,7 @@ fn worldgen_setup_system(
     mut assets: ResMut<Assets<RepeatingTextureMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    commands.insert_resource(ChunkMaterialHandle(assets.add(RepeatingTextureMaterial { atlas: asset_server.load("textures/debug.png") })));
+    commands.insert_resource(ChunkMaterialHandle(assets.add(RepeatingTextureMaterial { atlas: asset_server.load("textures/blocks.png") })));
 }
 
 fn meshtest(

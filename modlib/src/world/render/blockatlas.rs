@@ -2,7 +2,7 @@ use std::{sync::{Arc, RwLock}, collections::BTreeMap, fs, path::PathBuf};
 use bevy::{render::once_cell::sync::Lazy, prelude::{Handle, Image, Assets, AssetServer, Commands, Res}, math::Rect};
 use serde::Deserialize;
 
-pub(crate) static BLOCK_ATLAS_TEXTURE: Lazy<Arc<RwLock<Option<BlockAtlas>>>> = Lazy::new(||Arc::new(RwLock::new(None)));
+pub(crate) static BLOCK_ATLAS_TEXTURE: Lazy<Arc<RwLock<BlockAtlas>>> = Lazy::new(||Arc::new(RwLock::new(BlockAtlas { image: Handle::default(), map: BTreeMap::new() })));
 
 pub(super) fn block_atlas_creation_system(
     asset_server: Res<AssetServer>,
@@ -35,7 +35,7 @@ pub(super) fn block_atlas_creation_system(
         );
     }
 
-    *BLOCK_ATLAS_TEXTURE.write().unwrap() = Some(atlas);
+    *BLOCK_ATLAS_TEXTURE.write().unwrap() = atlas;
 }
 
 #[derive(Debug)]

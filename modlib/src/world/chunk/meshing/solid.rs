@@ -1,11 +1,11 @@
-use crate::world::{
+use crate::{world::{
     block::{
         data::BlockData,
         registry::{BlockRegistryInternal, BLOCK_REGISTRY},
         Block, BlockId,
     },
-    chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, meshing::greedy::greedy_determine_quads},
-};
+    chunk::{CHUNK_SIZE, CHUNK_SIZE_U8, meshing::greedy::greedy_determine_quads}, render::blockatlas::{BLOCK_ATLAS_TEXTURE, BlockAtlas},
+}, attributes::AttributeValue};
 use bevy::{
     prelude::{Color, Mesh},
     render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues},
@@ -31,6 +31,7 @@ impl MeshingPass for SolidBlockMesher {
         repeat: &mut Vec<[u32;2]>,
     ) {
         let registry = BLOCK_REGISTRY.read().unwrap();
+        let textures = BLOCK_ATLAS_TEXTURE.read().unwrap();
 
         fn selector(block: &BlockId, registry: &BlockRegistryInternal) -> bool {
             registry.get_by_numerical_id(*block).unwrap().get_attribute(BlockData::ATTRIBUTE_USE_SOLID_MESHER).is_some()
@@ -85,14 +86,16 @@ impl MeshingPass for SolidBlockMesher {
                     [x as f32, quad[2] as f32, quad[1] as f32],
                 ]);
                 normals.extend([[1.0, 0.0, 0.0]; 6]);
-                uvs.extend([
-                    [0.0, 1.0],
-                    [1.0, 1.0],
-                    [0.0, 0.0],
-                    [1.0, 1.0],
-                    [1.0, 0.0],
-                    [0.0, 0.0],
-                ]);
+                uvs.extend(
+                    material_extend(&registry, &textures, blockid, BlockDir::Left, [
+                        [0.0, 1.0],
+                        [1.0, 1.0],
+                        [0.0, 0.0],
+                        [1.0, 1.0],
+                        [1.0, 0.0],
+                        [0.0, 0.0],
+                    ])
+                );
                 color_extend(colors, blockid, &registry);
                 repeat.extend([[
                     ((quad[3]-quad[1])) as u32,
@@ -109,14 +112,16 @@ impl MeshingPass for SolidBlockMesher {
                     [x as f32 + 1.0, quad[2] as f32, quad[1] as f32],
                 ]);
                 normals.extend([[-1.0, 0.0, 0.0]; 6]);
-                uvs.extend([
-                    [0.0, 1.0],
-                    [1.0, 1.0],
-                    [1.0, 0.0],
-                    [0.0, 0.0],
-                    [0.0, 1.0],
-                    [1.0, 0.0],
-                ]);
+                uvs.extend(
+                    material_extend(&registry, &textures, blockid, BlockDir::Right, [
+                        [0.0, 1.0],
+                        [1.0, 1.0],
+                        [1.0, 0.0],
+                        [0.0, 0.0],
+                        [0.0, 1.0],
+                        [1.0, 0.0],
+                    ])
+                );
                 color_extend(colors, blockid, &registry);
                 repeat.extend([[
                     ((quad[3]-quad[1])) as u32,
@@ -158,14 +163,16 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, y as f32, quad[1] as f32],
                 ]);
                 normals.extend([[0.0, 1.0, 0.0]; 6]);
-                uvs.extend([
-                    [0.0, 1.0],
-                    [1.0, 1.0],
-                    [1.0, 0.0],
-                    [0.0, 0.0],
-                    [0.0, 1.0],
-                    [1.0, 0.0],
-                ]);
+                uvs.extend(
+                    material_extend(&registry, &textures, blockid, BlockDir::Bottom, [
+                        [0.0, 1.0],
+                        [1.0, 1.0],
+                        [1.0, 0.0],
+                        [0.0, 0.0],
+                        [0.0, 1.0],
+                        [1.0, 0.0],
+                    ])
+                );
                 color_extend(colors, blockid, &registry);
                 repeat.extend([[
                     ((quad[2]-quad[0])) as u32,
@@ -182,14 +189,16 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, y as f32 + 1.0, quad[1] as f32],
                 ]);
                 normals.extend([[0.0, -1.0, 0.0]; 6]);
-                uvs.extend([
-                    [0.0, 0.0],
-                    [0.0, 1.0],
-                    [1.0, 0.0],
-                    [0.0, 1.0],
-                    [1.0, 1.0],
-                    [1.0, 0.0],
-                ]);
+                uvs.extend(
+                    material_extend(&registry, &textures, blockid, BlockDir::Top, [
+                        [0.0, 0.0],
+                        [0.0, 1.0],
+                        [1.0, 0.0],
+                        [0.0, 1.0],
+                        [1.0, 1.0],
+                        [1.0, 0.0],
+                    ])
+                );
                 color_extend(colors, blockid, &registry);
                 repeat.extend([[
                     ((quad[2]-quad[0])) as u32,
@@ -231,14 +240,16 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, quad[1] as f32, z as f32],
                 ]);
                 normals.extend([[0.0, 0.0, 1.0]; 6]);
-                uvs.extend([
-                    [1.0, 1.0],
-                    [1.0, 0.0],
-                    [0.0, 1.0],
-                    [1.0, 0.0],
-                    [0.0, 0.0],
-                    [0.0, 1.0],
-                ]);
+                uvs.extend(
+                    material_extend(&registry, &textures, blockid, BlockDir::Forward, [
+                        [1.0, 1.0],
+                        [1.0, 0.0],
+                        [0.0, 1.0],
+                        [1.0, 0.0],
+                        [0.0, 0.0],
+                        [0.0, 1.0],
+                    ])
+                );
                 color_extend(colors, blockid, &registry);
                 repeat.extend([[
                     ((quad[2]-quad[0])) as u32,
@@ -255,14 +266,16 @@ impl MeshingPass for SolidBlockMesher {
                     [quad[2] as f32, quad[1] as f32, z as f32 + 1.0],
                 ]);
                 normals.extend([[0.0, 0.0, -1.0]; 6]);
-                uvs.extend([
-                    [0.0, 0.0],
-                    [0.0, 1.0],
-                    [1.0, 1.0],
-                    [1.0, 0.0],
-                    [0.0, 0.0],
-                    [1.0, 1.0],
-                ]);
+                uvs.extend(
+                    material_extend(&registry, &textures, blockid, BlockDir::Back, [
+                        [0.0, 0.0],
+                        [0.0, 1.0],
+                        [1.0, 1.0],
+                        [1.0, 0.0],
+                        [0.0, 0.0],
+                        [1.0, 1.0],
+                    ])
+                );
                 color_extend(colors, blockid, &registry);
                 repeat.extend([[
                     ((quad[2]-quad[0])) as u32,
@@ -289,6 +302,55 @@ pub(crate) fn color_extend(
         },
         None => EMPTY_COLOR,
     });
+}
+
+enum BlockDir {
+    Top,
+    Bottom,
+    Left,
+    Right,
+    Forward,
+    Back
+}
+
+// TODO: Make a more elegant solution. This is just an experiment to see if it works.
+fn material_extend(
+    registry: &BlockRegistryInternal,
+    textures: &RwLockReadGuard<BlockAtlas>,
+    blockid: BlockId,
+    face: BlockDir,
+    uvs: [[f32; 2]; 6],
+) -> [[f32; 2]; 6] {
+    let mats = registry
+        .get_by_numerical_id(blockid)
+        .expect("Block should have been valid!")
+        .get_attribute(BlockData::ATTRIBUTE_SOLID_TEXTURE_SIDES)
+        .unwrap();
+
+    let tex_id = match mats {
+        AttributeValue::StaticStrX6(faces) => {
+            match face {
+                BlockDir::Top => { faces[2] },
+                BlockDir::Bottom => { faces[3] },
+                BlockDir::Left => { faces[0] },
+                BlockDir::Right => { faces[1] },
+                BlockDir::Forward => { faces[4] } ,
+                BlockDir::Back => { faces[5] },
+            }
+        },
+        _ => panic!("Wrong attribute type")
+    };
+
+    let tex_uvs = textures.map.get(tex_id).unwrap();
+
+    [
+        [uvs[0][0], uvs[0][1]],
+        [uvs[1][0], uvs[1][1]],
+        [uvs[2][0], uvs[2][1]],
+        [uvs[3][0], uvs[3][1]],
+        [uvs[4][0], uvs[4][1]],
+        [uvs[5][0], uvs[5][1]],
+    ]
 }
 
 pub(crate) fn get_visibility(
