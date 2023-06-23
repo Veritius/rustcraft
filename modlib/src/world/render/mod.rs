@@ -1,4 +1,5 @@
 pub mod shader;
+pub mod packing;
 
 use bevy::prelude::{Plugin, App, MaterialPlugin};
 use self::shader::RepeatingTextureMaterial;
