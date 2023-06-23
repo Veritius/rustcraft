@@ -1,7 +1,8 @@
-use std::collections::BTreeMap;
-
-use bevy::{prelude::*, render::{render_resource::{Extent3d, TextureDimension, TextureFormat}, texture::TextureFormatPixelInfo}};
+use std::{collections::BTreeMap, sync::{Arc, RwLock}};
+use bevy::{prelude::*, render::{render_resource::{Extent3d, TextureDimension, TextureFormat}, texture::TextureFormatPixelInfo, once_cell::sync::Lazy}};
 use rectangle_pack::{GroupedRectsToPlace, RectToInsert, pack_rects, TargetBin, RectanglePackError, RectanglePackOk};
+
+pub static BLOCK_TEXTURE_ATLAS_DATA: Lazy<Arc<RwLock<BlockTextureAtlasData>>> = Lazy::new(|| Arc::new(RwLock::new(BlockTextureAtlasData::new(UVec2::splat(256)))));
 
 pub struct BlockTextureAtlasData {
     atlas_handle: Option<Handle<Image>>,
@@ -20,20 +21,33 @@ impl BlockTextureAtlasData {
         }
     }
 
+    /// Returns the handle for the atlas texture.
+    fn handle(&self) -> Option<Handle<Image>> {
+        self.atlas_handle.clone()
+    }
+
     /// Adds the texture to the set used during packing.
     /// This does not repack by itself. Use `repack` for that.
+    /// 
+    /// The image passed should be of format `R8Unorm`, `Rg8Unorm`, or `Rgba8UnormSrgb`.
+    /// If it's not, it will be ignored.
     fn add_texture(&mut self, handle: Handle<Image>) {
         self.handles.push(handle);
     }
 
     /// Finds the smallest image texture needed to pack all images, repacking the rectangles.
-    /// This can be a very expensive operation.
+    /// 
+    /// The `quality` is a value from 1-15, where 1 is faster, and 15 gets a smaller image.
+    /// If the necessary dimensions are very large, running at a quality of 9 can take a very long time!
     /// 
     /// This will not be the smallest possible texture, but is close enough, for the sake of performance.
-    fn minimise(&mut self, assets: &mut Assets<Image>) -> Result<(), TextureAtlasError> {
+    fn minimise(&mut self, quality: u8, assets: &mut Assets<Image>) -> Result<(), TextureAtlasError> {
+        if quality == 0 || quality > 15 { panic!("Packing quality was out of valid range at {quality}") }
+        let increment = 512 - quality as u32 * 32;
+
         let old_size = self.size;
         self.size = UVec2::ZERO;
-        if let Err(err) = self.repack(assets) {
+        if let Err(err) = self.repack(increment, assets) {
             self.size = old_size;
             Err(err)
         } else {
@@ -42,7 +56,7 @@ impl BlockTextureAtlasData {
     }
 
     /// Repacks the rectangles, automatically expanding the texture atlas if necessary.
-    fn repack(&mut self, assets: &mut Assets<Image>) -> Result<(), TextureAtlasError> {
+    fn repack(&mut self, expansion_increment: u32, assets: &mut Assets<Image>) -> Result<(), TextureAtlasError> {
         let mut rects: GroupedRectsToPlace<Handle<Image>, ()> = GroupedRectsToPlace::new();
 
         // Add all images to set
@@ -78,18 +92,14 @@ impl BlockTextureAtlasData {
         // Values related to automatically expanding the block atlas texture to fit everything.
         /// The image will not grow beyond this, for GPU reasons.
         const MAXIMUM_TEXTURE_SIZE: u32 = 15000;
-        /// The image size expands by EXPAND_AMOUNT pixels every try.
-        /// Higher values will execute faster, but there'll be more unused space.
-        /// Lower values will have a smaller image, but will take longer to run.
-        const EXPAND_AMOUNT: u32 = 64;
-        let mut expansion: u32 = 0;
+        let mut expansion_value: u32 = 0;
 
         // Repeatedly try to expand to fit.
         let ret: RectanglePackOk<Handle<Image>, u8>;
         loop {
             // Set image size
             if !bins.is_empty() { bins.clear(); }
-            bins.insert(1u8, TargetBin::new(self.size.x + expansion, self.size.y + expansion, 1));
+            bins.insert(1u8, TargetBin::new(self.size.x + expansion_value, self.size.y + expansion_value, 1));
 
             // Try to pack rectangles
             let placements = pack_rects(
@@ -108,10 +118,10 @@ impl BlockTextureAtlasData {
                     match err {
                         // Not enough size, try to expand
                         RectanglePackError::NotEnoughBinSpace => {
-                            expansion += EXPAND_AMOUNT;
+                            expansion_value += expansion_increment;
                             // Check we haven't gone over the limit
                             // This check works because it expands equally in both X and Y
-                            if self.size.x + expansion > MAXIMUM_TEXTURE_SIZE { return Err(TextureAtlasError::ReachedTextureLimit) }
+                            if self.size.x + expansion_value > MAXIMUM_TEXTURE_SIZE { return Err(TextureAtlasError::ReachedTextureLimit) }
                             continue;
                         },
                     }
@@ -120,7 +130,7 @@ impl BlockTextureAtlasData {
         }
 
         // Clear previous data and add new rectangles
-        self.size += UVec2::splat(expansion);
+        self.size += UVec2::splat(expansion_value);
         self.rects.clear();
         for pack in ret.packed_locations() {
             let pack_loc = pack.1.1;
