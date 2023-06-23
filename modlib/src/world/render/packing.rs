@@ -38,7 +38,7 @@ impl BlockTextureAtlasData {
     /// Finds the smallest image texture needed to pack all images, repacking the rectangles.
     /// 
     /// The `quality` is a value from 1-15, where 1 is faster, and 15 gets a smaller image.
-    /// If the necessary dimensions are very large, running at a quality of 9 can take a very long time!
+    /// If the necessary dimensions are very large, running at a quality of 15 can take a very long time!
     /// 
     /// This will not be the smallest possible texture, but is close enough, for the sake of performance.
     fn minimise(&mut self, quality: u8, assets: &mut Assets<Image>) -> Result<(), TextureAtlasError> {
