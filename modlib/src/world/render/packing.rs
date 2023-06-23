@@ -1,9 +1,10 @@
 use std::collections::BTreeMap;
 
-use bevy::{prelude::*, render::render_resource::{Extent3d, TextureDimension, TextureFormat}};
+use bevy::{prelude::*, render::{render_resource::{Extent3d, TextureDimension, TextureFormat}, texture::TextureFormatPixelInfo}};
 use rectangle_pack::{GroupedRectsToPlace, RectToInsert, pack_rects, TargetBin, RectanglePackError, RectanglePackOk};
 
 pub struct BlockTextureAtlasData {
+    atlas_handle: Option<Handle<Image>>,
     size: UVec2,
     handles: Vec<Handle<Image>>,
     rects: BTreeMap<Handle<Image>, (UVec2, UVec2)>,
@@ -12,6 +13,7 @@ pub struct BlockTextureAtlasData {
 impl BlockTextureAtlasData {
     fn new(size: UVec2) -> Self {
         Self {
+            atlas_handle: None,
             size,
             handles: vec![],
             rects: BTreeMap::new(),
@@ -126,18 +128,46 @@ impl BlockTextureAtlasData {
         }
 
         // Texture to add atlas textures to.
-        let mut tex = Image::new_fill(
+        let mut atlas = Image::new_fill(
             Extent3d { width: self.size.x, height: self.size.y, depth_or_array_layers: 1 },
             TextureDimension::D2,
             &[255, 0, 255, 255], // bright pink
             TextureFormat::Rgba8UnormSrgb);
+        let atlas_width = self.size.x as usize;
+        let format_size = atlas.texture_descriptor.format.pixel_size();
         
         // Copy image data to atlas texture.
-        for (image, (start, end)) in &self.rects {
-            let other = assets.get(image).expect("Handle should have been valid");
-            let other_size = UVec2::new(other.texture_descriptor.size.width, other.texture_descriptor.size.height);
-            todo!();
+        for (image, (top_left, _bottom_right)) in &self.rects {
+            // Get the sub-texture we'll be loading
+            let image = assets
+                .get(image)
+                .expect("Handle should have been valid")
+                .convert(TextureFormat::Rgba8UnormSrgb)
+                .expect("Image should have been a convertable format");
+
+            // This code is copied (with modifications) from here:
+            // https://github.com/bevyengine/bevy/blob/70f91b2b9e50b86c54e8a1e566f6f61e186b5e9e/crates/bevy_sprite/src/texture_atlas_builder.rs#L100-L114
+            let (rect_width, rect_height) = (image.texture_descriptor.size.width as usize, image.texture_descriptor.size.height as usize);
+            let (rect_x, rect_y) = (top_left.x as usize, top_left.y as usize);
+
+            // Write it to the atlas
+            for (tex_y, bnd_y) in (rect_y..rect_y + rect_height).enumerate() {
+                let begin = (bnd_y * atlas_width + rect_x) * format_size;
+                let end = begin + rect_width * format_size;
+                let tex_begin = tex_y * rect_width * format_size;
+                let tex_end = tex_begin + rect_width * format_size;
+                atlas.data[begin..end]
+                    .copy_from_slice(&image.data[tex_begin..tex_end]);
+            }
         }
+
+        // Debugging thing to output the texture data
+        // DONOTMERGE MERGEBLOCKER
+        if atlas.clone().try_into_dynamic().unwrap().save("atlas_output.png").is_err() { error!("Failed to save the atlas texture."); };
+
+        // Add to assets collection
+        let atlas_handle = assets.add(atlas);
+        self.atlas_handle = Some(atlas_handle);
 
         Ok(())
     }
