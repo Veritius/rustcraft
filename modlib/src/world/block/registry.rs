@@ -84,6 +84,11 @@ impl BlockRegistryInternal {
         }
     }
 
+    /// Returns a map of all the block names to their numerical IDs.
+    pub fn name_map(&self) -> &BTreeMap<String, BlockId> {
+        &self.name_map
+    }
+
     pub fn len(&self) -> usize {
         self.data_map.len()
     }
