@@ -11,7 +11,6 @@ use crate::world::{chunk::CHUNK_SIZE, block::{BlockId, registry::BlockRegistryIn
 /// Implementation of the greedy meshing algorithm based on the following resources.
 /// - https://0fps.net/2012/06/30/meshing-in-a-minecraft-game/s
 /// - https://devforum.roblox.com/t/consume-everything-how-greedy-meshing-works/452717
-#[doc(hidden)]
 pub fn greedy_determine_quads<Selector: Fn(&BlockId, &BlockRegistryInternal) -> bool>(slice: &[[BlockId; CHUNK_SIZE]; CHUNK_SIZE], registry: &BlockRegistryInternal, selector: Selector) -> Vec<(BlockId, [u8; 4])> {
     let mut quads = vec![];
     let mut occupied = [[false; CHUNK_SIZE]; CHUNK_SIZE];
