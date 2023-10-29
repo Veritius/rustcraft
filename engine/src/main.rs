@@ -1,3 +1,6 @@
+pub mod namespace;
+pub mod blocks;
+
 use bevy::prelude::*;
 
 fn main() {
