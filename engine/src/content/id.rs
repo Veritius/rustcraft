@@ -1,12 +1,33 @@
 use mlua::{FromLua, IntoLua, Integer};
 
+/// The engine's reserved content package name.
+pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
+
 /// An identifier object for a content package or a piece of content.
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+/// 
+/// Implements `PartialEq` and `Eq`, with special behavior.
+/// `StaticStr` and `BoxedStr` are equal to themselves and eachother, but `Integer` is only equal to itself.
+#[derive(Debug, Clone, Hash)]
 pub enum Identifier {
     StaticStr(&'static str),
     BoxedStr(Box<str>),
     Integer(i64),
 }
+
+impl PartialEq for Identifier {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::StaticStr(l0), Self::StaticStr(r0)) => l0 == r0,
+            (Self::StaticStr(l0), Self::BoxedStr(r0)) => l0.as_bytes() == r0.as_bytes(),
+            (Self::BoxedStr(l0), Self::BoxedStr(r0)) => l0 == r0,
+            (Self::BoxedStr(l0), Self::StaticStr(r0)) => l0.as_bytes() == r0.as_bytes(),
+            (Self::Integer(l0), Self::Integer(r0)) => l0 == r0,
+            _ => false,
+        }
+    }
+}
+
+impl Eq for Identifier {}
 
 impl FromLua<'_> for Identifier {
     fn from_lua(value: mlua::Value<'_>, _lua: &'_ mlua::Lua) -> mlua::Result<Self> {

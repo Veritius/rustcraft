@@ -1,5 +1,5 @@
 use std::any::Any;
-use crate::namespace::id::Identifier;
+use crate::content::id::Identifier;
 
 /// An identifier used to access a [BlockAttribute].
 pub struct AttributeIdentifier {
