@@ -2,6 +2,7 @@ use std::any::Any;
 use crate::content::id::Identifier;
 
 /// An identifier used to access a [BlockAttribute].
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AttributeIdentifier {
     pub namespace: Identifier,
     pub identifier: Identifier,

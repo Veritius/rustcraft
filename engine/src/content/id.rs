@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use mlua::{FromLua, IntoLua, Integer};
 
 /// The engine's reserved content package name.
@@ -7,7 +8,7 @@ pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
 /// 
 /// Implements `PartialEq` and `Eq`, with special behavior.
 /// `StaticStr` and `BoxedStr` are equal to themselves and eachother, but `Integer` is only equal to itself.
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone, Hash, PartialOrd, Ord)]
 pub enum Identifier {
     StaticStr(&'static str),
     BoxedStr(Box<str>),
@@ -105,6 +106,57 @@ impl IntoLua<'_> for Identifier {
             Identifier::Integer(int) => {
                 Ok(mlua::Value::Integer(Integer::from(int)))
             },
+        }
+    }
+}
+
+impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Identifier::StaticStr(v) => f.write_str(v),
+            Identifier::BoxedStr(v) => f.write_str(v),
+            Identifier::Integer(v) => f.write_str(&format!("{v}")),
+        }
+    }
+}
+
+/// An [Identifier] with an attached namespace, to prevent ID collisions.
+/// 
+/// For example, if two content packages added 'copper',
+/// they would have the same `identifier` value,
+/// but a different `namespace`, therefore being distinct.
+///
+/// A [NamespacedIdentifier] also has a `variant` field.
+/// Normal `PartialEq`/`Eq` comparisons will **ignore** this field.
+/// The `eq_variant` method can be used to compare all fields.
+#[derive(Debug, Hash, PartialOrd, Ord)]
+pub struct NamespacedIdentifier {
+    pub namespace: Identifier,
+    pub identifier: Identifier,
+    pub variant: Option<Identifier>,
+}
+
+impl NamespacedIdentifier {
+    /// Compares two [NamespacedIdentifier]s, but also compares the `variant` field.
+    pub fn eq_variant(&self, other: &Self) -> bool {
+        if !self.eq(other) { return false }
+        self.variant.eq(&other.variant)
+    }
+}
+
+impl PartialEq for NamespacedIdentifier {
+    fn eq(&self, other: &Self) -> bool {
+        self.namespace == other.namespace && self.identifier == other.identifier
+    }
+}
+
+impl Eq for NamespacedIdentifier {}
+
+impl Display for NamespacedIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.variant {
+            Some(variant) => f.write_str(&format!("{}:{}/{}", self.namespace, self.identifier, variant)),
+            None => f.write_str(&format!("{}:{}", self.namespace, self.identifier)),
         }
     }
 }
