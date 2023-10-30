@@ -28,7 +28,7 @@ impl BlockRegistryBuilder {
     }
 
     /// Adds an attribute to an already-existing block.
-    /// Panics if block `ident` doesn't
+    /// Panics if `ident` isn't already registered.
     pub fn insert_attribute(
         &mut self,
         ident: &NamespacedIdentifier,
