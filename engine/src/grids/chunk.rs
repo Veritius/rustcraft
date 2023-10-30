@@ -6,7 +6,7 @@ pub const CHUNK_SIZE: usize = 16;
 
 #[test]
 fn size_validity_test() {
-    assert!(CHUNK_SIZE.pow(3) < u16::MAX as usize,
+    assert!(CHUNK_SIZE.pow(3) <= u16::MAX as usize,
         "CHUNK_SIZE constant exceeded 2^16. Due to how information is associated with voxels in a chunk, this could make the chunk unable to store unique information for all blocks.");
 }
 
