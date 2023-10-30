@@ -1,2 +1,3 @@
 pub mod registry;
-pub mod traits;
+pub mod attributes;
+pub mod id;

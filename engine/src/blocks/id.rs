@@ -1,0 +1,3 @@
+/// An identifier for a block.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct BlockId(u16);
