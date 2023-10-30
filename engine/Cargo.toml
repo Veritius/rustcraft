@@ -6,9 +6,5 @@ edition = "2021"
 [dependencies.bevy]
 version = "0.11.3"
 
-[dependencies.mlua]
-version = "0.9.1"
-features = ["vendored", "send", "lua54"]
-
 [dependencies.semver]
 version = "1.0.20"

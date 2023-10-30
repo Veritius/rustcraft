@@ -48,6 +48,17 @@ impl BlockRegistryBuilder {
 #[derive(Resource, Clone)]
 pub struct BlockRegistry(Arc<BlockRegistryInner>);
 
+impl BlockRegistry {
+    pub fn block_exists(&self, id: ContentIdentifier) -> bool {
+        self.0.identifiers.contains_key(&id)
+    }
+
+    pub fn get_definition(&self, id: ContentIdentifier) -> Option<&BlockDefinition> {
+        let id = self.0.identifiers.get(&id)?;
+        self.0.definitions.get(id)
+    }
+}
+
 /// Storage for block data.
 struct BlockRegistryInner {
     identifiers: HashMap<ContentIdentifier, BlockId>,

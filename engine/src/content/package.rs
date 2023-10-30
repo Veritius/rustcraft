@@ -1,4 +1,3 @@
-use mlua::{FromLua, IntoLua};
 use semver::{Version, VersionReq};
 use super::id::Identifier;
 
@@ -20,15 +19,3 @@ impl PartialEq for ContentPackage {
 }
 
 impl Eq for ContentPackage {}
-
-impl FromLua<'_> for ContentPackage {
-    fn from_lua(value: mlua::Value<'_>, lua: &'_ mlua::Lua) -> mlua::Result<Self> {
-        todo!()
-    }
-}
-
-impl IntoLua<'_> for ContentPackage {
-    fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
-        todo!()
-    }
-}
