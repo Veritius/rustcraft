@@ -1,7 +1,11 @@
-use std::{sync::Arc, collections::BTreeMap};
+use std::{sync::Arc, collections::BTreeMap, any::Any};
 use bevy::{prelude::*, utils::HashMap};
-use crate::content::id::{Identifier, NamespacedIdentifier};
-use super::{id::BlockId, attributes::{BlockAttribute, AttributeIdentifier}};
+use crate::content::id::ContentIdentifier;
+use super::id::BlockId;
+
+/// A value that is added to a [BlockDefinition] in the [BlockRegistry] to define behaviors for a block..
+pub trait BlockAttribute: Send + Sync + Any {}
+impl<T: Send + Sync + Any> BlockAttribute for T {}
 
 /// Used during the setup stage of the game to create the [BlockRegistry].
 #[derive(Resource)]
@@ -15,8 +19,8 @@ impl BlockRegistryBuilder {
     /// Panics if the block already exists
     pub fn add_block(
         &mut self,
-        ident: NamespacedIdentifier,
-        attributes: impl Iterator<Item = (AttributeIdentifier, Box<dyn BlockAttribute>)>
+        ident: ContentIdentifier,
+        attributes: impl Iterator<Item = (ContentIdentifier, Box<dyn BlockAttribute>)>
     ) {
         let id = BlockId(self.seq);
         self.seq += 1;
@@ -31,8 +35,8 @@ impl BlockRegistryBuilder {
     /// Panics if `ident` isn't already registered.
     pub fn insert_attribute(
         &mut self,
-        ident: &NamespacedIdentifier,
-        attribute: (AttributeIdentifier, Box<dyn BlockAttribute>),
+        ident: &ContentIdentifier,
+        attribute: (ContentIdentifier, Box<dyn BlockAttribute>),
     ) {
         let id = self.inner.identifiers.get(ident)
             .expect(&format!("Block {ident} was not registered"));
@@ -46,10 +50,10 @@ pub struct BlockRegistry(Arc<BlockRegistryInner>);
 
 /// Storage for block data.
 struct BlockRegistryInner {
-    identifiers: HashMap<NamespacedIdentifier, BlockId>,
+    identifiers: HashMap<ContentIdentifier, BlockId>,
     definitions: BTreeMap<BlockId, BlockDefinition>
 }
 
 pub struct BlockDefinition {
-    attributes: BTreeMap<AttributeIdentifier, Box<dyn BlockAttribute>>,
+    attributes: BTreeMap<ContentIdentifier, Box<dyn BlockAttribute>>,
 }

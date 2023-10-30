@@ -4,7 +4,7 @@ use mlua::{FromLua, IntoLua, Integer};
 /// The engine's reserved content package name.
 pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
 
-/// An identifier object for a content package or a piece of content.
+/// An identifier value, used in [ContentIdentifier].
 /// 
 /// Implements `PartialEq` and `Eq`, with special behavior.
 /// `StaticStr` and `BoxedStr` are equal to themselves and eachother, but `Integer` is only equal to itself.
@@ -120,7 +120,7 @@ impl Display for Identifier {
     }
 }
 
-/// An [Identifier] with an attached namespace, to prevent ID collisions.
+/// An object used to identify content, like blocks or item IDs.
 /// 
 /// For example, if two content packages added 'copper',
 /// they would have the same `identifier` value,
@@ -130,13 +130,13 @@ impl Display for Identifier {
 /// Normal `PartialEq`/`Eq` comparisons will **ignore** this field.
 /// The `eq_variant` method can be used to compare all fields.
 #[derive(Debug, Hash, PartialOrd, Ord)]
-pub struct NamespacedIdentifier {
+pub struct ContentIdentifier {
     pub namespace: Identifier,
     pub identifier: Identifier,
     pub variant: Option<Identifier>,
 }
 
-impl NamespacedIdentifier {
+impl ContentIdentifier {
     /// Compares two [NamespacedIdentifier]s, but also compares the `variant` field.
     pub fn eq_variant(&self, other: &Self) -> bool {
         if !self.eq(other) { return false }
@@ -144,15 +144,15 @@ impl NamespacedIdentifier {
     }
 }
 
-impl PartialEq for NamespacedIdentifier {
+impl PartialEq for ContentIdentifier {
     fn eq(&self, other: &Self) -> bool {
         self.namespace == other.namespace && self.identifier == other.identifier
     }
 }
 
-impl Eq for NamespacedIdentifier {}
+impl Eq for ContentIdentifier {}
 
-impl Display for NamespacedIdentifier {
+impl Display for ContentIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.variant {
             Some(variant) => f.write_str(&format!("{}:{}/{}", self.namespace, self.identifier, variant)),
