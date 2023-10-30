@@ -3,7 +3,7 @@ use std::fmt::Display;
 /// The engine's reserved content package name.
 pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
 
-/// An identifier value, used in [ContentIdentifier].
+/// A segment of a [`ContentIdentifier`] value.
 /// 
 /// Implements `PartialEq` and `Eq`, with special behavior.
 /// `StaticStr` and `BoxedStr` are equal to themselves and eachother, but `Integer` is only equal to itself.
@@ -45,7 +45,7 @@ impl Display for Identifier {
 /// they would have the same `identifier` value,
 /// but a different `namespace`, therefore being distinct.
 ///
-/// A [NamespacedIdentifier] also has a `variant` field.
+/// A [`ContentIdentifier`] also has a `variant` field.
 /// Normal `PartialEq`/`Eq` comparisons will **ignore** this field.
 /// The `eq_variant` method can be used to compare all fields.
 #[derive(Debug, Hash, PartialOrd, Ord)]
@@ -56,7 +56,7 @@ pub struct ContentIdentifier {
 }
 
 impl ContentIdentifier {
-    /// Compares two [NamespacedIdentifier]s, but also compares the `variant` field.
+    /// Compares two [`ContentIdentifier`]s, but also compares the `variant` field.
     pub fn eq_variant(&self, other: &Self) -> bool {
         if !self.eq(other) { return false }
         self.variant.eq(&other.variant)
