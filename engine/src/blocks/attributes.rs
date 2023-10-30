@@ -1,10 +1,10 @@
 use std::any::Any;
-use crate::namespace::id::ContentIdentifier;
+use crate::namespace::id::Identifier;
 
 /// An identifier used to access a [BlockAttribute].
 pub struct AttributeIdentifier {
-    pub namespace: ContentIdentifier,
-    pub identifier: ContentIdentifier,
+    pub namespace: Identifier,
+    pub identifier: Identifier,
 }
 
 /// An attribute that is attached to a block definition.

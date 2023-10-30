@@ -1,13 +1,14 @@
 use mlua::{FromLua, IntoLua, Integer};
 
 /// An identifier object for a content package or a piece of content.
-pub enum ContentIdentifier {
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub enum Identifier {
     StaticStr(&'static str),
     BoxedStr(Box<str>),
     Integer(i64),
 }
 
-impl FromLua<'_> for ContentIdentifier {
+impl FromLua<'_> for Identifier {
     fn from_lua(value: mlua::Value<'_>, _lua: &'_ mlua::Lua) -> mlua::Result<Self> {
         match value {
             mlua::Value::Nil => Err(mlua::Error::FromLuaConversionError {
@@ -71,16 +72,16 @@ impl FromLua<'_> for ContentIdentifier {
     }
 }
 
-impl IntoLua<'_> for ContentIdentifier {
+impl IntoLua<'_> for Identifier {
     fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
         match self {
-            ContentIdentifier::StaticStr(str) => {
+            Identifier::StaticStr(str) => {
                 Ok(mlua::Value::String(lua.create_string(str.as_bytes())?))
             },
-            ContentIdentifier::BoxedStr(str) => {
+            Identifier::BoxedStr(str) => {
                 Ok(mlua::Value::String(lua.create_string(str.as_bytes())?))
             },
-            ContentIdentifier::Integer(int) => {
+            Identifier::Integer(int) => {
                 Ok(mlua::Value::Integer(Integer::from(int)))
             },
         }
