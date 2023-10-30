@@ -3,5 +3,9 @@ name = "rustcraft"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-bevy = "0.11.3"
+[dependencies.bevy]
+version = "0.11.3"
+
+[dependencies.mlua]
+version = "0.9.1"
+features = ["vendored", "send", "lua54"]
