@@ -4,8 +4,8 @@ use crate::content::id::ContentIdentifier;
 use super::id::BlockId;
 
 /// A value that is added to a [BlockDefinition] in the [BlockRegistry] to define behaviors for a block..
-pub trait BlockAttribute: Send + Sync + Any {}
-impl<T: Send + Sync + Any> BlockAttribute for T {}
+pub trait BlockAttribute: std::fmt::Debug + Send + Sync + Any {}
+impl<T: std::fmt::Debug + Send + Sync + Any> BlockAttribute for T {}
 
 /// Used during the setup stage of the game to create the [BlockRegistry].
 #[derive(Resource)]
@@ -65,6 +65,7 @@ struct BlockRegistryInner {
     definitions: BTreeMap<BlockId, BlockDefinition>
 }
 
+#[derive(Debug)]
 pub struct BlockDefinition {
     attributes: BTreeMap<ContentIdentifier, Box<dyn BlockAttribute>>,
 }
