@@ -1,3 +1,4 @@
+pub mod flags;
 pub mod state;
 pub mod content;
 pub mod scripting;
