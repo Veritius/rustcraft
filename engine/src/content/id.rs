@@ -11,7 +11,7 @@ pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
 pub enum Identifier {
     StaticStr(&'static str),
     BoxedStr(Box<str>),
-    Integer(i64),
+    Integer(i32),
 }
 
 impl PartialEq for Identifier {
