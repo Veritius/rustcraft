@@ -28,6 +28,15 @@ impl FromLua<'_> for Attribute {
 
 impl IntoLua<'_> for Attribute {
     fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
-        todo!()
+        match self {
+            Attribute::Tag => Ok(mlua::Value::Boolean(true)),
+            Attribute::Bool(i) => Ok(mlua::Value::Boolean(i)),
+            Attribute::Int(i) => Ok(mlua::Value::Integer(i)),
+            Attribute::Float(i) => Ok(mlua::Value::Number(i)),
+            Attribute::String(i) => Ok(i.into_lua(lua)?),
+            Attribute::Color(_) => todo!(),
+            Attribute::Vector(i) => Ok(i.into_lua(lua)?),
+            Attribute::Dyn(_) => todo!(),
+        }
     }
 }

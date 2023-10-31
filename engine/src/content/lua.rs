@@ -1,4 +1,4 @@
-use mlua::{FromLua, IntoLua, Value::Nil, UserData};
+use mlua::{FromLua, IntoLua, UserData};
 use super::id::{IdentifierSegment, ContentIdentifier};
 
 static KEY_NAMESPACE: &'static str = "namespace";
