@@ -1,4 +1,4 @@
-use mlua::{FromLua, IntoLua, Value::Nil};
+use mlua::{FromLua, IntoLua, Value::Nil, UserData};
 use super::id::{IdentifierSegment, ContentIdentifier};
 
 static KEY_NAMESPACE: &'static str = "namespace";
@@ -32,6 +32,34 @@ impl IntoLua<'_> for IdentifierSegment {
             IdentifierSegment::BoxedStr(i) => i.into_lua(lua),
             IdentifierSegment::Integer(i) => i.into_lua(lua),
         }
+    }
+}
+
+impl UserData for ContentIdentifier {
+    fn add_fields<'lua, F: mlua::UserDataFields<'lua, Self>>(fields: &mut F) {
+        fields.add_field_method_get("namespace", |_lua, this| {
+            Ok(this.namespace.clone())
+        });
+        fields.add_field_method_set("namespace", |_lua, this, val| {
+            this.namespace = val;
+            Ok(())
+        });
+
+        fields.add_field_method_get("identifier", |_lua, this| {
+            Ok(this.identifier.clone())
+        });
+        fields.add_field_method_set("identifier", |_lua, this, val| {
+            this.identifier = val;
+            Ok(())
+        });
+
+        fields.add_field_method_get("variant", |_lua, this| {
+            Ok(this.variant.clone())
+        });
+        fields.add_field_method_set("variant", |_lua, this, val| {
+            this.variant = val;
+            Ok(())
+        });
     }
 }
 
@@ -69,19 +97,5 @@ impl FromLua<'_> for ContentIdentifier {
                 })
             }
         }
-    }
-}
-
-impl IntoLua<'_> for ContentIdentifier {
-    fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
-        let table = lua.create_table()?;
-        table.set(KEY_NAMESPACE, self.namespace.into_lua(lua)?)?;
-        table.set(KEY_IDENTIFIER, self.identifier.into_lua(lua)?)?;
-        if self.variant.is_none() {
-            table.set(KEY_VARIANT, Nil)?;
-        } else {
-            table.set(KEY_VARIANT, self.variant.into_lua(lua)?)?;
-        }
-        Ok(mlua::Value::Table(table))
     }
 }
