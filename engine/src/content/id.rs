@@ -39,6 +39,12 @@ impl Display for Identifier {
     }
 }
 
+impl From<&str> for Identifier {
+    fn from(value: &str) -> Self {
+        todo!()
+    }
+}
+
 /// An object used to identify content, like blocks or item IDs.
 /// 
 /// For example, if two content packages added 'copper',
