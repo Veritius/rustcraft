@@ -1,0 +1,6 @@
+[book]
+authors = ["veritius <veritiusgaming@gmail.com>"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Rustcraft Modding Documentation"
