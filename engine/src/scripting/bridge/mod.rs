@@ -1,5 +1,6 @@
 mod stdlib;
 mod bevy;
+mod luau;
 
 /// A bridge between types from foreign crates and Lua, to work around the orphan rules.
 /// Implements `Deref` for `T`, most standard library traits where `T` does, and `FromLua` and `IntoLua` for certain types.

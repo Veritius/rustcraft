@@ -1,4 +1,5 @@
 use mlua::{FromLua, IntoLua};
+use crate::scripting::bridge::Bridge;
 use super::value::Attribute;
 
 impl FromLua<'_> for Attribute {
@@ -9,9 +10,12 @@ impl FromLua<'_> for Attribute {
             mlua::Value::LightUserData(_) => todo!(),
             mlua::Value::Integer(i) => Ok(Self::Int(i)),
             mlua::Value::Number(i) => Ok(Self::Float(i)),
-            mlua::Value::Vector(_) => todo!(),
+            mlua::Value::Vector(i) => Ok(Self::Vector(Bridge::from(Bridge(i)))),
             mlua::Value::String(i) => Ok(Self::String(i.to_string_lossy().into())),
-            mlua::Value::Table(_) => todo!(),
+            mlua::Value::Table(_i) => {
+                // Handle cases like Attribute::Color
+                todo!()
+            },
             mlua::Value::Function(_) => todo!(),
             mlua::Value::Thread(_) => todo!(),
             mlua::Value::UserData(_) => todo!(),

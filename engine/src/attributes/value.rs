@@ -1,4 +1,6 @@
 use std::any::Any;
+use bevy::prelude::*;
+use crate::scripting::bridge::Bridge;
 
 /// An attribute that can be stored in an [Attributes](super::map::Attributes) map.
 #[derive(Debug)]
@@ -17,6 +19,12 @@ pub enum Attribute {
 
     /// A string value. `String` in Lua.
     String(Box<str>),
+
+    /// An RGB color value. A table in Lua.
+    Color(Bridge<Color>),
+
+    /// A 3 dimensional vector. `Vector` in Lua.
+    Vector(Bridge<Vec3>),
 
     /// A dynamically typed attribute. Not accessible in Lua.
     Dyn(Box<dyn DynAttribute>),
