@@ -37,8 +37,7 @@ impl FromLua<'_> for Identifier {
                 message: None,
             }),
             mlua::Value::String(i) => {
-                let s = String::from_utf8_lossy(i.as_bytes());
-                Ok(Self::BoxedStr(s.into()))
+                Ok(Self::BoxedStr(i.to_string_lossy().into()))
             },
             mlua::Value::Table(_) => Err(mlua::Error::FromLuaConversionError {
                 from: "Table",
