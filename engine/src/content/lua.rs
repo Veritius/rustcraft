@@ -39,67 +39,16 @@ impl FromLua<'_> for ContentIdentifier {
     fn from_lua(value: mlua::Value<'_>, _lua: &'_ mlua::Lua) -> mlua::Result<Self> {
         match value {
             mlua::Value::String(i) => {
-                // Read a ContentIdentifier from the following form:
-                // namespace:identifier/variant
-
-                let i = String::from_utf8_lossy(i.as_bytes()).into_owned();
-                
-                if !i.contains(':') {
-                    return Err(mlua::Error::FromLuaConversionError {
-                        from: "string",
-                        to: "contentidentifier",
-                        message: Some("String did not contain a colon".to_string()),
-                    });
-                }
-
-                let mut colon_split = i.split(':');
-
-                // Namespace
-                let namespace = colon_split.next().unwrap();
-                if namespace.len() == 0 {
-                    return Err(mlua::Error::FromLuaConversionError {
-                        from: "string",
-                        to: "contentidentifier",
-                        message: Some("Length of namespace segment was zero".to_string()),
-                    });
-                }
-                let namespace = Identifier::from(namespace);
-
-                // Identifier
-                let identifier = colon_split.next().unwrap();
-                if identifier.len() == 0 {
-                    return Err(mlua::Error::FromLuaConversionError {
-                        from: "string",
-                        to: "contentidentifier",
-                        message: Some("Length of identifier segment was zero".to_string()),
-                    });
-                }
-
-                // Variant
-                if identifier.contains('/') {
-                    let mut slash_split = i.split('/');
-                    let identifier = slash_split.next().unwrap();
-                    let variant = slash_split.next().unwrap();
-
-                    if identifier.len() == 0 {
+                let v = ContentIdentifier::try_from(i.to_string_lossy().to_string().as_str());
+                match v {
+                    Ok(i) => { return Ok(i) },
+                    Err(_) => {
                         return Err(mlua::Error::FromLuaConversionError {
                             from: "string",
                             to: "contentidentifier",
-                            message: Some("Length of identifier segment was zero".to_string()),
-                        });
-                    }
-
-                    return Ok(Self {
-                        namespace,
-                        identifier: Identifier::from(identifier),
-                        variant: Some(Identifier::from(variant))
-                    })
-                } else {
-                    return Ok(Self {
-                        namespace,
-                        identifier: Identifier::from(identifier),
-                        variant: None,
-                    })
+                            message: None,
+                        })
+                    },
                 }
             },
             mlua::Value::Table(i) => {

@@ -7,6 +7,7 @@ pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
 /// 
 /// Implements `PartialEq` and `Eq`, with special behavior.
 /// `StaticStr` and `BoxedStr` are equal to themselves and eachother, but `Integer` is only equal to itself.
+/// Note that when using `From<&str>`, the `Integer` type will be prioritised.
 #[derive(Debug, Clone, Hash, PartialOrd, Ord)]
 pub enum Identifier {
     StaticStr(&'static str),
@@ -39,9 +40,21 @@ impl Display for Identifier {
     }
 }
 
+impl From<i32> for Identifier {
+    fn from(value: i32) -> Self {
+        Self::Integer(value)
+    }
+}
+
 impl From<&str> for Identifier {
+    /// Creates an `Identifier` value from a string slice.
+    /// 
+    /// This will try to create an `Integer` variant first by parsing the input as an `i32`, and if that doesn't work, the `BoxedStr` variant will be used.
     fn from(value: &str) -> Self {
-        todo!()
+        match value.parse::<i32>() {
+            Ok(i) => Self::Integer(i),
+            Err(_) => Self::BoxedStr(value.into()),
+        }
     }
 }
 
@@ -82,6 +95,49 @@ impl Display for ContentIdentifier {
         match &self.variant {
             Some(variant) => f.write_str(&format!("{}:{}/{}", self.namespace, self.identifier, variant)),
             None => f.write_str(&format!("{}:{}", self.namespace, self.identifier)),
+        }
+    }
+}
+
+impl TryFrom<&str> for ContentIdentifier {
+    type Error = ();
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        // Read a ContentIdentifier from the following form:
+        // namespace:identifier/variant
+
+        if !value.contains(':') { return Err(()) }
+
+        let mut colon_split = value.split(':');
+
+        // Namespace
+        let namespace = colon_split.next().unwrap();
+        if namespace.len() == 0 { return Err(()) }
+        let namespace = Identifier::from(namespace);
+
+        // Identifier and variant
+        let right_segment = colon_split.next().unwrap();
+        if right_segment.len() == 0 { return Err(()) }
+        if right_segment.contains('/') {
+            let mut slash_split = right_segment.split('/');
+            let identifier = slash_split.next().unwrap();
+            let variant = slash_split.next().unwrap();
+
+            if identifier.len() == 0 { return Err(()) }
+
+            // Identifier and variant
+            return Ok(Self {
+                namespace,
+                identifier: Identifier::from(identifier),
+                variant: Some(Identifier::from(variant))
+            })
+        } else {
+            // Just an identifier
+            return Ok(Self {
+                namespace,
+                identifier: Identifier::from(right_segment),
+                variant: None,
+            })
         }
     }
 }
