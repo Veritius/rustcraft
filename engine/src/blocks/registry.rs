@@ -44,20 +44,41 @@ impl BlockRegistryBuilder {
 pub struct BlockRegistry(Arc<BlockRegistryInner>);
 
 impl BlockRegistry {
-    pub fn block_exists(&self, id: ContentIdentifier) -> bool {
-        self.0.identifiers.contains_key(&id)
+    #[inline]
+    pub fn block_exists(&self, id: &ContentIdentifier) -> bool {
+        self.0.block_exists(id)
     }
 
-    pub fn get_definition(&self, id: ContentIdentifier) -> Option<&BlockDefinition> {
-        let id = self.0.identifiers.get(&id)?;
-        self.0.definitions.get(id)
+    #[inline]
+    pub fn block_id(&self, id: &ContentIdentifier) -> Option<BlockId> {
+        self.0.block_id(id)
+    }
+
+    #[inline]
+    pub fn get_definition(&self, id: &ContentIdentifier) -> Option<&BlockDefinition> {
+        self.0.get_definition(id)
     }
 }
 
 /// Storage for block data.
-struct BlockRegistryInner {
+pub(super) struct BlockRegistryInner {
     identifiers: HashMap<ContentIdentifier, BlockId>,
     definitions: BTreeMap<BlockId, BlockDefinition>
+}
+
+impl BlockRegistryInner {
+    pub fn block_exists(&self, id: &ContentIdentifier) -> bool {
+        self.identifiers.contains_key(id)
+    }
+
+    pub fn block_id(&self, id: &ContentIdentifier) -> Option<BlockId> {
+        self.identifiers.get(id).cloned()
+    }
+
+    pub fn get_definition(&self, id: &ContentIdentifier) -> Option<&BlockDefinition> {
+        let id = self.block_id(id)?;
+        self.definitions.get(&id)
+    }
 }
 
 #[derive(Debug)]
