@@ -7,7 +7,6 @@ impl FromLua<'_> for Attribute {
         match value {
             mlua::Value::Nil => Ok(Self::Tag),
             mlua::Value::Boolean(i) => Ok(Self::Bool(i)),
-            mlua::Value::LightUserData(_) => todo!(),
             mlua::Value::Integer(i) => Ok(Self::Int(i)),
             mlua::Value::Number(i) => Ok(Self::Float(i)),
             mlua::Value::Vector(i) => Ok(Self::Vector(Bridge::from(Bridge(i)))),
@@ -16,10 +15,13 @@ impl FromLua<'_> for Attribute {
                 // Handle cases like Attribute::Color
                 todo!()
             },
-            mlua::Value::Function(_) => todo!(),
-            mlua::Value::Thread(_) => todo!(),
-            mlua::Value::UserData(_) => todo!(),
-            mlua::Value::Error(_) => todo!(),
+            _ => {
+                Err(mlua::Error::FromLuaConversionError {
+                    from: value.type_name(),
+                    to: "attribute",
+                    message: None,
+                })
+            }
         }
     }
 }

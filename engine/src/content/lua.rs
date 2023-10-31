@@ -8,62 +8,19 @@ static KEY_VARIANT: &'static str = "variant";
 impl FromLua<'_> for Identifier {
     fn from_lua(value: mlua::Value<'_>, _lua: &'_ mlua::Lua) -> mlua::Result<Self> {
         match value {
-            mlua::Value::Nil => Err(mlua::Error::FromLuaConversionError {
-                from: "Nil",
-                to: "Identifier",
-                message: None,
-            }),
-            mlua::Value::Boolean(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Boolean",
-                to: "Identifier",
-                message: None,
-            }),
-            mlua::Value::LightUserData(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "LightUserData",
-                to: "Identifier",
-                message: None,
-            }),
             mlua::Value::Integer(i) => {
                 Ok(Self::Integer(i))
             },
-            mlua::Value::Number(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Number",
-                to: "Identifier",
-                message: None,
-            }),
-            mlua::Value::Vector(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Vector",
-                to: "Identifier",
-                message: None,
-            }),
             mlua::Value::String(i) => {
                 Ok(Self::BoxedStr(i.to_string_lossy().into()))
             },
-            mlua::Value::Table(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Table",
-                to: "Identifier",
-                message: None,
-            }),
-            mlua::Value::Function(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Function",
-                to: "Identifier",
-                message: None,
-            }),
-            mlua::Value::Thread(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Thread",
-                to: "Identifier",
-                message: None,
-            }),
-            mlua::Value::UserData(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "UserData",
-                to: "Identifier",
-                message: None,
-            }),
-            mlua::Value::Error(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Nil",
-                to: "Identifier",
-                message: None,
-            }),
+            _ => {
+                Err(mlua::Error::FromLuaConversionError {
+                    from: value.type_name(),
+                    to: "identifier",
+                    message: None,
+                })
+            }
         }
     }
 }
@@ -81,36 +38,6 @@ impl IntoLua<'_> for Identifier {
 impl FromLua<'_> for ContentIdentifier {
     fn from_lua(value: mlua::Value<'_>, _lua: &'_ mlua::Lua) -> mlua::Result<Self> {
         match value {
-            mlua::Value::Nil => Err(mlua::Error::FromLuaConversionError {
-                from: "Nil",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::Boolean(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Boolean",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::LightUserData(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "LightUserData",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::Integer(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Integer",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::Number(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Number",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::Vector(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Vector",
-                to: "ContentIdentifier",
-                message: None,
-            }),
             mlua::Value::String(_) => {
                 todo!()
             },
@@ -124,26 +51,13 @@ impl FromLua<'_> for ContentIdentifier {
                     },
                 })
             },
-            mlua::Value::Function(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Function",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::Thread(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Thread",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::UserData(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "UserData",
-                to: "ContentIdentifier",
-                message: None,
-            }),
-            mlua::Value::Error(_) => Err(mlua::Error::FromLuaConversionError {
-                from: "Error",
-                to: "ContentIdentifier",
-                message: None,
-            }),
+            _ => {
+                Err(mlua::Error::FromLuaConversionError {
+                    from: value.type_name(),
+                    to: "contentidentifier",
+                    message: None,
+                })
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use mlua::{FromLua, IntoLua};
+use mlua::{FromLua, IntoLua, Vector};
 use super::Bridge;
 
 impl FromLua<'_> for Bridge<Color> {
@@ -28,12 +28,12 @@ impl IntoLua<'_> for Bridge<Vec2> {
 
 impl FromLua<'_> for Bridge<Vec3> {
     fn from_lua(value: mlua::Value<'_>, lua: &'_ mlua::Lua) -> mlua::Result<Self> {
-        todo!()
+        Ok(Bridge(Vector::from_lua(value, lua)?).into())
     }
 }
 
 impl IntoLua<'_> for Bridge<Vec3> {
     fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
-        todo!()
+        Into::<Bridge<Vector>>::into(self).into_lua(lua)
     }
 }
