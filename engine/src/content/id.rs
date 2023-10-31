@@ -1,7 +1,10 @@
 use std::fmt::Display;
 
+/// Separators for processing strings into content identifiers.
+pub static ID_SEPARATORS: &[char] = &[':', '/'];
+
 /// The engine's reserved content package name.
-pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
+pub(crate) const ENGINE_ID: IdentifierSegment = IdentifierSegment::StaticStr("engine");
 
 /// A segment of a [`ContentIdentifier`] value.
 /// 
@@ -9,13 +12,13 @@ pub(crate) const ENGINE_ID: Identifier = Identifier::StaticStr("engine");
 /// `StaticStr` and `BoxedStr` are equal to themselves and eachother, but `Integer` is only equal to itself.
 /// Note that when using `From<&str>`, the `Integer` type will be prioritised.
 #[derive(Debug, Clone, Hash, PartialOrd, Ord)]
-pub enum Identifier {
+pub enum IdentifierSegment {
     StaticStr(&'static str),
     BoxedStr(Box<str>),
     Integer(i32),
 }
 
-impl PartialEq for Identifier {
+impl PartialEq for IdentifierSegment {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::StaticStr(l0), Self::StaticStr(r0)) => l0 == r0,
@@ -28,25 +31,25 @@ impl PartialEq for Identifier {
     }
 }
 
-impl Eq for Identifier {}
+impl Eq for IdentifierSegment {}
 
-impl Display for Identifier {
+impl Display for IdentifierSegment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Identifier::StaticStr(v) => f.write_str(v),
-            Identifier::BoxedStr(v) => f.write_str(v),
-            Identifier::Integer(v) => f.write_str(&format!("{v}")),
+            IdentifierSegment::StaticStr(v) => f.write_str(v),
+            IdentifierSegment::BoxedStr(v) => f.write_str(v),
+            IdentifierSegment::Integer(v) => f.write_str(&format!("{v}")),
         }
     }
 }
 
-impl From<i32> for Identifier {
+impl From<i32> for IdentifierSegment {
     fn from(value: i32) -> Self {
         Self::Integer(value)
     }
 }
 
-impl From<&str> for Identifier {
+impl From<&str> for IdentifierSegment {
     /// Creates an `Identifier` value from a string slice.
     /// 
     /// This will try to create an `Integer` variant first by parsing the input as an `i32`, and if that doesn't work, the `BoxedStr` variant will be used.
@@ -69,9 +72,9 @@ impl From<&str> for Identifier {
 /// The `eq_variant` method can be used to compare all fields.
 #[derive(Debug, Hash, Clone, PartialOrd, Ord)]
 pub struct ContentIdentifier {
-    pub namespace: Identifier,
-    pub identifier: Identifier,
-    pub variant: Option<Identifier>,
+    pub namespace: IdentifierSegment,
+    pub identifier: IdentifierSegment,
+    pub variant: Option<IdentifierSegment>,
 }
 
 impl ContentIdentifier {
@@ -103,41 +106,18 @@ impl TryFrom<&str> for ContentIdentifier {
     type Error = ();
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        // Read a ContentIdentifier from the following form:
-        // namespace:identifier/variant
+        let mut split = value.split(ID_SEPARATORS);
+        let namespace = if let Some(next) = split.next() { IdentifierSegment::from(next) } else { return Err(()) };
+        let identifier = if let Some(next) = split.next() { IdentifierSegment::from(next) } else { return Err(()) };
+        let variant = match split.next() {
+            Some(v) => Some(IdentifierSegment::from(v)),
+            None => None,
+        };
 
-        if !value.contains(':') { return Err(()) }
-
-        let mut colon_split = value.split(':');
-
-        // Namespace
-        let namespace = colon_split.next().unwrap();
-        if namespace.len() == 0 { return Err(()) }
-        let namespace = Identifier::from(namespace);
-
-        // Identifier and variant
-        let right_segment = colon_split.next().unwrap();
-        if right_segment.len() == 0 { return Err(()) }
-        if right_segment.contains('/') {
-            let mut slash_split = right_segment.split('/');
-            let identifier = slash_split.next().unwrap();
-            let variant = slash_split.next().unwrap();
-
-            if identifier.len() == 0 { return Err(()) }
-
-            // Identifier and variant
-            return Ok(Self {
-                namespace,
-                identifier: Identifier::from(identifier),
-                variant: Some(Identifier::from(variant))
-            })
-        } else {
-            // Just an identifier
-            return Ok(Self {
-                namespace,
-                identifier: Identifier::from(right_segment),
-                variant: None,
-            })
-        }
+        Ok(Self {
+            namespace,
+            identifier,
+            variant
+        })
     }
 }

@@ -1,14 +1,14 @@
 use semver::{Version, VersionReq};
-use super::id::Identifier;
+use super::id::IdentifierSegment;
 
 /// A content package.
 /// 
 /// Equality (`PartialEq`/`Eq`) only compares the `identifier` and `version` fields.
 #[derive(Debug)]
 pub struct ContentPackage {
-    pub identifier: Identifier,
+    pub identifier: IdentifierSegment,
     pub version: Version,    
-    pub dependencies: Vec<(Identifier, VersionReq)>,
+    pub dependencies: Vec<(IdentifierSegment, VersionReq)>,
     pub owners: Vec<String>,
 }
 

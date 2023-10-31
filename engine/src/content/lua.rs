@@ -1,11 +1,11 @@
 use mlua::{FromLua, IntoLua, Value::Nil};
-use super::id::{Identifier, ContentIdentifier};
+use super::id::{IdentifierSegment, ContentIdentifier};
 
 static KEY_NAMESPACE: &'static str = "namespace";
 static KEY_IDENTIFIER: &'static str = "identifier";
 static KEY_VARIANT: &'static str = "variant";
 
-impl FromLua<'_> for Identifier {
+impl FromLua<'_> for IdentifierSegment {
     fn from_lua(value: mlua::Value<'_>, _lua: &'_ mlua::Lua) -> mlua::Result<Self> {
         match value {
             mlua::Value::Integer(i) => {
@@ -25,12 +25,12 @@ impl FromLua<'_> for Identifier {
     }
 }
 
-impl IntoLua<'_> for Identifier {
+impl IntoLua<'_> for IdentifierSegment {
     fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
         match self {
-            Identifier::StaticStr(i) => i.into_lua(lua),
-            Identifier::BoxedStr(i) => i.into_lua(lua),
-            Identifier::Integer(i) => i.into_lua(lua),
+            IdentifierSegment::StaticStr(i) => i.into_lua(lua),
+            IdentifierSegment::BoxedStr(i) => i.into_lua(lua),
+            IdentifierSegment::Integer(i) => i.into_lua(lua),
         }
     }
 }
