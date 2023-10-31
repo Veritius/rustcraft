@@ -15,6 +15,10 @@ impl Attributes {
     pub fn insert(&mut self, identifier: ContentIdentifier, attribute: Attribute) {
         self.map.insert(identifier, attribute);
     }
+
+    pub fn get(&self, identifier: &ContentIdentifier) -> Option<&Attribute> {
+        self.map.get(identifier)
+    }
 }
 
 impl FromIterator<(ContentIdentifier, Attribute)> for Attributes {
