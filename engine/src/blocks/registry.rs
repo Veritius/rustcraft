@@ -1,11 +1,7 @@
-use std::{sync::Arc, collections::BTreeMap, any::Any};
+use std::{sync::Arc, collections::BTreeMap};
 use bevy::{prelude::*, utils::HashMap};
-use crate::content::id::ContentIdentifier;
+use crate::{content::id::ContentIdentifier, attributes::{value::Attribute, map::Attributes}};
 use super::id::{BlockId, BlockIdGenerator};
-
-/// A value that is added to a [BlockDefinition] in the [BlockRegistry] to define behaviors for a block..
-pub trait BlockAttribute: std::fmt::Debug + Send + Sync + Any {}
-impl<T: std::fmt::Debug + Send + Sync + Any> BlockAttribute for T {}
 
 /// Used during the setup stage of the game to create the [BlockRegistry].
 #[derive(Resource)]
@@ -20,7 +16,7 @@ impl BlockRegistryBuilder {
     pub fn add_block(
         &mut self,
         ident: ContentIdentifier,
-        attributes: impl Iterator<Item = (ContentIdentifier, Box<dyn BlockAttribute>)>
+        attributes: impl Iterator<Item = (ContentIdentifier, Attribute)>
     ) {
         let id = self.seq.next();
         self.inner.identifiers.insert(ident, id)
@@ -35,7 +31,7 @@ impl BlockRegistryBuilder {
     pub fn insert_attribute(
         &mut self,
         ident: &ContentIdentifier,
-        attribute: (ContentIdentifier, Box<dyn BlockAttribute>),
+        attribute: (ContentIdentifier, Attribute),
     ) {
         let id = self.inner.identifiers.get(ident)
             .expect(&format!("Block {ident} was not registered"));
@@ -66,5 +62,5 @@ struct BlockRegistryInner {
 
 #[derive(Debug)]
 pub struct BlockDefinition {
-    attributes: BTreeMap<ContentIdentifier, Box<dyn BlockAttribute>>,
+    attributes: Attributes,
 }

@@ -48,7 +48,7 @@ impl Display for Identifier {
 /// A [`ContentIdentifier`] also has a `variant` field.
 /// Normal `PartialEq`/`Eq` comparisons will **ignore** this field.
 /// The `eq_variant` method can be used to compare all fields.
-#[derive(Debug, Hash, PartialOrd, Ord)]
+#[derive(Debug, Hash, Clone, PartialOrd, Ord)]
 pub struct ContentIdentifier {
     pub namespace: Identifier,
     pub identifier: Identifier,
