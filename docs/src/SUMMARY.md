@@ -9,3 +9,5 @@
     - [Globals](./lua/globals/list.md)
         - [BlockRegistry](./lua/globals/blockregistry.md)
         - [Logger](./lua/globals/logger.md)
+    - [Types](./lua/types/list.md)
+        - [ContentIdentifier](./lua/types/contentidentifier.md)
