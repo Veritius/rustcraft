@@ -49,7 +49,7 @@ impl<'de> Deserialize<'de> for IdentifierSegment {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where D: serde::Deserializer<'de> {
         struct SegmentVisitor;
-        impl <'de> serde::de::Visitor<'de> for SegmentVisitor {
+        impl<'de> serde::de::Visitor<'de> for SegmentVisitor {
             type Value = IdentifierSegment;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -130,6 +130,25 @@ impl TryFrom<&str> for ContentIdentifier {
 impl<'de> Deserialize<'de> for ContentIdentifier {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where D: serde::Deserializer<'de> {
-        todo!()
+        struct ContentIdentifierVisitor;
+        impl<'de> serde::de::Visitor<'de> for ContentIdentifierVisitor {
+            type Value = ContentIdentifier;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a string or map")
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where E: serde::de::Error {
+                match ContentIdentifier::try_from(v) {
+                    Ok(v) => { return Ok(v) },
+                    Err(_) => { return Err(E::custom("failed to parse into string")) },
+                }
+            }
+
+            // TODO: visit_seq and visit_map impls
+        }
+
+        deserializer.deserialize_str(ContentIdentifierVisitor)
     }
 }
