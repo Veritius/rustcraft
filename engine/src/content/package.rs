@@ -1,10 +1,11 @@
 use semver::{Version, VersionReq};
+use serde::Deserialize;
 use super::id::IdentifierSegment;
 
 /// A content package.
 /// 
 /// Equality (`PartialEq`/`Eq`) only compares the `identifier` and `version` fields.
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct ContentPackage {
     pub identifier: IdentifierSegment,
     pub version: Version,    

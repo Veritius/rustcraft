@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use serde::Deserialize;
+
 /// Separators for processing strings into content identifiers.
 pub static ID_SEPARATORS: &[char] = &[':', '/'];
 
@@ -7,15 +9,10 @@ pub static ID_SEPARATORS: &[char] = &[':', '/'];
 pub(crate) const ENGINE_ID: IdentifierSegment = IdentifierSegment::StaticStr("engine");
 
 /// A segment of a [`ContentIdentifier`] value.
-/// 
-/// Implements `PartialEq` and `Eq`, with special behavior.
-/// `StaticStr` and `BoxedStr` are equal to themselves and eachother, but `Integer` is only equal to itself.
-/// Note that when using `From<&str>`, the `Integer` type will be prioritised.
 #[derive(Debug, Clone, Hash, PartialOrd, Ord)]
 pub enum IdentifierSegment {
     StaticStr(&'static str),
     BoxedStr(Box<str>),
-    Integer(i32),
 }
 
 impl PartialEq for IdentifierSegment {
@@ -25,7 +22,6 @@ impl PartialEq for IdentifierSegment {
             (Self::StaticStr(l0), Self::BoxedStr(r0)) => l0.as_bytes() == r0.as_bytes(),
             (Self::BoxedStr(l0), Self::BoxedStr(r0)) => l0 == r0,
             (Self::BoxedStr(l0), Self::StaticStr(r0)) => l0.as_bytes() == r0.as_bytes(),
-            (Self::Integer(l0), Self::Integer(r0)) => l0 == r0,
             _ => false,
         }
     }
@@ -38,26 +34,35 @@ impl Display for IdentifierSegment {
         match self {
             IdentifierSegment::StaticStr(v) => f.write_str(v),
             IdentifierSegment::BoxedStr(v) => f.write_str(v),
-            IdentifierSegment::Integer(v) => f.write_str(&format!("{v}")),
         }
-    }
-}
-
-impl From<i32> for IdentifierSegment {
-    fn from(value: i32) -> Self {
-        Self::Integer(value)
     }
 }
 
 impl From<&str> for IdentifierSegment {
-    /// Creates an `Identifier` value from a string slice.
-    /// 
-    /// This will try to create an `Integer` variant first by parsing the input as an `i32`, and if that doesn't work, the `BoxedStr` variant will be used.
+    /// Creates an `Identifier` value from a string slice by cloning.
     fn from(value: &str) -> Self {
-        match value.parse::<i32>() {
-            Ok(i) => Self::Integer(i),
-            Err(_) => Self::BoxedStr(value.into()),
+        Self::BoxedStr(value.into())
+    }
+}
+
+impl<'de> Deserialize<'de> for IdentifierSegment {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
+        struct SegmentVisitor;
+        impl <'de> serde::de::Visitor<'de> for SegmentVisitor {
+            type Value = IdentifierSegment;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a string value")
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where E: serde::de::Error, {
+                Ok(IdentifierSegment::BoxedStr(v.into()))
+            }
         }
+
+        deserializer.deserialize_str(SegmentVisitor)
     }
 }
 
@@ -119,5 +124,12 @@ impl TryFrom<&str> for ContentIdentifier {
             identifier,
             variant
         })
+    }
+}
+
+impl<'de> Deserialize<'de> for ContentIdentifier {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
+        todo!()
     }
 }

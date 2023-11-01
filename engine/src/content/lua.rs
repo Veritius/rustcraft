@@ -8,9 +8,6 @@ static KEY_VARIANT: &'static str = "variant";
 impl FromLua<'_> for IdentifierSegment {
     fn from_lua(value: mlua::Value<'_>, _lua: &'_ mlua::Lua) -> mlua::Result<Self> {
         match value {
-            mlua::Value::Integer(i) => {
-                Ok(Self::Integer(i))
-            },
             mlua::Value::String(i) => {
                 Ok(Self::BoxedStr(i.to_string_lossy().into()))
             },
@@ -30,7 +27,6 @@ impl IntoLua<'_> for IdentifierSegment {
         match self {
             IdentifierSegment::StaticStr(i) => i.into_lua(lua),
             IdentifierSegment::BoxedStr(i) => i.into_lua(lua),
-            IdentifierSegment::Integer(i) => i.into_lua(lua),
         }
     }
 }
