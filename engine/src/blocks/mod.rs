@@ -1,6 +1,5 @@
 pub mod registry;
 pub mod id;
-pub mod lua;
 
 mod def;
 

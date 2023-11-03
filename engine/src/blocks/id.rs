@@ -7,18 +7,6 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BlockId(internal::BlockIdInner);
 
-impl mlua::FromLua<'_> for BlockId {
-    fn from_lua(value: mlua::Value<'_>, lua: &'_ mlua::Lua) -> mlua::Result<Self> {
-        Ok(Self(internal::BlockIdInner::from_lua(value, lua)?))
-    }
-}
-
-impl mlua::IntoLua<'_> for BlockId {
-    fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
-        self.0.into_lua(lua)
-    }
-}
-
 #[cfg(not(feature="big_ids"))]
 mod internal {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -33,37 +21,6 @@ mod internal {
     impl Into<u16> for BlockIdInner {
         fn into(self) -> u16 {
             self.0
-        }
-    }
-
-    impl mlua::FromLua<'_> for BlockIdInner {
-        fn from_lua(value: mlua::Value<'_>, lua: &'_ mlua::Lua) -> mlua::Result<Self> {
-            match value {
-                mlua::Value::Integer(i) => {
-                    let v = i.abs() as u32;
-                    if v > 2u32.pow(16) {
-                        return Err(mlua::Error::FromLuaConversionError {
-                            from: "integer",
-                            to: "blockid",
-                            message: Some(format!("Passed integer was an unrepresentable value: {v}")),
-                        });
-                    }
-                    Ok(Self(v.try_into().unwrap()))
-                },
-                _ => {
-                    Err(mlua::Error::FromLuaConversionError {
-                        from: value.type_name(),
-                        to: "blockid",
-                        message: None,
-                    })
-                }
-            }   
-        }
-    }
-
-    impl mlua::IntoLua<'_> for BlockIdInner {
-        fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
-            self.0.into_lua(lua)
         }
     }
 }
@@ -86,37 +43,6 @@ mod internal {
     impl Into<u32> for BlockIdInner {
         fn into(self) -> u32 {
             u32::from_be_bytes([self.0[0], self.0[1], self.0[2], 0])
-        }
-    }
-
-    impl mlua::FromLua<'_> for BlockIdInner {
-        fn from_lua(value: mlua::Value<'_>, lua: &'_ mlua::Lua) -> mlua::Result<Self> {
-            match value {
-                mlua::Value::Integer(i) => {
-                    let v = i.abs() as u32;
-                    if v > 2u32.pow(24) {
-                        return Err(mlua::Error::FromLuaConversionError {
-                            from: "integer",
-                            to: "blockid",
-                            message: Some(format!("Passed integer was an unrepresentable value: {v}")),
-                        });
-                    }
-                    Ok(Self::try_from(v).unwrap())
-                },
-                _ => {
-                    Err(mlua::Error::FromLuaConversionError {
-                        from: value.type_name(),
-                        to: "blockid",
-                        message: None,
-                    })
-                }
-            }   
-        }
-    }
-
-    impl mlua::IntoLua<'_> for BlockIdInner {
-        fn into_lua(self, lua: &'_ mlua::Lua) -> mlua::Result<mlua::Value<'_>> {
-            self.0.into_lua(lua)
         }
     }
 }
